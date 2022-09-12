@@ -2,10 +2,10 @@
 
 #include "clang/Basic/SourceLocation.h"
 
+#include "llvm/ADT/StringRef.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include <vector>
-#include <string>
 
 namespace cpp2c
 {
@@ -15,7 +15,7 @@ namespace cpp2c
         // Invocations that were directly expanded under this expansion
         std::vector<cpp2c::MacroExpansionNode *> Children;
         // The name of the expanded macro
-        std::string Name;
+        llvm::StringRef Name;
         // The expansion that this expansion was expanded under (if any)
         cpp2c::MacroExpansionNode *Parent;
         // The source range that the definition of this expanded macro spans
