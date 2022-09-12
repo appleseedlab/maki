@@ -23,9 +23,6 @@ namespace cpp2c
         // of the current invocation.
         std::stack<cpp2c::MacroExpansionNode *> InvocationStack;
 
-        // The expansion that the current expansion is an argument of
-        cpp2c::MacroExpansionNode *ArgumentOf = nullptr;
-
         MacroForest(clang::Preprocessor &PP, clang::ASTContext &Ctx);
 
         void MacroExpands(const clang::Token &MacroNameTok,

@@ -10,14 +10,7 @@ namespace cpp2c
             OS << "\t";
         }
 
-        OS << Name;
-        if (!Args.empty())
-            OS << "(";
-        for (auto Arg : Args)
-            OS << " " << Arg->Name;
-        if (!Args.empty())
-            OS << " )";
-        OS << " @ depth " << Depth << "\n";
+        OS << Name << " @ depth " << Depth << "\n";
 
         for (auto Child : Children)
         {

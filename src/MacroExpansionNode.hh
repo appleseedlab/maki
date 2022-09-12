@@ -14,11 +14,6 @@ namespace cpp2c
     public:
         // Invocations that were directly expanded under this expansion
         std::vector<cpp2c::MacroExpansionNode *> Children;
-        // Invocations that were passed as arguments to this invocation
-        // (if any)
-        std::vector<cpp2c::MacroExpansionNode *> MacroArgs;
-        // Invocation that this node was passed as an argument of, if any
-        cpp2c::MacroExpansionNode *ArgumentOf;
         // The name of the expanded macro
         std::string Name;
         // The expansion that this expansion was expanded under (if any)

@@ -55,18 +55,6 @@ namespace cpp2c
             Expansion->Depth = Expansion->Parent->Depth + 1;
         }
 
-        // TODO: Make this more nuanced so that we can record which argument
-        // each macro was expanded for
-        // If this macro was expanded inside a macro argument, record that
-        if (ArgumentOf != nullptr &&
-            // Don't record arguments of arguments
-            !(Expansion->Parent &&
-              Expansion->Parent->ArgumentOf == ArgumentOf))
-        {
-            Expansion->ArgumentOf = ArgumentOf;
-            ArgumentOf->MacroArgs.push_back(Expansion);
-        }
-
         // Add this expansion to the stack
         InvocationStack.push(Expansion);
 
@@ -89,17 +77,11 @@ namespace cpp2c
                     InvocationStack.pop();
                 InvocationStack.push(Expansion->Parent);
 
-                // We also back up the current macro whose arguments we may
-                // be expanding
-                auto ArgumentOfCopy = ArgumentOf;
-                ArgumentOf = Expansion;
-
                 // This const_cast is ugly, but is fine
                 const_cast<clang::MacroArgs *>(Args)->getPreExpArgument(i, PP);
 
                 // After visiting each argument, restore the state
                 InvocationStack = InvocationStackCopy;
-                ArgumentOf = ArgumentOfCopy;
             }
         }
     }
