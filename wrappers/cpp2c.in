@@ -1,0 +1,8 @@
+exec @CLANG_C_COMPILER@ -fplugin=@PROJECT_BINARY_DIR@/lib/libcpp2c.so \
+     -Wno-address-of-packed-member \
+     -Wno-unused-argument \
+     -Wno-unused-parameter \
+     -Wno-sign-compare \
+     -Wno-initializer-overrides \
+     -fsyntax-only \
+     "$@"
