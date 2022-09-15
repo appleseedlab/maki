@@ -7,12 +7,11 @@ namespace cpp2c
     using namespace clang::ast_matchers;
 
     // Matches the root AST nodes of a given macro expansion.
-    // We don't support TypeLoc right now because Clang
-    // offers no way of accessing TypeLoc nodes' parents.
     AST_POLYMORPHIC_MATCHER_P2(
         isMacroExpansionASTRoot,
         AST_POLYMORPHIC_SUPPORTED_TYPES(clang::Decl,
-                                        clang::Stmt),
+                                        clang::Stmt,
+                                        clang::TypeLoc),
         clang::ASTContext *, Ctx,
         MacroExpansionNode *, Expansion)
     {
@@ -33,6 +32,11 @@ namespace cpp2c
                     return false;
             }
             else if (auto P = Parent.template get<clang::Stmt>())
+            {
+                if (SM.getExpansionLoc(P->getEndLoc()) == EE)
+                    return false;
+            }
+            else if (auto P = Parent.template get<clang::TypeLoc>())
                 if (SM.getExpansionLoc(P->getEndLoc()) == EE)
                     return false;
 
