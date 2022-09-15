@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DeclStmtTypeLoc.hh"
+#include "MacroExpansionNode.hh"
 
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 
@@ -11,8 +11,11 @@ namespace cpp2c
     class ExpansionMatchHandler
         : public clang::ast_matchers::MatchFinder::MatchCallback
     {
+    private:
+        MacroExpansionNode *Expansion;
+
     public:
-        std::vector<DeclStmtTypeLoc> Matches;
+        ExpansionMatchHandler(MacroExpansionNode *Expansion);
 
         virtual void run(
             const clang::ast_matchers::MatchFinder::MatchResult &Result)
