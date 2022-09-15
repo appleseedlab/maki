@@ -1,5 +1,9 @@
 #include "MacroExpansionNode.hh"
 
+#include "clang/Basic/SourceManager.h"
+
+#include "assert.h"
+
 namespace cpp2c
 {
     void cpp2c::MacroExpansionNode::dump(llvm::raw_fd_ostream &OS,
@@ -16,5 +20,21 @@ namespace cpp2c
         {
             Child->dump(OS, indent + 1);
         }
+    }
+
+    bool MacroExpansionNode::findAlignedRoot(clang::SourceManager &SM)
+    {
+        // TODO: Maybe instead we should align the expansion with the root
+        // that has the largest range?
+        for (auto &&R : ASTRoots)
+        {
+            if (SpellingRange ==
+                SM.getExpansionRange(R.getSourceRange()).getAsRange())
+            {
+                AlignedRoot = &R;
+                return true;
+            }
+        }
+        return false;
     }
 } // namespace cpp2c

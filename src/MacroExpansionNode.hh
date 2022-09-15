@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DeclStmtTypeLoc.hh"
 #include "clang/Basic/SourceLocation.h"
 
 #include "llvm/ADT/StringRef.h"
@@ -31,10 +32,17 @@ namespace cpp2c
         clang::SourceRange SpellingRange;
         // How deeply nested this macro is in its expansion tree
         unsigned int Depth;
+        // The AST roots of this expansion, if any
+        std::vector<cpp2c::DeclStmtTypeLoc> ASTRoots;
+        // The AST root this expansion is aligned with, if any
+        cpp2c::DeclStmtTypeLoc *AlignedRoot = nullptr;
 
         // Prints a macro expansion tree
-        void dump(llvm::raw_fd_ostream &OS,
-                  unsigned int indent = 0);
+        void dump(llvm::raw_fd_ostream &OS, unsigned int indent = 0);
+        // Sets this expansion's AlignedRoot to the first of its AST roots
+        // that it aligned with.
+        // Returns true if a node was matched, false otherwise
+        bool findAlignedRoot(clang::SourceManager &SM);
     };
 
 } // namespace cpp2c
