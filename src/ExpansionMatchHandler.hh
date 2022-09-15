@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DeclStmt.hh"
+#include "DeclStmtTypeLoc.hh"
 
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 
@@ -12,7 +12,7 @@ namespace cpp2c
         : public clang::ast_matchers::MatchFinder::MatchCallback
     {
     public:
-        std::vector<DeclStmt> Matches;
+        std::vector<DeclStmtTypeLoc> Matches;
 
         virtual void run(
             const clang::ast_matchers::MatchFinder::MatchResult &Result)

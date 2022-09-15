@@ -10,10 +10,12 @@ namespace cpp2c
         const clang::ast_matchers::MatchFinder::MatchResult &Result)
     {
         if (const auto D = Result.Nodes.getNodeAs<clang::Decl>("root"))
-            Matches.push_back(DeclStmt(D));
+            Matches.push_back(DeclStmtTypeLoc(D));
         else if (const auto ST = Result.Nodes.getNodeAs<clang::Stmt>("root"))
-            Matches.push_back(DeclStmt(ST));
+            Matches.push_back(DeclStmtTypeLoc(ST));
+        else if (const auto TL = Result.Nodes.getNodeAs<clang::TypeLoc>("root"))
+            Matches.push_back(DeclStmtTypeLoc(TL));
         else
-            assert(!"Matched a node that was node a Decl or Stmt");
+            assert(!"Matched a node that was node a Decl/Stmt/TypeLoc");
     }
 } // namespace cpp2c
