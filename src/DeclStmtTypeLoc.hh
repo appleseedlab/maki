@@ -8,6 +8,9 @@ namespace cpp2c
 {
     class DeclStmtTypeLoc
     {
+    private:
+        inline void assertOneNonNull();
+
     public:
         const clang::Decl *D = nullptr;
         const clang::Stmt *ST = nullptr;
@@ -18,5 +21,7 @@ namespace cpp2c
         DeclStmtTypeLoc(const clang::TypeLoc *TL);
 
         void dump();
+
+        clang::SourceRange getSourceRange();
     };
 } // namespace cpp2c
