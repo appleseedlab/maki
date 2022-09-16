@@ -13,6 +13,14 @@ namespace cpp2c
     class MacroExpansionNode
     {
     public:
+        // Internal struct that represents the tokens behind a single
+        // macro expansion's argument
+        struct Argument
+        {
+            llvm::StringRef Name;
+            std::vector<clang::SourceRange> TokenRanges;
+        };
+
         // Invocations that were directly expanded under this expansion
         std::vector<cpp2c::MacroExpansionNode *> Children;
         // The name of the expanded macro
@@ -21,8 +29,6 @@ namespace cpp2c
         cpp2c::MacroExpansionNode *Parent;
         // The source range that the definition of this expanded macro spans
         clang::SourceRange DefinitionRange;
-        // The source ranges spanned by the tokens passed to invocation
-        std::vector<clang::SourceRange> ArgPreExpRanges;
         // The source range that the invocation (spelling) of this expansion
         // spans.
         // This is the range of text that the developer would see when writing
@@ -36,6 +42,8 @@ namespace cpp2c
         std::vector<cpp2c::DeclStmtTypeLoc> ASTRoots;
         // The AST root this expansion is aligned with, if any
         cpp2c::DeclStmtTypeLoc *AlignedRoot = nullptr;
+        // The arguments to this macro invocation, if any
+        std::vector<Argument> Arguments;
 
         // Prints a macro expansion tree
         void dump(llvm::raw_fd_ostream &OS, unsigned int indent = 0);
