@@ -25,7 +25,7 @@ namespace cpp2c
     bool MacroExpansionNode::findAlignedRoot(clang::SourceManager &SM)
     {
         // TODO: Maybe instead we should align the expansion with the root
-        // that has the largest range?
+        // that has the most inclusive range?
         for (auto &&R : ASTRoots)
         {
             if (SpellingRange ==
