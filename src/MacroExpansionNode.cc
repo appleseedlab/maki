@@ -21,20 +21,4 @@ namespace cpp2c
             Child->dump(OS, indent + 1);
         }
     }
-
-    bool MacroExpansionNode::findAlignedRoot(clang::SourceManager &SM)
-    {
-        // TODO: Maybe instead we should align the expansion with the root
-        // that has the most inclusive range?
-        for (auto &&R : ASTRoots)
-        {
-            if (SpellingRange ==
-                SM.getExpansionRange(R.getSourceRange()).getAsRange())
-            {
-                AlignedRoot = &R;
-                return true;
-            }
-        }
-        return false;
-    }
 } // namespace cpp2c
