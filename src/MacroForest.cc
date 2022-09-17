@@ -104,6 +104,11 @@ namespace cpp2c
                 // Collect the argument's token rages
                 if (!ArgTokens.empty())
                 {
+                    Arg.Tokens = ArgTokens;
+                    // Remove the last token since it will always be the EOF
+                    // token for this argument
+                    Arg.Tokens.pop_back();
+
                     // Iterate the rest of the argument's tokens,
                     // and merge their ranges if necessary to get the
                     // spelling ranges spanned by this argument's passed
