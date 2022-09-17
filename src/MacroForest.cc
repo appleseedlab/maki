@@ -101,45 +101,13 @@ namespace cpp2c
                                ? MI->params()[i]->getName()
                                : llvm::StringRef("__VA_ARGS__");
 
-                // Collect the argument's token rages
+                // Collect the argument's tokens
                 if (!ArgTokens.empty())
                 {
                     Arg.Tokens = ArgTokens;
                     // Remove the last token since it will always be the EOF
                     // token for this argument
                     Arg.Tokens.pop_back();
-
-                    // Iterate the rest of the argument's tokens,
-                    // and merge their ranges if necessary to get the
-                    // spelling ranges spanned by this argument's passed
-                    // tokens.
-                    // Normally the interval merge algorithm requires that
-                    // the input intervals be first sorted by their starts
-                    // and then ends, but we can skip this step since
-                    // the input is inherently sorted this way
-                    Arg.TokenRanges.push_back(
-                        getSpellingRange(Ctx,
-                                         ArgTokens.front().getLocation(),
-                                         ArgTokens.front().getEndLoc()));
-                    for (auto it = ArgTokens.begin() + 1;
-                         it != ArgTokens.end();
-                         it++)
-                    {
-                        auto CurrentRange = Arg.TokenRanges.back();
-                        clang::SourceRange TokenRange =
-                            getSpellingRange(Ctx,
-                                             it->getLocation(),
-                                             it->getEndLoc());
-                        if (TokenRange.getBegin() <= CurrentRange.getEnd())
-                            // Merge ranges
-                            Arg.TokenRanges.back().setEnd(
-                                CurrentRange.getEnd() > TokenRange.getEnd()
-                                    ? CurrentRange.getEnd()
-                                    : TokenRange.getEnd());
-                        else
-                            // Don't merge ranges
-                            Arg.TokenRanges.push_back(TokenRange);
-                    }
                 }
 
                 // Add the argument to the list of arguments for this expansion
