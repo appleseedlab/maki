@@ -22,8 +22,10 @@ add_library(cpp2c SHARED
   Cpp2CAction.cc
   Cpp2CASTConsumer.cc
   DeclStmtTypeLoc.cc
+  ExpansionArgumentMatchHandler.cc
   ExpansionMatchHandler.cc
   MacroForest.cc
+  MacroExpansionArgument.cc
   MacroExpansionNode.cc
 )
 
