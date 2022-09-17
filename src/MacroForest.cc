@@ -96,7 +96,7 @@ namespace cpp2c
 
                 // Construct the next argument to add to the invocation's
                 // argument list
-                MacroExpansionNode::Argument Arg;
+                MacroExpansionArgument Arg;
                 Arg.Name = (i < MI->getNumParams())
                                ? MI->params()[i]->getName()
                                : llvm::StringRef("__VA_ARGS__");
