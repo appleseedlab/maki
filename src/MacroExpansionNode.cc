@@ -6,8 +6,8 @@
 
 namespace cpp2c
 {
-    void cpp2c::MacroExpansionNode::dump(llvm::raw_fd_ostream &OS,
-                                         unsigned int indent)
+    void MacroExpansionNode::dumpMacroInfo(llvm::raw_fd_ostream &OS,
+                                           unsigned int indent)
     {
         for (unsigned int i = 0; i < indent; i++)
         {
@@ -18,7 +18,27 @@ namespace cpp2c
 
         for (auto Child : Children)
         {
-            Child->dump(OS, indent + 1);
+            Child->dumpMacroInfo(OS, indent + 1);
         }
+    }
+
+    void MacroExpansionNode::dumpASTInfo(
+        llvm::raw_fd_ostream &OS,
+        clang::SourceManager &SM,
+        const clang::LangOptions &LO)
+    {
+        OS << "Top level expansion of " << Name << "\n";
+
+        OS << "Aligned root: \n";
+        if (AlignedRoot)
+            AlignedRoot->dump();
+        else
+            OS << "None\n";
+
+        if (!Arguments.empty())
+            for (auto &&Arg : Arguments)
+                Arg.dumpASTInfo(OS, SM, LO);
+        else
+            OS << "No arguments\n";
     }
 } // namespace cpp2c

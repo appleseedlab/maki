@@ -40,7 +40,13 @@ namespace cpp2c
         std::vector<MacroExpansionArgument> Arguments;
 
         // Prints a macro expansion tree
-        void dump(llvm::raw_fd_ostream &OS, unsigned int indent = 0);
+        void dumpMacroInfo(llvm::raw_fd_ostream &OS, unsigned int indent = 0);
+        // Prints information about the AST nodes aligned with this expansion
+        // and its arguments
+        void dumpASTInfo(
+            llvm::raw_fd_ostream &OS,
+            clang::SourceManager &SM,
+            const clang::LangOptions &LO);
     };
 
 } // namespace cpp2c
