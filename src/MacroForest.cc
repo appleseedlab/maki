@@ -3,6 +3,7 @@
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/IdentifierTable.h"
 #include "clang/Lex/Token.h"
+#include "clang/Lex/Lexer.h"
 #include "clang/Lex/MacroArgs.h"
 #include "clang/Lex/MacroInfo.h"
 
@@ -109,6 +110,14 @@ namespace cpp2c
                     // token for this argument
                     Arg.Tokens.pop_back();
                 }
+
+                // Count how many times this argument is expanded in
+                // the macro body
+                auto &SM = Ctx.getSourceManager();
+                const auto &LO = Ctx.getLangOpts();
+                for (auto Tok : MI->tokens())
+                    if (clang::Lexer::getSpelling(Tok, SM, LO) == Arg.Name.str())
+                        Arg.numberOfTimesExpanded++;
 
                 // Add the argument to the list of arguments for this expansion
                 Expansion->Arguments.push_back(Arg);

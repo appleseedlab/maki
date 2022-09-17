@@ -20,10 +20,16 @@ namespace cpp2c
         std::vector<clang::Token> Tokens;
         // The AST roots this argument aligns with, if any
         std::vector<cpp2c::DeclStmtTypeLoc> AlignedRoots;
+        // The number of times this argument is expanded in the body
+        // of its corresponding macro definition.
+        // If this argument is expanded properly, then this number
+        // should be equal to the number of aligned AST roots for this
+        // argument
+        unsigned int numberOfTimesExpanded = 0;
 
         // Prints information the AST nodes aligned with this argument
         void dumpASTInfo(llvm::raw_fd_ostream &OS,
-                  clang::SourceManager &SM,
-                  const clang::LangOptions &LO);
+                         clang::SourceManager &SM,
+                         const clang::LangOptions &LO);
     };
 } // namespace cpp2c

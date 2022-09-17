@@ -165,13 +165,15 @@ namespace cpp2c
                 if (TL)
                     llvm::errs() << "TypeLoc,";
             }
+
+            // Check that the number of AST nodes aligned with each argument
+            // equals the number of times that argument was expanded
             if (std::all_of(
                     TLE->Arguments.begin(),
                     TLE->Arguments.end(),
-                    // TODO: Check if no. aligned roots ==
-                    // no. times arg was expanded
                     [](MacroExpansionArgument Arg)
-                    { return !Arg.AlignedRoots.empty(); }))
+                    { return Arg.AlignedRoots.size() ==
+                             Arg.numberOfTimesExpanded; }))
                 llvm::errs() << "Aligned arguments,";
             else
                 llvm::errs() << "Unaligned argument,";
