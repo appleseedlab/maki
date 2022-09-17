@@ -6,6 +6,14 @@ namespace cpp2c
 {
     using namespace clang::ast_matchers;
 
+    // TODO: Right now, for finding nodes aligned withe expansions,
+    // we first find potentially aligned nodes, and then determine which
+    // of these are the actually aligned nodes.
+    // For macro arguments though, we have access to the tokens behind them,
+    // and are able to directly find the aligned nodes.
+    // It would be nice if we could directly find all the aligned nodes
+    // for expansions as well.
+
     // Matches all AST nodes who expand to a source range that shares
     // begin/end with the given range
     AST_POLYMORPHIC_MATCHER_P2(
@@ -28,64 +36,67 @@ namespace cpp2c
     }
 
     AST_POLYMORPHIC_MATCHER_P2(
-        spellsToShareSourceRangeEdge,
+        isSpelledFromTokens,
         AST_POLYMORPHIC_SUPPORTED_TYPES(clang::Decl,
                                         clang::Stmt,
                                         clang::TypeLoc),
         clang::ASTContext *, Ctx,
-        clang::SourceRange, Range)
+        std::vector<clang::Token>, Tokens)
     {
         auto &SM = Ctx->getSourceManager();
-        auto EB = Range.getBegin();
-        auto EE = Range.getEnd();
-        auto NB = SM.getSpellingLoc(Node.getBeginLoc());
-        auto NE = SM.getSpellingLoc(Node.getEndLoc());
+        auto B = SM.getSpellingLoc(Node.getBeginLoc());
+        auto E = SM.getSpellingLoc(Node.getEndLoc());
+        clang::SourceRange SpellingRange(B, E);
 
-        // Check whether this AST node's beginning or ending loc
-        // matches that of the spelling range's
-        return (EB == NB) || (EE == NE);
+        // First ensure that this node spans the same range
+        // as the given token list
+        if (!(B == Tokens.front().getLocation() &&
+              E == Tokens.back().getLocation()))
+            return false;
+
+        // Next, ensure that every token in the list is included
+        // in the range spanned by this AST node
+        for (auto Tok : Tokens)
+            if (!SpellingRange.fullyContains(Tok.getLocation()))
+                return false;
+
+        return true;
     }
 
-// TODO: Instead of having two difference callback classes for
-// expansions and arguments, we should just have one that collects
-// its results in a vec, and then has a method for accessing those results
-
 // Utility macro for matching AST roots of an expansion
-// TODO: Change this to a method for MacroExpansionNode
+// TODO: Change this to a function
 #define MATCH_EXPANSION_ROOTS_OF(MATCHER, EXPANSION)          \
     do                                                        \
     {                                                         \
         MatchFinder Finder;                                   \
-        ExpansionMatchHandler Handler(EXPANSION);             \
+        ExpansionMatchHandler Handler;                        \
         auto Matcher = MATCHER(expandsToShareSourceRangeEdge( \
                                    &Ctx,                      \
                                    EXPANSION->SpellingRange)) \
                            .bind("root");                     \
         Finder.addMatcher(Matcher, &Handler);                 \
         Finder.matchAST(Ctx);                                 \
+        for (auto M : Handler.Matches)                        \
+            EXPANSION->ASTRoots.push_back(M);                 \
     } while (0)
 
-// TODO: The following macro doesn't quite work
-// I think for matching arguments, we need to check expansion range edges,
-// not spelling range edges.
-// Yes, actually now that I think about it that makes sense.
-// I should also spend some time thinking of a more general abstraction as well
-#define MATCH_ARGUMENT_ROOTS_OF(MATCHER, ARGUMENT)               \
-    do                                                           \
-    {                                                            \
-        MatchFinder Finder;                                      \
-        ExpansionArgumentMatchHandler Handler(ARGUMENT);         \
-        auto B = (ARGUMENT)->TokenRanges.front().getBegin();     \
-        auto E = (ARGUMENT)->TokenRanges.back().getEnd();        \
-        clang::SourceRange Range(B, E);                          \
-        if (!((ARGUMENT)->TokenRanges.empty()))                  \
-        {                                                        \
-            auto Matcher = MATCHER(spellsToShareSourceRangeEdge( \
-                                       &Ctx,                     \
-                                       Range))                   \
-                               .bind("root");                    \
-            Finder.addMatcher(Matcher, &Handler);                \
-            Finder.matchAST(Ctx);                                \
-        }                                                        \
+// Utility macro for matching aligned AST roots of a macro argument
+// TODO: Change this to a function
+#define MATCH_ARGUMENT_ROOTS_OF(MATCHER, ARGUMENT)          \
+    do                                                      \
+    {                                                       \
+        MatchFinder Finder;                                 \
+        ExpansionMatchHandler Handler;                      \
+        if (!((ARGUMENT)->Tokens.empty()))                  \
+        {                                                   \
+            auto Matcher = MATCHER(isSpelledFromTokens(     \
+                                       &Ctx,                \
+                                       (ARGUMENT)->Tokens)) \
+                               .bind("root");               \
+            Finder.addMatcher(Matcher, &Handler);           \
+            Finder.matchAST(Ctx);                           \
+            for (auto M : Handler.Matches)                  \
+                (ARGUMENT)->AlignedRoots.push_back(M);      \
+        }                                                   \
     } while (0)
 } // namespace clang::cpp2c
