@@ -17,8 +17,6 @@
 int main(int argc, char const *argv[])
 {
 
-    ADD(1, 2);
-
     ONE;
     TWO;
     THREE;
