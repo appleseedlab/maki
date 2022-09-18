@@ -104,7 +104,10 @@ namespace cpp2c
                 MATCH_ARGUMENT_ROOTS_OF(typeLoc, (&Arg));
             }
 
+            //// Print macro expansion info
+
             // TLE->dumpASTInfo(llvm::errs(), SM, LO);
+
             if (!TLE->AlignedRoot)
                 llvm::errs() << "Unaligned body,";
             else
