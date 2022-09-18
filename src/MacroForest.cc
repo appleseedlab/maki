@@ -9,6 +9,9 @@
 
 #include "llvm/Support/raw_ostream.h"
 
+// TODO:    Check if we should treat expansions written in scratch space
+//          differently from other expansions
+
 namespace cpp2c
 {
 
