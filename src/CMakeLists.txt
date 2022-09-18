@@ -26,6 +26,7 @@ add_library(cpp2c SHARED
   MacroForest.cc
   MacroExpansionArgument.cc
   MacroExpansionNode.cc
+  StmtCollectorMatchHandler.cc
 )
 
 # Allow undefined symbols in shared objects on Darwin (this is the default
