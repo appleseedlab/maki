@@ -168,12 +168,11 @@ namespace cpp2c
 
             // Check that the number of AST nodes aligned with each argument
             // equals the number of times that argument was expanded
-            if (std::all_of(
-                    TLE->Arguments.begin(),
-                    TLE->Arguments.end(),
-                    [](MacroExpansionArgument Arg)
-                    { return Arg.AlignedRoots.size() ==
-                             Arg.numberOfTimesExpanded; }))
+            if (std::all_of(TLE->Arguments.begin(),
+                            TLE->Arguments.end(),
+                            [](MacroExpansionArgument Arg)
+                            { return Arg.AlignedRoots.size() ==
+                                     Arg.numberOfTimesExpanded; }))
                 llvm::errs() << "Aligned arguments,";
             else
                 llvm::errs() << "Unaligned argument,";
