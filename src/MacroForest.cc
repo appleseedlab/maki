@@ -31,15 +31,18 @@ namespace cpp2c
                                    clang::SourceRange Range,
                                    const clang::MacroArgs *Args)
     {
+        auto MI = MD.getMacroInfo();
+        auto &SM = Ctx.getSourceManager();
 
         // Initialize the new expansion with the parts we can get
         // directly from clang
 
         cpp2c::MacroExpansionNode *Expansion = new cpp2c::MacroExpansionNode();
         Expansion->Name = MacroNameTok.getIdentifierInfo()->getName();
+        Expansion->MacroHash = MI->getDefinitionLoc().printToString(SM);
         Expansion->DefinitionRange = clang::SourceRange(
-            MD.getMacroInfo()->getDefinitionLoc(),
-            MD.getMacroInfo()->getDefinitionEndLoc());
+            MI->getDefinitionLoc(),
+            MI->getDefinitionEndLoc());
         Expansion->SpellingRange = getSpellingRange(Ctx,
                                                     Range.getBegin(),
                                                     Range.getEnd());
@@ -72,8 +75,6 @@ namespace cpp2c
 
         if (Args != nullptr)
         {
-            auto MI = MD.getMacroInfo();
-
             // Expand this expansion's arguments
             for (unsigned int i = 0; i < Args->getNumMacroArguments(); i++)
             {
@@ -116,7 +117,6 @@ namespace cpp2c
 
                 // Count how many times this argument is expanded in
                 // the macro body
-                auto &SM = Ctx.getSourceManager();
                 const auto &LO = Ctx.getLangOpts();
                 for (auto Tok : MI->tokens())
                     if (clang::Lexer::getSpelling(Tok, SM, LO) == Arg.Name.str())

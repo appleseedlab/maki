@@ -15,12 +15,11 @@ namespace cpp2c
     class MacroExpansionNode
     {
     public:
-        // Invocations that were directly expanded under this expansion
-        std::vector<cpp2c::MacroExpansionNode *> Children;
         // The name of the expanded macro
         llvm::StringRef Name;
-        // The expansion that this expansion was expanded under (if any)
-        cpp2c::MacroExpansionNode *Parent;
+        // The hash of the macro this expansion is an expansion of.
+        // This hash is the source location of the macro's definition.
+        std::string MacroHash;
         // The source range that the definition of this expanded macro spans
         clang::SourceRange DefinitionRange;
         // The source range that the invocation (spelling) of this expansion
@@ -32,6 +31,10 @@ namespace cpp2c
         clang::SourceRange SpellingRange;
         // How deeply nested this macro is in its expansion tree
         unsigned int Depth;
+        // The expansion that this expansion was expanded under (if any)
+        cpp2c::MacroExpansionNode *Parent;
+        // Invocations that were directly expanded under this expansion
+        std::vector<cpp2c::MacroExpansionNode *> Children;
         // The AST roots of this expansion, if any
         std::vector<cpp2c::DeclStmtTypeLoc> ASTRoots;
         // The AST root this expansion is aligned with, if any
