@@ -23,6 +23,22 @@
 
 namespace cpp2c
 {
+
+    template <typename T>
+    inline void printIfIsOneOf(const clang::Stmt *ST)
+    {
+        if (clang::isa<T>(ST))
+            llvm::errs() << typeid(T).name() << ",";
+    }
+
+    template <typename T1, typename T2, typename... Ts>
+    inline void printIfIsOneOf(const clang::Stmt *ST)
+    {
+        if (clang::isa<T1>(ST))
+            llvm::errs() << typeid(T1).name() << ",";
+        printIfIsOneOf<T2, Ts...>(ST);
+    }
+
     inline std::function<bool(const clang::Stmt *)>
     stmtIsBinOp(clang::BinaryOperator::Opcode OC)
     {
@@ -166,33 +182,19 @@ namespace cpp2c
 
                     llvm::errs() << "Stmt,";
 
-                    if (llvm::isa<clang::DoStmt>(ST))
-                        llvm::errs() << "DoStmt,";
-                    if (llvm::isa<clang::ContinueStmt>(ST))
-                        llvm::errs() << "ContinueStmt,";
-                    if (llvm::isa<clang::BreakStmt>(ST))
-                        llvm::errs() << "BreakStmt,";
+                    printIfIsOneOf<clang::DoStmt,
+                                   clang::ContinueStmt,
+                                   clang::BreakStmt,
+                                   clang::ReturnStmt,
+                                   clang::GotoStmt,
 
-                    if (llvm::isa<clang::ReturnStmt>(ST))
-                        llvm::errs() << "ReturnStmt,";
-                    if (llvm::isa<clang::GotoStmt>(ST))
-                        llvm::errs() << "GotoStmt,";
-
-                    if (llvm::isa<clang::CharacterLiteral>(ST))
-                        llvm::errs() << "CharacterLiteral,";
-                    if (llvm::isa<clang::IntegerLiteral>(ST))
-                        llvm::errs() << "IntegerLiteral,";
-                    if (llvm::isa<clang::FloatingLiteral>(ST))
-                        llvm::errs() << "FloatingLiteral,";
-                    if (llvm::isa<clang::FixedPointLiteral>(ST))
-                        llvm::errs() << "FixedPointLiteral,";
-                    if (llvm::isa<clang::ImaginaryLiteral>(ST))
-                        llvm::errs() << "ImaginaryLiteral,";
-
-                    if (llvm::isa<clang::StringLiteral>(ST))
-                        llvm::errs() << "StringLiteral,";
-                    if (llvm::isa<clang::CompoundLiteralExpr>(ST))
-                        llvm::errs() << "CompoundLiteralExpr,";
+                                   clang::CharacterLiteral,
+                                   clang::IntegerLiteral,
+                                   clang::FloatingLiteral,
+                                   clang::FixedPointLiteral,
+                                   clang::ImaginaryLiteral,
+                                   clang::StringLiteral,
+                                   clang::CompoundLiteralExpr>(ST);
 
                     if (isInTree(ST, stmtIsA<clang::ConditionalOperator>()))
                         llvm::errs() << "ConditionalOperator,";
@@ -242,12 +244,6 @@ namespace cpp2c
                     llvm::errs() << "L-value independent,";
                 else
                     llvm::errs() << "L-value dependent,";
-            }
-            else
-            {
-                llvm::errs() << "Cannot check for hygiene,";
-                llvm::errs() << "Cannot check for parameter side-effects,";
-                llvm::errs() << "Cannot check for L-value independence,";
             }
 
             llvm::errs() << "\n";
