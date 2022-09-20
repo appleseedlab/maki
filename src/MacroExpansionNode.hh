@@ -22,6 +22,8 @@ namespace cpp2c
         std::string MacroHash;
         // The source range that the definition of this expanded macro spans
         clang::SourceRange DefinitionRange;
+        // The tokens in the definition of this expanded macro
+        std::vector<clang::Token> DefinitionTokens;
         // The source range that the invocation (spelling) of this expansion
         // spans.
         // This is the range of text that the developer would see when writing

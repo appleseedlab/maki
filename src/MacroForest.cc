@@ -43,6 +43,7 @@ namespace cpp2c
         Expansion->DefinitionRange = clang::SourceRange(
             MI->getDefinitionLoc(),
             MI->getDefinitionEndLoc());
+        Expansion->DefinitionTokens = MI->tokens();
         Expansion->SpellingRange = getSpellingRange(Ctx,
                                                     Range.getBegin(),
                                                     Range.getEnd());
