@@ -17,4 +17,10 @@ namespace cpp2c
         void HandleTranslationUnit(clang::ASTContext &Ctx) override;
     };
 
+    template <typename T>
+    inline std::function<bool(const clang::Stmt *)> stmtIsA()
+    {
+        return [](const clang::Stmt *ST)
+        { return clang::isa<T>(ST); };
+    }
 } // namespace cpp2c

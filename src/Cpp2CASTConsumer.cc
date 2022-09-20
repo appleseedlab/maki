@@ -23,23 +23,6 @@
 
 namespace cpp2c
 {
-    Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI)
-    {
-        clang::Preprocessor &PP = CI.getPreprocessor();
-        clang::ASTContext &Ctx = CI.getASTContext();
-
-        MF = new cpp2c::MacroForest(PP, Ctx);
-
-        PP.addPPCallbacks(std::unique_ptr<cpp2c::MacroForest>(MF));
-    }
-
-    template <typename T>
-    inline std::function<bool(const clang::Stmt *)> stmtIsA()
-    {
-        return [](const clang::Stmt *ST)
-        { return clang::isa<T>(ST); };
-    }
-
     inline std::function<bool(const clang::Stmt *)>
     stmtIsBinOp(clang::BinaryOperator::Opcode OC)
     {
@@ -49,6 +32,16 @@ namespace cpp2c
                 return BO->getOpcode() == OC;
             return false;
         };
+    }
+
+    Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI)
+    {
+        clang::Preprocessor &PP = CI.getPreprocessor();
+        clang::ASTContext &Ctx = CI.getASTContext();
+
+        MF = new cpp2c::MacroForest(PP, Ctx);
+
+        PP.addPPCallbacks(std::unique_ptr<cpp2c::MacroForest>(MF));
     }
 
     void Cpp2CASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx)
