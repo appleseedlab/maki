@@ -60,46 +60,4 @@ namespace cpp2c
 
         return true;
     }
-
-// Utility macro for matching AST roots of an expansion
-// TODO: Change this to a function
-#define MATCH_EXPANSION_ROOTS_OF(MATCHER, EXPANSION)  \
-    do                                                \
-    {                                                 \
-        if (!((EXPANSION)->DefinitionTokens.empty())) \
-        {                                             \
-            MatchFinder Finder;                       \
-            ExpansionMatchHandler Handler;            \
-            auto Matcher =                            \
-                MATCHER(alignsWithExpansion(          \
-                            &Ctx,                     \
-                            (EXPANSION)))             \
-                    .bind("root");                    \
-            Finder.addMatcher(Matcher, &Handler);     \
-            Finder.matchAST(Ctx);                     \
-            for (auto M : Handler.Matches)            \
-                (EXPANSION)->ASTRoots.push_back(M);   \
-        }                                             \
-    } while (0)
-
-// Utility macro for matching aligned AST roots of a macro argument
-// TODO: Change this to a function
-#define MATCH_ARGUMENT_ROOTS_OF(MATCHER, ARGUMENT)     \
-    do                                                 \
-    {                                                  \
-        if (!((ARGUMENT)->Tokens.empty()))             \
-        {                                              \
-            MatchFinder Finder;                        \
-            ExpansionMatchHandler Handler;             \
-            auto Matcher =                             \
-                MATCHER(isSpelledFromTokens(           \
-                            &Ctx,                      \
-                            (ARGUMENT)->Tokens))       \
-                    .bind("root");                     \
-            Finder.addMatcher(Matcher, &Handler);      \
-            Finder.matchAST(Ctx);                      \
-            for (auto M : Handler.Matches)             \
-                (ARGUMENT)->AlignedRoots.push_back(M); \
-        }                                              \
-    } while (0)
-} // namespace clang::cpp2c
+}
