@@ -17,22 +17,20 @@ namespace cpp2c
     // Matches all AST nodes who expand to a source range that shares
     // begin/end with the given range
     AST_POLYMORPHIC_MATCHER_P2(
-        expandsToShareSourceRangeEdge,
+        alignsWithExpansion,
         AST_POLYMORPHIC_SUPPORTED_TYPES(clang::Decl,
                                         clang::Stmt,
                                         clang::TypeLoc),
         clang::ASTContext *, Ctx,
-        clang::SourceRange, Range)
+        cpp2c::MacroExpansionNode *, Expansion)
     {
         auto &SM = Ctx->getSourceManager();
-        auto EB = Range.getBegin();
-        auto EE = Range.getEnd();
-        auto NB = SM.getExpansionLoc(Node.getBeginLoc());
-        auto NE = SM.getExpansionLoc(Node.getEndLoc());
+        auto DefB = Expansion->DefinitionTokens.front().getLocation();
+        auto DefE = Expansion->DefinitionTokens.back().getLocation();
+        auto NodeB = SM.getSpellingLoc(Node.getBeginLoc());
+        auto NodeE = SM.getSpellingLoc(Node.getEndLoc());
 
-        // Check whether this AST node's beginning or ending loc
-        // matches that of the spelling range's
-        return (EB == NB) || (EE == NE);
+        return (NodeB == DefB) && (NodeE == DefE);
     }
 
     AST_POLYMORPHIC_MATCHER_P2(
@@ -65,38 +63,43 @@ namespace cpp2c
 
 // Utility macro for matching AST roots of an expansion
 // TODO: Change this to a function
-#define MATCH_EXPANSION_ROOTS_OF(MATCHER, EXPANSION)          \
-    do                                                        \
-    {                                                         \
-        MatchFinder Finder;                                   \
-        ExpansionMatchHandler Handler;                        \
-        auto Matcher = MATCHER(expandsToShareSourceRangeEdge( \
-                                   &Ctx,                      \
-                                   EXPANSION->SpellingRange)) \
-                           .bind("root");                     \
-        Finder.addMatcher(Matcher, &Handler);                 \
-        Finder.matchAST(Ctx);                                 \
-        for (auto M : Handler.Matches)                        \
-            EXPANSION->ASTRoots.push_back(M);                 \
+#define MATCH_EXPANSION_ROOTS_OF(MATCHER, EXPANSION)  \
+    do                                                \
+    {                                                 \
+        if (!((EXPANSION)->DefinitionTokens.empty())) \
+        {                                             \
+            MatchFinder Finder;                       \
+            ExpansionMatchHandler Handler;            \
+            auto Matcher =                            \
+                MATCHER(alignsWithExpansion(          \
+                            &Ctx,                     \
+                            (EXPANSION)))             \
+                    .bind("root");                    \
+            Finder.addMatcher(Matcher, &Handler);     \
+            Finder.matchAST(Ctx);                     \
+            for (auto M : Handler.Matches)            \
+                (EXPANSION)->ASTRoots.push_back(M);   \
+        }                                             \
     } while (0)
 
 // Utility macro for matching aligned AST roots of a macro argument
 // TODO: Change this to a function
-#define MATCH_ARGUMENT_ROOTS_OF(MATCHER, ARGUMENT)          \
-    do                                                      \
-    {                                                       \
-        MatchFinder Finder;                                 \
-        ExpansionMatchHandler Handler;                      \
-        if (!((ARGUMENT)->Tokens.empty()))                  \
-        {                                                   \
-            auto Matcher = MATCHER(isSpelledFromTokens(     \
-                                       &Ctx,                \
-                                       (ARGUMENT)->Tokens)) \
-                               .bind("root");               \
-            Finder.addMatcher(Matcher, &Handler);           \
-            Finder.matchAST(Ctx);                           \
-            for (auto M : Handler.Matches)                  \
-                (ARGUMENT)->AlignedRoots.push_back(M);      \
-        }                                                   \
+#define MATCH_ARGUMENT_ROOTS_OF(MATCHER, ARGUMENT)     \
+    do                                                 \
+    {                                                  \
+        if (!((ARGUMENT)->Tokens.empty()))             \
+        {                                              \
+            MatchFinder Finder;                        \
+            ExpansionMatchHandler Handler;             \
+            auto Matcher =                             \
+                MATCHER(isSpelledFromTokens(           \
+                            &Ctx,                      \
+                            (ARGUMENT)->Tokens))       \
+                    .bind("root");                     \
+            Finder.addMatcher(Matcher, &Handler);      \
+            Finder.matchAST(Ctx);                      \
+            for (auto M : Handler.Matches)             \
+                (ARGUMENT)->AlignedRoots.push_back(M); \
+        }                                              \
     } while (0)
 } // namespace clang::cpp2c

@@ -17,23 +17,13 @@
 // TODO:    Remember to check if we should be ignoring implicit casts
 //          and if we should be using TK_IgnoreUnlessSpelledInSource
 //          and ignoringImplicit
+// NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
+//          paren exprs
+// TODO:    make sure we always use
+//          unless(anyOf(implicitCastExpr(), implicitValueInitExpr()))
 
 namespace cpp2c
 {
-    DeclStmtTypeLoc *firstASTRootExpandsToAlignWithRange(
-        clang::SourceManager &SM,
-        std::vector<DeclStmtTypeLoc> &ASTRoots,
-        clang::SourceRange Range)
-    {
-
-        // TODO: Maybe instead we should align the expansion with the root
-        // that has the most inclusive range?
-        for (auto &&R : ASTRoots)
-            if (Range == SM.getExpansionRange(R.getSourceRange()).getAsRange())
-                return &R;
-        return nullptr;
-    }
-
     Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI)
     {
         clang::Preprocessor &PP = CI.getPreprocessor();
@@ -136,7 +126,8 @@ namespace cpp2c
         for (auto ST : matchAndCollectStmtsIn<const clang::Stmt>(
                  Ctx,
                  Expansion->AlignedRoot->ST,
-                 stmt(unless(implicitCastExpr()),
+                 stmt(unless(anyOf(implicitCastExpr(),
+                                   implicitValueInitExpr())),
                       declRefExpr(to(varDecl(hasLocalStorage())))
                           .bind("root"))))
             if (auto DRE = clang::dyn_cast<clang::DeclRefExpr>(ST))
@@ -176,7 +167,8 @@ namespace cpp2c
         for (auto ST : matchAndCollectStmtsIn<const clang::Stmt>(
                  Ctx,
                  Expansion->AlignedRoot->ST,
-                 stmt(unless(implicitCastExpr()),
+                 stmt(unless(anyOf(implicitCastExpr(),
+                                   implicitValueInitExpr())),
                       anyOf(
                           binaryOperator(isAssignmentOperator()).bind("root"),
                           unaryOperator(hasOperatorName("++")).bind("root"),
@@ -210,7 +202,8 @@ namespace cpp2c
         for (auto ST : matchAndCollectStmtsIn<const clang::Stmt>(
                  Ctx,
                  Expansion->AlignedRoot->ST,
-                 stmt(unless(implicitCastExpr()),
+                 stmt(unless(anyOf(implicitCastExpr(),
+                                   implicitValueInitExpr())),
                       anyOf(
                           unaryOperator(hasOperatorName("&")).bind("root"),
                           binaryOperator(isAssignmentOperator()).bind("root"),
@@ -268,7 +261,19 @@ namespace cpp2c
             //// Find potential AST roots of the entire expansion
 
             // Match stmts
-            MATCH_EXPANSION_ROOTS_OF(stmt, TLE);
+            if (!(TLE)->DefinitionTokens.empty())
+            {
+                MatchFinder Finder;
+                ExpansionMatchHandler Handler;
+                auto Matcher = stmt(unless(anyOf(implicitCastExpr(),
+                                                 implicitValueInitExpr())),
+                                    alignsWithExpansion(&Ctx, TLE))
+                                   .bind("root");
+                Finder.addMatcher(Matcher, &Handler);
+                Finder.matchAST(Ctx);
+                for (auto M : Handler.Matches)
+                    TLE->ASTRoots.push_back(M);
+            }
 
             // Match decls
             MATCH_EXPANSION_ROOTS_OF(decl, TLE);
@@ -276,16 +281,43 @@ namespace cpp2c
             // Match type locs
             MATCH_EXPANSION_ROOTS_OF(typeLoc, TLE);
 
-            TLE->AlignedRoot = firstASTRootExpandsToAlignWithRange(
-                SM,
-                TLE->ASTRoots,
-                TLE->SpellingRange);
+            // Find aligned root
+            // TODO: The matcher should just return the aligned root
+            //       immediately
+            for (auto &&R : TLE->ASTRoots)
+            {
+                // R.dump();
+                clang::SourceRange RootSpellingRange(
+                    SM.getSpellingLoc(R.getSourceRange().getBegin()),
+                    SM.getSpellingLoc(R.getSourceRange().getEnd()));
+                if (TLE->SpellingRange ==
+                    SM.getExpansionRange(R.getSourceRange()).getAsRange())
+                {
+                    TLE->AlignedRoot = &R;
+                    break;
+                }
+            }
 
             //// Find AST roots aligned with each of the expansion's arguments
             for (auto &&Arg : TLE->Arguments)
             {
                 // Match stmts
-                MATCH_ARGUMENT_ROOTS_OF(stmt, (&Arg));
+                if (!Arg.Tokens.empty())
+                {
+                    MatchFinder Finder;
+                    ExpansionMatchHandler Handler;
+                    auto Matcher =
+                        stmt(unless(anyOf(implicitCastExpr(),
+                                          implicitValueInitExpr())),
+                             isSpelledFromTokens(
+                                 &Ctx,
+                                 Arg.Tokens))
+                            .bind("root");
+                    Finder.addMatcher(Matcher, &Handler);
+                    Finder.matchAST(Ctx);
+                    for (auto M : Handler.Matches)
+                        Arg.AlignedRoots.push_back(M);
+                }
 
                 // Match decls
                 MATCH_ARGUMENT_ROOTS_OF(decl, (&Arg));
@@ -308,49 +340,52 @@ namespace cpp2c
                 auto TL = TLE->AlignedRoot->TL;
 
                 if (ST)
+                {
+
                     llvm::errs() << "Stmt,";
 
-                if (llvm::isa_and_nonnull<clang::DoStmt>(ST))
-                    llvm::errs() << "DoStmt,";
-                else
-                {
-                    if (isInTree(ST, stmtIsA<clang::ContinueStmt>()))
-                        llvm::errs() << "ContinueStmt,";
-                    if (isInTree(ST, stmtIsA<clang::BreakStmt>()))
-                        llvm::errs() << "BreakStmt,";
+                    if (llvm::isa_and_nonnull<clang::DoStmt>(ST))
+                        llvm::errs() << "DoStmt,";
+                    else
+                    {
+                        if (isInTree(ST, stmtIsA<clang::ContinueStmt>()))
+                            llvm::errs() << "ContinueStmt,";
+                        if (isInTree(ST, stmtIsA<clang::BreakStmt>()))
+                            llvm::errs() << "BreakStmt,";
+                    }
+
+                    if (isInTree(ST, stmtIsA<clang::ReturnStmt>()))
+                        llvm::errs() << "ReturnStmt,";
+                    if (isInTree(ST, stmtIsA<clang::GotoStmt>()))
+                        llvm::errs() << "GotoStmt,";
+
+                    if (llvm::isa_and_nonnull<clang::CharacterLiteral>(ST))
+                        llvm::errs() << "CharacterLiteral,";
+                    if (llvm::isa_and_nonnull<clang::IntegerLiteral>(ST))
+                        llvm::errs() << "IntegerLiteral,";
+                    if (llvm::isa_and_nonnull<clang::FloatingLiteral>(ST))
+                        llvm::errs() << "FloatingLiteral,";
+                    if (llvm::isa_and_nonnull<clang::FixedPointLiteral>(ST))
+                        llvm::errs() << "FixedPointLiteral,";
+                    if (llvm::isa_and_nonnull<clang::ImaginaryLiteral>(ST))
+                        llvm::errs() << "ImaginaryLiteral,";
+
+                    if (llvm::isa_and_nonnull<clang::StringLiteral>(ST))
+                        llvm::errs() << "StringLiteral,";
+                    if (llvm::isa_and_nonnull<clang::CompoundLiteralExpr>(ST))
+                        llvm::errs() << "CompoundLiteralExpr,";
+
+                    if (isInTree(ST, stmtIsA<clang::ConditionalOperator>()))
+                        llvm::errs() << "ConditionalOperator,";
+                    if (isInTree(ST,
+                                 stmtIsBinOp(
+                                     clang::BinaryOperator::Opcode::BO_LAnd)))
+                        llvm::errs() << "BinaryOperator::Opcode::BO_LAnd,";
+                    if (isInTree(ST,
+                                 stmtIsBinOp(
+                                     clang::BinaryOperator::Opcode::BO_LOr)))
+                        llvm::errs() << "BinaryOperator::Opcode::BO_LOr,";
                 }
-
-                if (isInTree(ST, stmtIsA<clang::ReturnStmt>()))
-                    llvm::errs() << "ReturnStmt,";
-                if (isInTree(ST, stmtIsA<clang::GotoStmt>()))
-                    llvm::errs() << "GotoStmt,";
-
-                if (llvm::isa_and_nonnull<clang::CharacterLiteral>(ST))
-                    llvm::errs() << "CharacterLiteral,";
-                if (llvm::isa_and_nonnull<clang::IntegerLiteral>(ST))
-                    llvm::errs() << "IntegerLiteral,";
-                if (llvm::isa_and_nonnull<clang::FloatingLiteral>(ST))
-                    llvm::errs() << "FloatingLiteral,";
-                if (llvm::isa_and_nonnull<clang::FixedPointLiteral>(ST))
-                    llvm::errs() << "FixedPointLiteral,";
-                if (llvm::isa_and_nonnull<clang::ImaginaryLiteral>(ST))
-                    llvm::errs() << "ImaginaryLiteral,";
-
-                if (llvm::isa_and_nonnull<clang::StringLiteral>(ST))
-                    llvm::errs() << "StringLiteral,";
-                if (llvm::isa_and_nonnull<clang::CompoundLiteralExpr>(ST))
-                    llvm::errs() << "CompoundLiteralExpr,";
-
-                if (isInTree(ST, stmtIsA<clang::ConditionalOperator>()))
-                    llvm::errs() << "ConditionalOperator,";
-                if (isInTree(ST,
-                             stmtIsBinOp(
-                                 clang::BinaryOperator::Opcode::BO_LAnd)))
-                    llvm::errs() << "BinaryOperator::Opcode::BO_LAnd,";
-                if (isInTree(ST,
-                             stmtIsBinOp(
-                                 clang::BinaryOperator::Opcode::BO_LOr)))
-                    llvm::errs() << "BinaryOperator::Opcode::BO_LOr,";
 
                 if (D)
                     llvm::errs() << "Decl,";
