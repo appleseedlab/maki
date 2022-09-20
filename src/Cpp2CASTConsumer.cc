@@ -1,8 +1,9 @@
 #include "Cpp2CASTConsumer.hh"
+#include "ASTUtils.hh"
 #include "DeclStmtTypeLoc.hh"
 #include "ExpansionMatchHandler.hh"
 #include "ExpansionMatcher.hh"
-#include "StmtCollectorMatchHandler.hh"
+#include "Properties.hh"
 
 #include "clang/Lex/Lexer.h"
 #include "clang/Lex/Preprocessor.h"
@@ -19,8 +20,6 @@
 //          and ignoringImplicit
 // NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
 //          paren exprs
-// TODO:    make sure we always use
-//          unless(anyOf(implicitCastExpr(), implicitValueInitExpr()))
 
 namespace cpp2c
 {
@@ -32,18 +31,6 @@ namespace cpp2c
         MF = new cpp2c::MacroForest(PP, Ctx);
 
         PP.addPPCallbacks(std::unique_ptr<cpp2c::MacroForest>(MF));
-    }
-
-    bool isInTree(
-        const clang::Stmt *ST,
-        std::function<bool(const clang::Stmt *)> pred)
-    {
-        if (pred(ST))
-            return true;
-        for (auto child : ST->children())
-            if (isInTree(child, pred))
-                return true;
-        return false;
     }
 
     template <typename T>
@@ -64,196 +51,8 @@ namespace cpp2c
         };
     }
 
-    inline std::function<bool(MacroExpansionArgument)>
-    locInArg(clang::SourceLocation L)
-    {
-        return [L](MacroExpansionArgument Arg)
-        {
-            if (Arg.Tokens.empty())
-                return false;
-            clang::SourceRange ArgTokRange(
-                Arg.Tokens.front().getLocation(),
-                Arg.Tokens.back().getEndLoc());
-            return ArgTokRange.fullyContains(L);
-        };
-    }
-
-    template <typename T>
-    std::vector<const clang::Stmt *>
-    matchAndCollectStmtsIn(
-        clang::ASTContext &Ctx,
-        T *Node,
-        const clang::ast_matchers::internal::BindableMatcher<clang::Stmt> m)
-    {
-        using namespace clang::ast_matchers;
-        MatchFinder Finder;
-        StmtCollectorMatchHandler Handler;
-
-        // We have to add two matchers because by default,
-        // clang appears to not recursively match on AST nodes when given
-        // a specific node to look for matches in
-
-        // Matcher for subtrees
-        auto SubtreeMatcher = m;
-        // Matcher for recursively applying the subtree matcher to the root node
-        auto RootMatcher = stmt(forEachDescendant(SubtreeMatcher));
-
-        // According to Dietrich, the order in which we apply
-        // these matchers is important, but I'm not sure why.
-        Finder.addMatcher(SubtreeMatcher, &Handler);
-        Finder.addMatcher(RootMatcher, &Handler);
-        Finder.match(*Node, Ctx);
-        return Handler.Stmts;
-    }
-
-    // Checks that a given expansion is hygienic.
-    // By hygienic, we mean that it satisfies Clinger and Rees'
-    // strong hygiene condition for macros:
-    // Local variables in the expansion must have been passed as arguments,
-    // and the expansion must not create new declarations that can be
-    // accessed outside of the expansion.
-    // TODO: Check for new declarations!
-    //       Right now we only check for unbound local vars.
-    bool isHygienic(
-        clang::ASTContext &Ctx,
-        cpp2c::MacroExpansionNode *Expansion)
-    {
-        assert(Expansion->AlignedRoot &&
-               Expansion->AlignedRoot->ST &&
-               "Expansion must have an aligned Stmt root");
-        // 1. Collect all local vars in the expansion
-        std::vector<const clang::DeclRefExpr *> LocalVars;
-        for (auto ST : matchAndCollectStmtsIn<const clang::Stmt>(
-                 Ctx,
-                 Expansion->AlignedRoot->ST,
-                 stmt(unless(anyOf(implicitCastExpr(),
-                                   implicitValueInitExpr())),
-                      declRefExpr(to(varDecl(hasLocalStorage())))
-                          .bind("root"))))
-            if (auto DRE = clang::dyn_cast<clang::DeclRefExpr>(ST))
-                LocalVars.push_back(DRE);
-            else
-                assert(!"Matched a non DeclRefExpr");
-
-        // 2. Check if any local vars were not passed as arguments.
-        //    If a local var was spelled inside any of the macro's
-        //    arguments, then its hygienic; otherwise, it's not.
-        auto &SM = Ctx.getSourceManager();
-        for (auto DRE : LocalVars)
-        {
-            // NOTE: Maybe we should use endLoc here?
-            auto L = SM.getSpellingLoc(DRE->getBeginLoc());
-            if (!std::any_of(Expansion->Arguments.begin(),
-                             Expansion->Arguments.end(),
-                             locInArg(L)))
-                return false;
-        }
-        // 3. TODO: Check if the expansion contains a decl that could be
-        //          accessed after the macro is expanded.
-        //          (i.e., if the expansion contains a decl that is not
-        //           inside a compound stmt).
-        return true;
-    }
-
-    bool isParameterSideEffectFree(
-        clang::ASTContext &Ctx,
-        MacroExpansionNode *Expansion)
-    {
-        assert(Expansion->AlignedRoot &&
-               Expansion->AlignedRoot->ST &&
-               "Expansion must have an aligned Stmt root");
-        // 1. Collect all expressions with side-effects in the expansion
-        std::vector<const clang::Expr *> SideEffectExprs;
-        for (auto ST : matchAndCollectStmtsIn<const clang::Stmt>(
-                 Ctx,
-                 Expansion->AlignedRoot->ST,
-                 stmt(unless(anyOf(implicitCastExpr(),
-                                   implicitValueInitExpr())),
-                      anyOf(
-                          binaryOperator(isAssignmentOperator()).bind("root"),
-                          unaryOperator(hasOperatorName("++")).bind("root"),
-                          unaryOperator(hasOperatorName("--")).bind("root")))))
-            if (auto Ex = clang::dyn_cast<clang::Expr>(ST))
-                SideEffectExprs.push_back(Ex);
-            else
-                assert(!"Matched a non Expr");
-
-        // 2. Check that none of these side-effect exprs came from
-        //    a macro argument
-        auto &SM = Ctx.getSourceManager();
-        return !(std::any_of(SideEffectExprs.begin(),
-                             SideEffectExprs.end(),
-                             [&SM, &Expansion](const clang::Expr *Ex)
-                             {
-                                 auto L = SM.getSpellingLoc(Ex->getBeginLoc());
-                                 return std::any_of(
-                                     Expansion->Arguments.begin(),
-                                     Expansion->Arguments.end(),
-                                     locInArg(L));
-                             }));
-    }
-
-    bool isLValueIndependent(
-        clang::ASTContext &Ctx,
-        MacroExpansionNode *Expansion)
-    {
-        // 1. Collect & exprs and side-effecting exprs
-        std::vector<const clang::Expr *> LValueExprs;
-        for (auto ST : matchAndCollectStmtsIn<const clang::Stmt>(
-                 Ctx,
-                 Expansion->AlignedRoot->ST,
-                 stmt(unless(anyOf(implicitCastExpr(),
-                                   implicitValueInitExpr())),
-                      anyOf(
-                          unaryOperator(hasOperatorName("&")).bind("root"),
-                          binaryOperator(isAssignmentOperator()).bind("root"),
-                          unaryOperator(hasOperatorName("++")).bind("root"),
-                          unaryOperator(hasOperatorName("--")).bind("root")))))
-            if (auto Ex = clang::dyn_cast<clang::Expr>(ST))
-                LValueExprs.push_back(Ex);
-            else
-                assert(!"Matched a non Expr");
-
-        // 2. Check that either the entire expr came from an argument,
-        //    or the expr's operand did not come from an argument
-        // TODO: clean this up
-        auto &SM = Ctx.getSourceManager();
-        for (auto Ex : LValueExprs)
-        {
-            // Check if the entire expr came from an argument
-            auto L = SM.getSpellingLoc(Ex->getBeginLoc());
-            if (std::any_of(
-                    Expansion->Arguments.begin(),
-                    Expansion->Arguments.end(),
-                    locInArg(L)))
-                continue;
-
-            // If not, the expression may still be safe if the L-value operand
-            // does not contain any subtree that came from an argument
-            const clang::Expr *Operand = nullptr;
-            if (auto AO = clang::dyn_cast<clang::UnaryOperator>(Ex))
-                Operand = AO->getSubExpr();
-            else if (auto BO = clang::dyn_cast<clang::BinaryOperator>(Ex))
-                Operand = BO->getLHS();
-            else
-                assert(!"Matched a non &, non binary assignment operator");
-
-            for (auto Arg : Expansion->Arguments)
-                if (isInTree(
-                        Operand,
-                        [&SM, &Arg](const clang::Stmt *ST)
-                        {
-                            auto L = SM.getSpellingLoc(ST->getBeginLoc());
-                            return locInArg(L)(Arg);
-                        }))
-                    return false;
-        }
-        return true;
-    }
-
     void Cpp2CASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx)
     {
-        auto &SM = Ctx.getSourceManager();
         for (auto TLE : MF->TopLevelExpansions)
         {
             using namespace clang::ast_matchers;
@@ -276,29 +75,38 @@ namespace cpp2c
             }
 
             // Match decls
-            MATCH_EXPANSION_ROOTS_OF(decl, TLE);
-
-            // Match type locs
-            MATCH_EXPANSION_ROOTS_OF(typeLoc, TLE);
-
-            // Find aligned root
-            // TODO: The matcher should just return the aligned root
-            //       immediately
-            for (auto &&R : TLE->ASTRoots)
+            if (!(TLE->DefinitionTokens.empty()))
             {
-                // R.dump();
-                clang::SourceRange RootSpellingRange(
-                    SM.getSpellingLoc(R.getSourceRange().getBegin()),
-                    SM.getSpellingLoc(R.getSourceRange().getEnd()));
-                if (TLE->SpellingRange ==
-                    SM.getExpansionRange(R.getSourceRange()).getAsRange())
-                {
-                    TLE->AlignedRoot = &R;
-                    break;
-                }
+                MatchFinder Finder;
+                ExpansionMatchHandler Handler;
+                auto Matcher = decl(alignsWithExpansion(&Ctx, TLE))
+                                   .bind("root");
+                Finder.addMatcher(Matcher, &Handler);
+                Finder.matchAST(Ctx);
+                for (auto M : Handler.Matches)
+                    TLE->ASTRoots.push_back(M);
             }
 
+            // Match type locs
+            if (!((TLE)->DefinitionTokens.empty()))
+            {
+                MatchFinder Finder;
+                ExpansionMatchHandler Handler;
+                auto Matcher = typeLoc(alignsWithExpansion(&Ctx, (TLE)))
+                                   .bind("root");
+                Finder.addMatcher(Matcher, &Handler);
+                Finder.matchAST(Ctx);
+                for (auto M : Handler.Matches)
+                    TLE->ASTRoots.push_back(M);
+            }
+
+            // If the expansion only aligns with one node, then set this
+            // as its aligned root
+            if (TLE->ASTRoots.size() == 1)
+                TLE->AlignedRoot = &(TLE->ASTRoots.front());
+
             //// Find AST roots aligned with each of the expansion's arguments
+
             for (auto &&Arg : TLE->Arguments)
             {
                 // Match stmts
@@ -306,13 +114,10 @@ namespace cpp2c
                 {
                     MatchFinder Finder;
                     ExpansionMatchHandler Handler;
-                    auto Matcher =
-                        stmt(unless(anyOf(implicitCastExpr(),
-                                          implicitValueInitExpr())),
-                             isSpelledFromTokens(
-                                 &Ctx,
-                                 Arg.Tokens))
-                            .bind("root");
+                    auto Matcher = stmt(unless(anyOf(implicitCastExpr(),
+                                                     implicitValueInitExpr())),
+                                        isSpelledFromTokens(&Ctx, Arg.Tokens))
+                                       .bind("root");
                     Finder.addMatcher(Matcher, &Handler);
                     Finder.matchAST(Ctx);
                     for (auto M : Handler.Matches)
@@ -320,21 +125,45 @@ namespace cpp2c
                 }
 
                 // Match decls
-                MATCH_ARGUMENT_ROOTS_OF(decl, (&Arg));
+                if (!(Arg.Tokens.empty()))
+                {
+                    MatchFinder Finder;
+                    ExpansionMatchHandler Handler;
+                    auto Matcher = decl(isSpelledFromTokens(&Ctx, Arg.Tokens))
+                                       .bind("root");
+                    Finder.addMatcher(Matcher, &Handler);
+                    Finder.matchAST(Ctx);
+                    for (auto M : Handler.Matches)
+                        Arg.AlignedRoots.push_back(M);
+                }
 
                 // Match type locs
-                MATCH_ARGUMENT_ROOTS_OF(typeLoc, (&Arg));
+                if (!(Arg.Tokens.empty()))
+                {
+                    MatchFinder Finder;
+                    ExpansionMatchHandler Handler;
+                    auto Matcher =
+                        typeLoc(isSpelledFromTokens(&Ctx, Arg.Tokens))
+                            .bind("root");
+                    Finder.addMatcher(Matcher, &Handler);
+                    Finder.matchAST(Ctx);
+                    for (auto M : Handler.Matches)
+                        Arg.AlignedRoots.push_back(M);
+                }
             }
 
             //// Print macro expansion info
 
-            // TLE->dumpASTInfo(llvm::errs(), SM, Ctx.getLangOpts());
+            // TLE->dumpASTInfo(llvm::errs(),
+            //                  Ctx.getSourceManager(), Ctx.getLangOpts());
 
-            if (!TLE->AlignedRoot)
-                llvm::errs() << "Unaligned body,";
+            if (TLE->ASTRoots.size() == 0)
+                llvm::errs() << "No aligned body,";
+            else if (TLE->ASTRoots.size() > 1)
+                llvm::errs() << "Multiple aligned bodies,";
             else
             {
-                llvm::errs() << "Aligned body,";
+                llvm::errs() << "Single aligned body,";
                 auto D = TLE->AlignedRoot->D;
                 auto ST = TLE->AlignedRoot->ST;
                 auto TL = TLE->AlignedRoot->TL;
@@ -344,35 +173,32 @@ namespace cpp2c
 
                     llvm::errs() << "Stmt,";
 
-                    if (llvm::isa_and_nonnull<clang::DoStmt>(ST))
+                    if (llvm::isa<clang::DoStmt>(ST))
                         llvm::errs() << "DoStmt,";
-                    else
-                    {
-                        if (isInTree(ST, stmtIsA<clang::ContinueStmt>()))
-                            llvm::errs() << "ContinueStmt,";
-                        if (isInTree(ST, stmtIsA<clang::BreakStmt>()))
-                            llvm::errs() << "BreakStmt,";
-                    }
+                    if (llvm::isa<clang::ContinueStmt>(ST))
+                        llvm::errs() << "ContinueStmt,";
+                    if (llvm::isa<clang::BreakStmt>(ST))
+                        llvm::errs() << "BreakStmt,";
 
-                    if (isInTree(ST, stmtIsA<clang::ReturnStmt>()))
+                    if (llvm::isa<clang::ReturnStmt>(ST))
                         llvm::errs() << "ReturnStmt,";
-                    if (isInTree(ST, stmtIsA<clang::GotoStmt>()))
+                    if (llvm::isa<clang::GotoStmt>(ST))
                         llvm::errs() << "GotoStmt,";
 
-                    if (llvm::isa_and_nonnull<clang::CharacterLiteral>(ST))
+                    if (llvm::isa<clang::CharacterLiteral>(ST))
                         llvm::errs() << "CharacterLiteral,";
-                    if (llvm::isa_and_nonnull<clang::IntegerLiteral>(ST))
+                    if (llvm::isa<clang::IntegerLiteral>(ST))
                         llvm::errs() << "IntegerLiteral,";
-                    if (llvm::isa_and_nonnull<clang::FloatingLiteral>(ST))
+                    if (llvm::isa<clang::FloatingLiteral>(ST))
                         llvm::errs() << "FloatingLiteral,";
-                    if (llvm::isa_and_nonnull<clang::FixedPointLiteral>(ST))
+                    if (llvm::isa<clang::FixedPointLiteral>(ST))
                         llvm::errs() << "FixedPointLiteral,";
-                    if (llvm::isa_and_nonnull<clang::ImaginaryLiteral>(ST))
+                    if (llvm::isa<clang::ImaginaryLiteral>(ST))
                         llvm::errs() << "ImaginaryLiteral,";
 
-                    if (llvm::isa_and_nonnull<clang::StringLiteral>(ST))
+                    if (llvm::isa<clang::StringLiteral>(ST))
                         llvm::errs() << "StringLiteral,";
-                    if (llvm::isa_and_nonnull<clang::CompoundLiteralExpr>(ST))
+                    if (llvm::isa<clang::CompoundLiteralExpr>(ST))
                         llvm::errs() << "CompoundLiteralExpr,";
 
                     if (isInTree(ST, stmtIsA<clang::ConditionalOperator>()))
@@ -403,7 +229,7 @@ namespace cpp2c
                                      Arg.numberOfTimesExpanded; }))
                 llvm::errs() << "Aligned arguments,";
             else
-                llvm::errs() << "Unaligned argument,";
+                llvm::errs() << "Unaligned arguments,";
 
             // Check for semantic properties of interface-equivalence
             // TODO: Check for these properties in decls as well?
