@@ -19,6 +19,7 @@ include_directories(SYSTEM "${LLVM_INCLUDE_DIRS};${CLANG_INCLUDE_DIRS}")
 # ADD THE TARGET
 #===============================================================================
 add_library(cpp2c SHARED
+  ASTUtils.cc
   Cpp2CAction.cc
   Cpp2CASTConsumer.cc
   DeclStmtTypeLoc.cc
@@ -26,6 +27,7 @@ add_library(cpp2c SHARED
   MacroForest.cc
   MacroExpansionArgument.cc
   MacroExpansionNode.cc
+  Properties.cc
   StmtCollectorMatchHandler.cc
 )
 
