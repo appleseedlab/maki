@@ -2,6 +2,8 @@
 
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 
+#include <algorithm>
+
 namespace cpp2c
 {
     using namespace clang::ast_matchers;
@@ -22,7 +24,24 @@ namespace cpp2c
         auto NodeB = SM.getSpellingLoc(Node.getBeginLoc());
         auto NodeE = SM.getSpellingLoc(Node.getEndLoc());
 
-        return (NodeB == DefB) && (NodeE == DefE);
+        // Either the node aligns with the macro itself,
+        // or one of its arguments
+        // TODO: Test this and make sure that its correct to include
+        // the argument token ranges
+        return ((NodeB == DefB) ||
+                (std::any_of(Expansion->Arguments.begin(),
+                             Expansion->Arguments.end(),
+                             [&NodeB](MacroExpansionArgument Arg)
+                             { return (!Arg.Tokens.empty()) &&
+                                      (NodeB == Arg.Tokens.front()
+                                                    .getLocation()); }))) &&
+               (NodeE == DefE ||
+                (std::any_of(Expansion->Arguments.begin(),
+                             Expansion->Arguments.end(),
+                             [&NodeE](MacroExpansionArgument Arg)
+                             { return (!Arg.Tokens.empty()) &&
+                                      (NodeE == Arg.Tokens.back()
+                                                    .getLocation()); })));
     }
 
     // Matches all AST nodes who span the same range that the
