@@ -37,7 +37,8 @@ namespace cpp2c
         // Initialize the new expansion with the parts we can get
         // directly from clang
 
-        cpp2c::MacroExpansionNode *Expansion = new cpp2c::MacroExpansionNode();
+        cpp2c::MacroExpansionNode *Expansion =
+            new cpp2c::MacroExpansionNode(MD);
         Expansion->Name = MacroNameTok.getIdentifierInfo()->getName();
         Expansion->MacroHash = MI->getDefinitionLoc().printToString(SM);
         Expansion->DefinitionRange = clang::SourceRange(

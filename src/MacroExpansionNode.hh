@@ -1,9 +1,10 @@
 #pragma once
 
 #include "MacroExpansionArgument.hh"
-
 #include "DeclStmtTypeLoc.hh"
+
 #include "clang/Basic/SourceLocation.h"
+#include "clang/Lex/MacroInfo.h"
 
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/raw_ostream.h"
@@ -15,6 +16,8 @@ namespace cpp2c
     class MacroExpansionNode
     {
     public:
+        // The definition of the macro is an expansion of
+        const clang::MacroDefinition &MD;
         // The name of the expanded macro
         llvm::StringRef Name;
         // The hash of the macro this expansion is an expansion of.
@@ -43,6 +46,8 @@ namespace cpp2c
         cpp2c::DeclStmtTypeLoc *AlignedRoot = nullptr;
         // The arguments to this macro invocation, if any
         std::vector<MacroExpansionArgument> Arguments;
+
+        MacroExpansionNode(const clang::MacroDefinition &MD);
 
         // Prints a macro expansion tree
         void dumpMacroInfo(llvm::raw_fd_ostream &OS, unsigned int indent = 0);

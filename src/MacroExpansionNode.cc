@@ -6,6 +6,9 @@
 
 namespace cpp2c
 {
+    MacroExpansionNode::MacroExpansionNode(const clang::MacroDefinition &MD)
+        : MD(MD) {}
+
     void MacroExpansionNode::dumpMacroInfo(llvm::raw_fd_ostream &OS,
                                            unsigned int indent)
     {
