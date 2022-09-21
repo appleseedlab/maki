@@ -25,6 +25,9 @@ namespace cpp2c
         return (NodeB == DefB) && (NodeE == DefE);
     }
 
+    // Matches all AST nodes who span the same range that the
+    // given token list spans, and for whose range every token
+    // in the list is spelled
     AST_POLYMORPHIC_MATCHER_P2(
         isSpelledFromTokens,
         AST_POLYMORPHIC_SUPPORTED_TYPES(clang::Decl,
