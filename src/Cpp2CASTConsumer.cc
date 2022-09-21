@@ -2,7 +2,7 @@
 #include "ASTUtils.hh"
 #include "DeclStmtTypeLoc.hh"
 #include "ExpansionMatchHandler.hh"
-#include "ExpansionMatcher.hh"
+#include "AlignmentMatchers.hh"
 #include "Properties.hh"
 
 #include "clang/Lex/Lexer.h"
