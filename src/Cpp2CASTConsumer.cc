@@ -166,7 +166,12 @@ namespace cpp2c
             // TLE->dumpASTInfo(llvm::errs(),
             //                  Ctx.getSourceManager(), Ctx.getLangOpts());
 
-            if (TLE->ASTRoots.size() == 0)
+            if (TLE->MD.getMacroInfo()->isObjectLike())
+                llvm::errs() << "Object-like,";
+            else
+                llvm::errs() << "Function-like,";
+
+            if (TLE->ASTRoots.empty())
                 llvm::errs() << "No aligned body,";
             else if (TLE->ASTRoots.size() > 1)
                 llvm::errs() << "Multiple aligned bodies,";
