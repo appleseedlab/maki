@@ -166,7 +166,7 @@ namespace cpp2c
             // TLE->dumpASTInfo(llvm::errs(),
             //                  Ctx.getSourceManager(), Ctx.getLangOpts());
 
-            if (TLE->MD.getMacroInfo()->isObjectLike())
+            if (TLE->MI->isObjectLike())
                 llvm::errs() << "Object-like,";
             else
                 llvm::errs() << "Function-like,";
@@ -252,6 +252,9 @@ namespace cpp2c
             }
 
             llvm::errs() << "\n";
+
+            // Free the expansion node and its subtrees.
+            // delete TLE;
         }
     }
 } // namespace cpp2c

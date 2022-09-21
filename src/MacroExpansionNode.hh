@@ -16,8 +16,8 @@ namespace cpp2c
     class MacroExpansionNode
     {
     public:
-        // The definition of the macro is an expansion of
-        const clang::MacroDefinition &MD;
+        // Info about the macro this is an expansion of
+        clang::MacroInfo *MI;
         // The name of the expanded macro
         llvm::StringRef Name;
         // The hash of the macro this expansion is an expansion of.
@@ -46,8 +46,6 @@ namespace cpp2c
         cpp2c::DeclStmtTypeLoc *AlignedRoot = nullptr;
         // The arguments to this macro invocation, if any
         std::vector<MacroExpansionArgument> Arguments;
-
-        MacroExpansionNode(const clang::MacroDefinition &MD);
 
         // Prints a macro expansion tree
         void dumpMacroInfo(llvm::raw_fd_ostream &OS, unsigned int indent = 0);
