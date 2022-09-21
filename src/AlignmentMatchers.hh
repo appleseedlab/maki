@@ -6,14 +6,6 @@ namespace cpp2c
 {
     using namespace clang::ast_matchers;
 
-    // TODO: Right now, for finding nodes aligned withe expansions,
-    // we first find potentially aligned nodes, and then determine which
-    // of these are the actually aligned nodes.
-    // For macro arguments though, we have access to the tokens behind them,
-    // and are able to directly find the aligned nodes.
-    // It would be nice if we could directly find all the aligned nodes
-    // for expansions as well.
-
     // Matches all AST nodes who expand to a source range that shares
     // begin/end with the given range
     AST_POLYMORPHIC_MATCHER_P2(
