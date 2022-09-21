@@ -253,8 +253,7 @@ namespace cpp2c
 
             llvm::errs() << "\n";
 
-            // Free the expansion node and its subtrees.
-            // delete TLE;
+            delete TLE;
         }
     }
 } // namespace cpp2c

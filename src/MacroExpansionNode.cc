@@ -7,6 +7,12 @@
 namespace cpp2c
 {
 
+    MacroExpansionNode::~MacroExpansionNode()
+    {
+        for (auto &&Child : Children)
+            delete Child;
+    }
+
     void MacroExpansionNode::dumpMacroInfo(llvm::raw_fd_ostream &OS,
                                            unsigned int indent)
     {

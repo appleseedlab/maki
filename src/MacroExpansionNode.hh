@@ -47,6 +47,9 @@ namespace cpp2c
         // The arguments to this macro invocation, if any
         std::vector<MacroExpansionArgument> Arguments;
 
+        // Destructor should only be called on top-level expansions
+        ~MacroExpansionNode();
+
         // Prints a macro expansion tree
         void dumpMacroInfo(llvm::raw_fd_ostream &OS, unsigned int indent = 0);
         // Prints information about the AST nodes aligned with this expansion
