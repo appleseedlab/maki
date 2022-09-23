@@ -17,16 +17,16 @@ namespace cpp2c
                << " (" << clang::tok::getTokenName(T.getKind()) << ")"
                << " @ ";
             T.getLocation().dump(SM);
-
-            llvm::errs() << "Aligned roots for argument "
-                         << Name
-                         << ":\n";
-            if (!AlignedRoots.empty())
-                for (auto R : AlignedRoots)
-                    R.dump();
-            else
-                llvm::errs() << "None\n";
         }
+
+        llvm::errs() << "Aligned roots for argument "
+                     << Name
+                     << ":\n";
+        if (!AlignedRoots.empty())
+            for (auto R : AlignedRoots)
+                R.dump();
+        else
+            llvm::errs() << "None\n";
     }
 
 } // namespace cpp2c
