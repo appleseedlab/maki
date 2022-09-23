@@ -193,6 +193,7 @@ namespace cpp2c
                                    clang::ReturnStmt,
                                    clang::GotoStmt,
 
+                                   clang::Expr,
                                    clang::CharacterLiteral,
                                    clang::IntegerLiteral,
                                    clang::FloatingLiteral,
