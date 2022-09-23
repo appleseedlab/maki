@@ -26,22 +26,10 @@ namespace cpp2c
 
         // Either the node aligns with the macro itself,
         // or one of its arguments
-        // TODO: Test this and make sure that its correct to include
-        // the argument token ranges
-        return ((NodeB == DefB) ||
-                (std::any_of(Expansion->Arguments.begin(),
-                             Expansion->Arguments.end(),
-                             [&NodeB](MacroExpansionArgument Arg)
-                             { return (!Arg.Tokens.empty()) &&
-                                      (NodeB == Arg.Tokens.front()
-                                                    .getLocation()); }))) &&
-               (NodeE == DefE ||
-                (std::any_of(Expansion->Arguments.begin(),
-                             Expansion->Arguments.end(),
-                             [&NodeE](MacroExpansionArgument Arg)
-                             { return (!Arg.Tokens.empty()) &&
-                                      (NodeE == Arg.Tokens.back()
-                                                    .getLocation()); })));
+        // TODO: See if there is a way to reliably match macros which
+        // begin/end with an expansion of an argument.
+        // Right now this will not match those macros at all.
+        return (((NodeB == DefB) && (NodeE == DefE)));
     }
 
     // Matches all AST nodes who span the same range that the
