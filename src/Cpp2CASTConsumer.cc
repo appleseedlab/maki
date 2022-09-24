@@ -161,7 +161,9 @@ namespace cpp2c
                 }
             }
 
-            //// Print macro expansion info
+            //// Print macro info
+
+            // TLE->dumpMacroInfo(llvm::errs());
 
             // TLE->dumpASTInfo(llvm::errs(),
             //                  Ctx.getSourceManager(), Ctx.getLangOpts());
@@ -223,14 +225,21 @@ namespace cpp2c
 
             // Check that the number of AST nodes aligned with each argument
             // equals the number of times that argument was expanded
-            if (std::all_of(TLE->Arguments.begin(),
-                            TLE->Arguments.end(),
-                            [](MacroExpansionArgument Arg)
-                            { return Arg.AlignedRoots.size() ==
-                                     Arg.numberOfTimesExpanded; }))
-                llvm::errs() << "Aligned arguments,";
+            if (TLE->Arguments.empty())
+            {
+                llvm::errs() << "No arguments,";
+            }
             else
-                llvm::errs() << "Unaligned arguments,";
+            {
+                if (std::all_of(TLE->Arguments.begin(),
+                                TLE->Arguments.end(),
+                                [](MacroExpansionArgument Arg)
+                                { return Arg.AlignedRoots.size() ==
+                                         Arg.numberOfTimesExpanded; }))
+                    llvm::errs() << "Aligned arguments,";
+                else
+                    llvm::errs() << "Unaligned arguments,";
+            }
 
             // Check for semantic properties of interface-equivalence
             // TODO: Check for these properties in decls as well?
