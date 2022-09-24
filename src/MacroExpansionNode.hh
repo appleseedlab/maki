@@ -37,15 +37,25 @@ namespace cpp2c
         // How deeply nested this macro is in its expansion tree
         unsigned int Depth;
         // The expansion that this expansion was expanded under (if any)
-        cpp2c::MacroExpansionNode *Parent;
+        MacroExpansionNode *Parent;
         // Invocations that were directly expanded under this expansion
-        std::vector<cpp2c::MacroExpansionNode *> Children;
+        std::vector<MacroExpansionNode *> Children;
         // The AST roots of this expansion, if any
-        std::vector<cpp2c::DeclStmtTypeLoc> ASTRoots;
+        std::vector<DeclStmtTypeLoc> ASTRoots;
         // The AST root this expansion is aligned with, if any
-        cpp2c::DeclStmtTypeLoc *AlignedRoot = nullptr;
+        DeclStmtTypeLoc *AlignedRoot = nullptr;
         // The arguments to this macro invocation, if any
         std::vector<MacroExpansionArgument> Arguments;
+        // The macro argument that that the expanded macro's definition
+        // begins with.
+        // If the macro's definition does not begin with an argument,
+        // this is the nullptr.
+        MacroExpansionArgument *ArgDefBeginsWith = nullptr;
+        // The macro argument that that the expanded macro's definition
+        // ends with.
+        // If the macro's definition does not end with an argument,
+        // this is the nullptr.
+        MacroExpansionArgument *ArgDefEndsWith = nullptr;
 
         // Destructor should only be called on top-level expansions
         ~MacroExpansionNode();

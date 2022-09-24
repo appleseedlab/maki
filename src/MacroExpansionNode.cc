@@ -17,16 +17,18 @@ namespace cpp2c
                                            unsigned int indent)
     {
         for (unsigned int i = 0; i < indent; i++)
-        {
             OS << "\t";
-        }
 
         OS << Name << " @ depth " << Depth << "\n";
 
         for (auto Child : Children)
-        {
             Child->dumpMacroInfo(OS, indent + 1);
-        }
+
+        if (ArgDefBeginsWith)
+            OS << Name << " begins with arg " << ArgDefBeginsWith->Name << "\n";
+
+        if (ArgDefEndsWith)
+            OS << Name << " ends with arg " << ArgDefEndsWith->Name << "\n";
     }
 
     void MacroExpansionNode::dumpASTInfo(
@@ -35,6 +37,10 @@ namespace cpp2c
         const clang::LangOptions &LO)
     {
         OS << "Top level expansion of " << Name << "\n";
+
+        OS << "AST roots: \n";
+        for (auto &&Root : ASTRoots)
+            Root.dump();
 
         OS << "Aligned root: \n";
         if (AlignedRoot)

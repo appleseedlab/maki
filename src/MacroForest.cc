@@ -33,6 +33,7 @@ namespace cpp2c
     {
         auto MI = MD.getMacroInfo();
         auto &SM = Ctx.getSourceManager();
+        const auto &LO = Ctx.getLangOpts();
 
         // Initialize the new expansion with the parts we can get
         // directly from clang
@@ -119,13 +120,27 @@ namespace cpp2c
 
                 // Count how many times this argument is expanded in
                 // the macro body
-                const auto &LO = Ctx.getLangOpts();
                 for (auto Tok : MI->tokens())
-                    if (clang::Lexer::getSpelling(Tok, SM, LO) == Arg.Name.str())
+                    if (clang::Lexer::getSpelling(Tok, SM, LO) ==
+                        Arg.Name.str())
                         Arg.numberOfTimesExpanded++;
 
                 // Add the argument to the list of arguments for this expansion
                 Expansion->Arguments.push_back(Arg);
+            }
+        }
+
+        // Check if the macro definition begins or ends with an argument
+        if (!MI->tokens_empty())
+        {
+            for (auto &&Arg : Expansion->Arguments)
+            {
+                if (clang::Lexer::getSpelling(
+                        MI->tokens().front(), SM, LO) == Arg.Name.str())
+                    Expansion->ArgDefBeginsWith = &Arg;
+                if (clang::Lexer::getSpelling(
+                        MI->tokens().back(), SM, LO) == Arg.Name.str())
+                    Expansion->ArgDefEndsWith = &Arg;
             }
         }
     }
