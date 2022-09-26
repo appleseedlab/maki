@@ -16,6 +16,9 @@
 
 int main(int argc, char const *argv[])
 {
+    // All of these macros have aligned bodies,
+    // but unaligned arguments
+
     ID(1);
     ADD(1, 2);
     ADD(1 * 2, 3 * 4);
