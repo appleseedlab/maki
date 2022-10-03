@@ -50,6 +50,37 @@ namespace cpp2c
         };
     }
 
+    // Expects that the passed expansion is entirely wellformed
+    bool hasAmbiguousSignature(MacroExpansionNode *Expansion)
+    {
+        // TODO: Check for anonymous types
+
+        // Check that the whole macro expands to a stmt
+        if (auto ST = Expansion->AlignedRoot->ST)
+        {
+            // Check that each argument is not ambiguous
+            for (auto &&Arg : Expansion->Arguments)
+            {
+                for (auto &&R : Arg.AlignedRoots)
+                {
+                    // Arguments must be expressions
+                    if (auto E = clang::dyn_cast_or_null<clang::Expr>(R.ST))
+                    {
+                        // Arguments must have a type
+                        if (auto T = E->getType().getTypePtr())
+                            // Arguments cannot have the void type
+                            if (T->isVoidType())
+                                return true;
+                    }
+                    else
+                        return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
     Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI)
     {
         clang::Preprocessor &PP = CI.getPreprocessor();
@@ -214,6 +245,9 @@ namespace cpp2c
                                  stmtIsBinOp(
                                      clang::BinaryOperator::Opcode::BO_LOr)))
                         llvm::errs() << "BinaryOperator::Opcode::BO_LOr,";
+
+                    if (hasAmbiguousSignature(TLE))
+                        llvm::errs() << "Ambiguous signature,";
                 }
 
                 if (D)
