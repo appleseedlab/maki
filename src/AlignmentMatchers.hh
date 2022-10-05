@@ -72,37 +72,6 @@ namespace cpp2c
         return frontAligned && backAligned;
     }
 
-    // TODO
-    // Do Decls have children?
-    bool NodeAndChildrenSpelledInRange(clang::SourceManager &SM,
-                                       const clang::Decl *D,
-                                       clang::SourceRange Range)
-    {
-        return true;
-    }
-
-    bool NodeAndChildrenSpelledInRange(clang::SourceManager &SM,
-                                       const clang::Stmt *ST,
-                                       clang::SourceRange Range)
-    {
-        return Range.fullyContains(SM.getSpellingLoc(ST->getBeginLoc())) &&
-               Range.fullyContains(SM.getSpellingLoc(ST->getEndLoc())) &&
-               std::all_of(
-                   ST->child_begin(),
-                   ST->child_end(),
-                   [&SM, &Range](const clang::Stmt *Child)
-                   { return NodeAndChildrenSpelledInRange(SM, Child, Range); });
-    }
-
-    // TODO
-    // Do TypeLocs have children?
-    bool NodeAndChildrenSpelledInRange(clang::SourceManager &SM,
-                                       const clang::TypeLoc *TL,
-                                       clang::SourceRange Range)
-    {
-        return true;
-    }
-
     // Matches all AST nodes who span the same range that the
     // given token list spans, and for whose range every token
     // in the list is spelled
@@ -119,6 +88,12 @@ namespace cpp2c
         // empty token list.
         if (Tokens.empty())
             return false;
+
+        // These sets keep track of nodes we have already matched,
+        // so that we do not match their subtrees as well
+        static std::set<const clang::Stmt *> MatchedStmts;
+        static std::set<const clang::Decl *> MatchedDecls;
+        static std::set<const clang::TypeLoc *> MatchedTypeLocs;
 
         auto &SM = Ctx->getSourceManager();
         auto NodeB = SM.getSpellingLoc(Node.getBeginLoc());
@@ -140,14 +115,38 @@ namespace cpp2c
         if (NodeB != TokB || NodeE != TokE)
             return false;
 
-        // Ensure that this node and all its subtrees span
-        // the same range as the given token list
-        // This is to prevent matching subtrees, for instance consider:
-        //  #define FOO (x, y) x + y + x + y
-        // If we didn't have this check, then such trees would erroneously
-        // be matched
-        if (!NodeAndChildrenSpelledInRange(SM, &Node, TokRange))
-            return false;
+        // Check that this node is not the subtree of an aligned node
+        // that we already found.
+        for (auto P : Ctx->getParents(Node))
+        {
+            if (auto PST = P.template get<clang::Stmt>())
+            {
+                if (MatchedStmts.find(PST) != MatchedStmts.end())
+                    return false;
+            }
+            else if (auto DP = P.template get<clang::Decl>())
+            {
+                if (MatchedDecls.find(DP) != MatchedDecls.end())
+                    return false;
+            }
+            else if (auto DTL = P.template get<clang::TypeLoc>())
+            {
+                if (MatchedTypeLocs.find(DTL) != MatchedTypeLocs.end())
+                    return false;
+            }
+        }
+
+        // Store this node in the set of aligned subtrees we've found
+        // Since we can't know the type of the node beforehand,
+        // I'm using a bit of a hack to determine the type of Node
+        // on-the-fly
+        DeclStmtTypeLoc DTSL(&Node);
+        if (DTSL.ST)
+            MatchedStmts.insert(DTSL.ST);
+        else if (DTSL.D)
+            MatchedDecls.insert(DTSL.D);
+        else if (DTSL.TL)
+            MatchedTypeLocs.insert(DTSL.TL);
 
         return true;
     }
