@@ -141,7 +141,8 @@ namespace cpp2c
         auto &LO = Ctx.getLangOpts();
 
         // Collect declaration ranges
-        std::vector<const clang::Decl *> Decls = ({
+        std::vector<const clang::Decl *> Decls;
+        {
             MatchFinder Finder;
             DeclCollectorMatchHandler Handler;
             auto Matcher = decl(unless(anyOf(
@@ -150,8 +151,8 @@ namespace cpp2c
                                .bind("root");
             Finder.addMatcher(Matcher, &Handler);
             Finder.matchAST(Ctx);
-            Handler.Decls;
-        });
+            Decls = Handler.Decls;
+        };
 
         // Dump include-directive information
         {
