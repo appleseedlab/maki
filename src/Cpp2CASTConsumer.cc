@@ -155,7 +155,7 @@ namespace cpp2c
 
         // Dump include-directive information
         {
-            std::set<llvm::StringRef> InvalidIncludes;
+            std::set<llvm::StringRef> NonGlobalIncludes;
             for (auto &&Item : IC->IncludeEntriesLocs)
             {
                 auto FE = Item.first;
@@ -185,11 +185,11 @@ namespace cpp2c
                             {
                                 llvm::errs() << "IncludedFileRealpath,";
                                 valid =
-                                    InvalidIncludes.find(IncludedInRealpath) ==
-                                    InvalidIncludes.end();
+                                    NonGlobalIncludes.find(IncludedInRealpath) ==
+                                    NonGlobalIncludes.end();
                                 if (valid)
                                 {
-                                    llvm::errs() << "Not included in invalid file,";
+                                    llvm::errs() << "Not included in a non-globally included file,";
                                     valid = !std::any_of(
                                         Decls.begin(),
                                         Decls.end(),
@@ -212,13 +212,15 @@ namespace cpp2c
                                             return Range.fullyContains(L);
                                         });
                                     if (!valid)
-                                        InvalidIncludes.insert(IncludedFileRealpath);
+                                        NonGlobalIncludes.insert(IncludedFileRealpath);
                                 }
                             }
                         }
                     }
                 }
-                llvm::errs() << (valid ? "Valid," : "Invalid,") << "\n";
+                llvm::errs() << (valid ? "Included at global scope,"
+                                       : "Included at non-global scope,")
+                             << "\n";
             }
         }
 
