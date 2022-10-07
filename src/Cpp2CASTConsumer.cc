@@ -1,9 +1,11 @@
 #include "Cpp2CASTConsumer.hh"
 #include "ASTUtils.hh"
 #include "DeclStmtTypeLoc.hh"
+#include "DeclCollectorMatchHandler.hh"
 #include "ExpansionMatchHandler.hh"
 #include "AlignmentMatchers.hh"
 #include "Properties.hh"
+#include "IncludeCollector.hh"
 
 #include "clang/Lex/Lexer.h"
 #include "clang/Lex/Preprocessor.h"
@@ -12,6 +14,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <set>
 
 #include "assert.h"
 
@@ -126,12 +129,101 @@ namespace cpp2c
         clang::ASTContext &Ctx = CI.getASTContext();
 
         MF = new cpp2c::MacroForest(PP, Ctx);
+        IC = new cpp2c::IncludeCollector();
 
         PP.addPPCallbacks(std::unique_ptr<cpp2c::MacroForest>(MF));
+        PP.addPPCallbacks(std::unique_ptr<cpp2c::IncludeCollector>(IC));
     }
 
     void Cpp2CASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx)
     {
+        auto &SM = Ctx.getSourceManager();
+        auto &LO = Ctx.getLangOpts();
+
+        // Collect declaration ranges
+        std::vector<const clang::Decl *> Decls = ({
+            MatchFinder Finder;
+            DeclCollectorMatchHandler Handler;
+            auto Matcher = decl(unless(anyOf(
+                                    isImplicit(),
+                                    translationUnitDecl())))
+                               .bind("root");
+            Finder.addMatcher(Matcher, &Handler);
+            Finder.matchAST(Ctx);
+            Handler.Decls;
+        });
+
+        // Dump include-directive information
+        {
+            std::set<llvm::StringRef> InvalidIncludes;
+            for (auto &&Item : IC->IncludeEntriesLocs)
+            {
+                auto FE = Item.first;
+                auto HashLoc = Item.second;
+
+                llvm::errs() << "#include,";
+
+                // TODO: Would be really nice to have a monad here...
+                auto IncludedInFID = SM.getFileID(HashLoc);
+                bool valid = IncludedInFID.isValid();
+                if (valid)
+                {
+                    llvm::errs() << "IncludedInFID,";
+                    auto IncludedInFE = SM.getFileEntryForID(IncludedInFID);
+                    valid = IncludedInFE != nullptr;
+                    if (valid)
+                    {
+                        llvm::errs() << "IncludedInFE,";
+                        auto IncludedInRealpath = IncludedInFE->tryGetRealPathName();
+                        valid = !IncludedInRealpath.empty();
+                        if (valid)
+                        {
+                            llvm::errs() << "IncludedInRealpath,";
+                            auto IncludedFileRealpath = FE->tryGetRealPathName();
+                            valid = !IncludedFileRealpath.empty();
+                            if (valid)
+                            {
+                                llvm::errs() << "IncludedFileRealpath,";
+                                valid =
+                                    InvalidIncludes.find(IncludedInRealpath) ==
+                                    InvalidIncludes.end();
+                                if (valid)
+                                {
+                                    llvm::errs() << "Not included in invalid file,";
+                                    valid = !std::any_of(
+                                        Decls.begin(),
+                                        Decls.end(),
+                                        [&Item, &SM, &LO](const clang::Decl *D)
+                                        {
+                                            auto Range =
+                                                clang::SourceRange(
+                                                    SM.getFileLoc(D->getBeginLoc()),
+                                                    SM.getFileLoc(D->getEndLoc()));
+                                            // Include the location just after the declaration
+                                            // to account for semicolons.
+                                            // If the decl does not have semicolon after it,
+                                            // that's fine since it would be a non-global
+                                            // location anyway
+                                            if (auto Tok = clang::Lexer::findNextToken(
+                                                               Range.getEnd(), SM, LO)
+                                                               .getPointer())
+                                                Range.setEnd(SM.getFileLoc(Tok->getEndLoc()));
+                                            auto L = SM.getFileLoc(Item.second);
+                                            return Range.fullyContains(L);
+                                        });
+                                    if (!valid)
+                                        InvalidIncludes.insert(IncludedFileRealpath);
+                                }
+                            }
+                        }
+                    }
+                }
+                llvm::errs() << (valid ? "Valid," : "Invalid,") << "\n";
+            }
+        }
+
+        // Dump macro expansion information
+
         for (auto TLE : MF->TopLevelExpansions)
         {
             using namespace clang::ast_matchers;
