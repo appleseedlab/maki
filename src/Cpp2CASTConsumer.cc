@@ -63,66 +63,6 @@ namespace cpp2c
                 containsAnonymousType(T->getPointeeOrArrayElementType()));
     }
 
-    // Returns true if the the given stmt is a valid function argument
-    bool isValidArgument(const clang::Stmt *ST)
-    {
-        // The stmt exists
-        if (!ST)
-            return false;
-        // The stmt is an expr
-        if (!clang::isa<clang::Expr>(ST))
-            return false;
-        auto E = clang::dyn_cast<clang::Expr>(ST);
-        auto T = E->getType().getTypePtrOrNull();
-        // Type must exist
-        if (!T)
-            return false;
-        // Type is not void
-        if (T->isVoidType())
-            return false;
-        // Type does not contain an anonymous type
-        if (containsAnonymousType(T))
-            return false;
-
-        return true;
-    }
-
-    // Expects that the passed expansion is entirely wellformed
-    bool hasValidSignature(MacroExpansionNode *Expansion)
-    {
-        assert(Expansion);
-
-        // Verify that the expansion expands to a stmt
-        if (!Expansion->AlignedRoot->ST)
-            return false;
-
-        auto ST = Expansion->AlignedRoot->ST;
-
-        assert(Expansion->MI);
-        // If the expansion is to an object-like macro, then check the
-        // entire expansion as if it were a function argument
-        if (Expansion->MI->isObjectLike())
-            return isValidArgument(ST);
-
-        // If the expansion is function-like...
-        // ...then the return type must not contain an anonymous type...
-        if (auto E = clang::dyn_cast<clang::Expr>(ST))
-        {
-            auto T = E->getType().getTypePtrOrNull();
-            if (!T || containsAnonymousType(T))
-                return false;
-        }
-
-        // ...and all the arguments must be valid
-        for (auto &&Arg : Expansion->Arguments)
-            if (Arg.AlignedRoots.empty() ||
-                !(Arg.AlignedRoots.front().ST) ||
-                !isValidArgument(Arg.AlignedRoots.front().ST))
-                return false;
-
-        return true;
-    }
-
     Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI)
     {
         clang::Preprocessor &PP = CI.getPreprocessor();
@@ -333,6 +273,28 @@ namespace cpp2c
             // TLE->dumpASTInfo(llvm::errs(),
             //                  Ctx.getSourceManager(), Ctx.getLangOpts());
 
+            llvm::errs() << TLE->Name << ",";
+
+            auto FID = SM.getFileID(TLE->MI->getDefinitionLoc());
+            if (FID.isValid())
+            {
+                auto FE = SM.getFileEntryForID(FID);
+                if (FE)
+                {
+                    auto Name = FE->tryGetRealPathName();
+                    if (!Name.empty())
+                    {
+                        llvm::errs() << "Defined in " << Name << ",";
+                    }
+                    else
+                        llvm::errs() << "Defined in a nameless file,";
+                }
+                else
+                    llvm::errs() << "Defined in file without FileEntry,";
+            }
+            else
+                llvm::errs() << "Defined in file with invalid ID,";
+
             if (TLE->MI->isObjectLike())
                 llvm::errs() << "Object-like,";
             else
@@ -369,6 +331,9 @@ namespace cpp2c
                                    clang::StringLiteral,
                                    clang::CompoundLiteralExpr>(ST);
 
+                    if (isInTree(ST, stmtIsA<clang::DeclRefExpr>()))
+                        llvm::errs() << "DeclRefExpr,";
+
                     if (isInTree(ST, stmtIsA<clang::ConditionalOperator>()))
                         llvm::errs() << "ConditionalOperator,";
                     if (isInTree(ST,
@@ -380,10 +345,19 @@ namespace cpp2c
                                      clang::BinaryOperator::Opcode::BO_LOr)))
                         llvm::errs() << "BinaryOperator::Opcode::BO_LOr,";
 
-                    if (hasValidSignature(TLE))
-                        llvm::errs() << "Valid signature,";
-                    else
-                        llvm::errs() << "Invalid signature,";
+                    // Type information about the entire expansion
+                    if (auto E = clang::dyn_cast<clang::Expr>(ST))
+                    {
+                        if (auto T = E->getType().getTypePtrOrNull())
+                        {
+                            if (T->isVoidType())
+                                llvm::errs() << "Void type,";
+                            else if (containsAnonymousType(T))
+                                llvm::errs() << "Anonymous type,";
+                        }
+                        else
+                            llvm::errs() << "No type,";
+                    }
                 }
 
                 if (D)
@@ -406,7 +380,49 @@ namespace cpp2c
                                 [](MacroExpansionArgument Arg)
                                 { return Arg.AlignedRoots.size() ==
                                          Arg.numberOfTimesExpanded; }))
+                {
                     llvm::errs() << "Aligned arguments,";
+
+                    for (auto &&Arg : TLE->Arguments)
+                    {
+                        if (!Arg.AlignedRoots.empty())
+                        {
+                            if (auto E = clang::dyn_cast_or_null<clang::Expr>(
+                                    Arg.AlignedRoots.front().ST))
+                            {
+                                // Type information about arguments
+                                if (auto T = E->getType().getTypePtrOrNull())
+                                {
+                                    if (T->isVoidType())
+                                    {
+                                        llvm::errs() << "Void argument,";
+                                        break;
+                                    }
+                                    else if (containsAnonymousType(T))
+                                    {
+                                        llvm::errs() << "Anonymous type argument,";
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    llvm::errs() << "Untyped argument,";
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                llvm::errs() << "Non-expr argument,";
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            llvm::errs() << "Unexpanded argument,";
+                            break;
+                        }
+                    }
+                }
                 else
                     llvm::errs() << "Unaligned arguments,";
             }
