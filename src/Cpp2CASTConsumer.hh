@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MacroForest.hh"
+#include "IncludeCollector.hh"
 
 #include "clang/Frontend/ASTConsumers.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -11,6 +12,7 @@ namespace cpp2c
     {
     private:
         cpp2c::MacroForest *MF;
+        cpp2c::IncludeCollector *IC;
 
     public:
         Cpp2CASTConsumer(clang::CompilerInstance &CI);
