@@ -18,9 +18,6 @@
 
 #include "assert.h"
 
-// TODO:    Remember to check if we should be ignoring implicit casts
-//          and if we should be using TK_IgnoreUnlessSpelledInSource
-//          and ignoringImplicit
 // NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
 //          paren exprs
 
