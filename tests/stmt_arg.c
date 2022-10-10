@@ -6,7 +6,7 @@
 
 int main(int argc, char const *argv[])
 {
-    // Should have an ambiguous signature
+    // Should have an aligned non-expr argument
     WRAP_STMT(int x);
     return 0;
 }
