@@ -93,7 +93,9 @@ namespace cpp2c
                 auto InvocationStackCopy = InvocationStack;
                 while (!InvocationStack.empty())
                     InvocationStack.pop();
-                InvocationStack.push(Expansion->Parent);
+                // Only push parent if non-null
+                if (Expansion->Parent)
+                    InvocationStack.push(Expansion->Parent);
 
                 // This const_cast is ugly, but is fine
                 auto ArgTokens = const_cast<clang::MacroArgs *>(Args)
