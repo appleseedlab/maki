@@ -1,15 +1,12 @@
-#define ADD_WELLFORMED(a, b) ((a) + (b))
-#define ADD_MALFORMED(a, b) a + b
+#define ADD(a, b) ((a) + (b))
 
 int main(int argc, char const *argv[])
 {
-    ADD_WELLFORMED(1, 2);
+    ADD(ADD(1, 2), 3);
 
-    ADD_WELLFORMED(1 + 2, 3 + 4);
+    ADD(1, ADD(2, 3));
 
-    ADD_MALFORMED(1, 2);
-
-    ADD_MALFORMED(1 + 2, 3 + 4);
+    ADD(ADD(1, 2), ADD(3, 4));
 
     return 0;
 }
