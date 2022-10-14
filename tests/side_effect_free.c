@@ -1,4 +1,4 @@
-#define INC_G g++;
+#define INC_G g++
 
 int g = 0;
 
