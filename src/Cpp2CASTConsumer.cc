@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <functional>
 #include <set>
+#include <queue>
 
 #include "assert.h"
 
@@ -48,6 +49,33 @@ namespace cpp2c
                 return BO->getOpcode() == OC;
             return false;
         };
+    }
+
+    bool descendantOfConstantExpression(clang::ASTContext &Ctx,
+                                        const clang::Stmt *ST)
+    {
+        std::queue<clang::DynTypedNode> Q;
+        for (auto P : Ctx.getParents(*ST))
+            Q.push(P);
+        while (!Q.empty())
+        {
+            auto Cur = Q.front();
+            Q.pop();
+            if (Cur.get<clang::CaseStmt>() ||
+                Cur.get<clang::EnumDecl>())
+                return true;
+            if (auto FD = Cur.get<clang::FieldDecl>())
+                if (FD->isBitField())
+                    return true;
+            if (auto VD = Cur.get<clang::VarDecl>())
+                if (auto T = VD->getType().getTypePtr())
+                    if (T->isArrayType())
+                        return true;
+
+            for (auto P : Ctx.getParents(Cur))
+                Q.push(P);
+        }
+        return false;
     }
 
     // Returns true if the given type represent an anonymous type
@@ -347,9 +375,9 @@ namespace cpp2c
                                      clang::BinaryOperator::Opcode::BO_LOr)))
                         llvm::errs() << "BinaryOperator::Opcode::BO_LOr,";
 
-                    // Type information about the entire expansion
                     if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
+                        // Type information about the entire expansion
                         if (auto T = E->getType().getTypePtrOrNull())
                         {
                             if (T->isVoidType())
@@ -359,6 +387,11 @@ namespace cpp2c
                         }
                         else
                             llvm::errs() << "No type,";
+
+                        // Whether the expression was expanded where a constant
+                        // expression is required
+                        if (descendantOfConstantExpression(Ctx, E))
+                            llvm::errs() << "Must be constant expression,";
                     }
                 }
 
