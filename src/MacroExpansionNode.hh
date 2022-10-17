@@ -56,6 +56,10 @@ namespace cpp2c
         // If the macro's definition does not end with an argument,
         // this is the nullptr.
         MacroExpansionArgument *ArgDefEndsWith = nullptr;
+        // Whether this macro performs stringification
+        bool HasStringification = false;
+        // Whether this macro performs token-pasting
+        bool HasTokenPasting = false;
 
         // Destructor should only be called on top-level expansions
         ~MacroExpansionNode();
