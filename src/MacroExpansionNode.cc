@@ -13,22 +13,34 @@ namespace cpp2c
             delete Child;
     }
 
-    void MacroExpansionNode::dumpMacroInfo(llvm::raw_fd_ostream &OS,
-                                           unsigned int indent)
+    static inline void printIndent(llvm::raw_fd_ostream &OS,
+                                   unsigned int indent)
     {
         for (unsigned int i = 0; i < indent; i++)
             OS << "\t";
+    }
+
+    void MacroExpansionNode::dumpMacroInfo(llvm::raw_fd_ostream &OS,
+                                           unsigned int indent)
+    {
+        printIndent(OS, indent);
 
         OS << Name << " @ depth " << Depth << "\n";
 
-        for (auto Child : Children)
-            Child->dumpMacroInfo(OS, indent + 1);
-
         if (ArgDefBeginsWith)
+        {
+            printIndent(OS, indent);
             OS << Name << " begins with arg " << ArgDefBeginsWith->Name << "\n";
+        }
 
         if (ArgDefEndsWith)
+        {
+            printIndent(OS, indent);
             OS << Name << " ends with arg " << ArgDefEndsWith->Name << "\n";
+        }
+
+        for (auto Child : Children)
+            Child->dumpMacroInfo(OS, indent + 1);
     }
 
     void MacroExpansionNode::dumpASTInfo(
