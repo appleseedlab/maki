@@ -132,9 +132,9 @@ namespace cpp2c
             }
         }
 
-        // Check if the macro definition begins or ends with an argument
         if (!MI->tokens_empty())
         {
+            // Check if the macro definition begins or ends with an argument
             for (auto &&Arg : Expansion->Arguments)
             {
                 if (clang::Lexer::getSpelling(
@@ -144,6 +144,20 @@ namespace cpp2c
                         MI->tokens().back(), SM, LO) == Arg.Name.str())
                     Expansion->ArgDefEndsWith = &Arg;
             }
+
+            // Check if the macro performs stringification or token-pasting
+            for (auto &&Tok : MI->tokens())
+                if (Tok.is(clang::tok::TokenKind::hash))
+                    Expansion->HasStringification = true;
+                else if (Tok.is(clang::tok::TokenKind::hashhash))
+                    Expansion->HasTokenPasting = true;
+        }
+
+        // Update the status of the expansion's parent as well
+        if (auto P = Expansion->Parent)
+        {
+            P->HasStringification |= Expansion->HasStringification;
+            P->HasTokenPasting |= Expansion->HasTokenPasting;
         }
     }
 
