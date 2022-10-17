@@ -292,6 +292,11 @@ namespace cpp2c
             else
                 llvm::errs() << "Defined in file with invalid ID,";
 
+            if (TLE->HasStringification)
+                llvm::errs() << "Stringification,";
+            if (TLE->HasTokenPasting)
+                llvm::errs() << "Token-pasting,";
+
             if (TLE->MI->isObjectLike())
                 llvm::errs() << "Object-like,";
             else
