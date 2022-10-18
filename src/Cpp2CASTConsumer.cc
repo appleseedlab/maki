@@ -311,6 +311,11 @@ namespace cpp2c
 
             llvm::errs() << TLE->Name << ",";
 
+            if (TLE->MI->isObjectLike())
+                llvm::errs() << "Object-like,";
+            else
+                llvm::errs() << "Function-like,";
+
             auto FID = SM.getFileID(TLE->MI->getDefinitionLoc());
             if (FID.isValid())
             {
@@ -346,11 +351,6 @@ namespace cpp2c
                 llvm::errs() << "Stringification,";
             if (TLE->HasTokenPasting)
                 llvm::errs() << "Token-pasting,";
-
-            if (TLE->MI->isObjectLike())
-                llvm::errs() << "Object-like,";
-            else
-                llvm::errs() << "Function-like,";
 
             if (TLE->ASTRoots.empty())
                 llvm::errs() << "No aligned body,";
