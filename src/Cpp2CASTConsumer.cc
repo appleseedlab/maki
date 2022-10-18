@@ -89,7 +89,7 @@ namespace cpp2c
     }
 
     // Returns true if the given type contains a locally-defined type
-    bool containsLocalType(const clang::Type *T)
+    inline bool containsLocalType(const clang::Type *T)
     {
         assert(T);
         return (T->getAsTagDecl() &&
