@@ -397,6 +397,21 @@ namespace cpp2c
                                      clang::BinaryOperator::Opcode::BO_LOr)))
                         llvm::errs() << "BinaryOperator::Opcode::BO_LOr,";
 
+                    // Check if any subtree of the entire expansion
+                    // is an expression with a locally-defined type
+                    if (isInTree(ST,
+                                 [](const clang::Stmt *ST)
+                                 {
+                                     if (auto E =
+                                             clang::dyn_cast<clang::Expr>(ST))
+                                         if (auto T =
+                                                 E->getType()
+                                                     .getTypePtrOrNull())
+                                             return containsLocalType(T);
+                                     return false;
+                                 }))
+                        llvm::errs() << "Local type subexpr,";
+
                     if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
                         // Type information about the entire expansion
