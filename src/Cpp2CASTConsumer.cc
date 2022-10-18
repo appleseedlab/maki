@@ -78,7 +78,7 @@ namespace cpp2c
         return false;
     }
 
-    // Returns true if the given type represent an anonymous type
+    // Returns true if the given type contains an anonymous type
     inline bool containsAnonymousType(const clang::Type *T)
     {
         assert(T);
@@ -86,6 +86,17 @@ namespace cpp2c
                 T->getAsTagDecl()->getName().empty()) ||
                ((T->isAnyPointerType() || T->isArrayType()) &&
                 containsAnonymousType(T->getPointeeOrArrayElementType()));
+    }
+
+    // Returns true if the given type contains a locally-defined type
+    bool containsLocalType(const clang::Type *T)
+    {
+        assert(T);
+        return (T->getAsTagDecl() &&
+                ((!T->getAsTagDecl()->getDeclContext()) ||
+                 !(T->getAsTagDecl()->getDeclContext()->isTranslationUnit()))) ||
+               ((T->isAnyPointerType() || T->isArrayType()) &&
+                containsLocalType(T->getPointeeOrArrayElementType()));
     }
 
     Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI)
@@ -393,6 +404,8 @@ namespace cpp2c
                         {
                             if (T->isVoidType())
                                 llvm::errs() << "Void type,";
+                            else if (containsLocalType(T))
+                                llvm::errs() << "Local type,";
                             else if (containsAnonymousType(T))
                                 llvm::errs() << "Anonymous type,";
                         }
@@ -444,9 +457,15 @@ namespace cpp2c
                                         llvm::errs() << "Void argument,";
                                         break;
                                     }
+                                    else if (containsLocalType(T))
+                                    {
+                                        llvm::errs() << "Local type argument,";
+                                        break;
+                                    }
                                     else if (containsAnonymousType(T))
                                     {
-                                        llvm::errs() << "Anonymous type argument,";
+                                        llvm::errs() << "Anonymous type "
+                                                        " argument,";
                                         break;
                                     }
                                 }
