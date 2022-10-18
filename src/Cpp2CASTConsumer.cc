@@ -309,7 +309,18 @@ namespace cpp2c
                     auto Name = FE->tryGetRealPathName();
                     if (!Name.empty())
                     {
-                        llvm::errs() << "Defined in " << Name << ",";
+                        auto DefLoc = SM.getFileLoc(TLE->MI->getDefinitionLoc());
+                        if (DefLoc.isValid())
+                        {
+                            auto s = DefLoc.printToString(SM);
+                            // Find second-to-last colon
+                            auto i = s.rfind(':', s.rfind(':') - 1);
+                            llvm::errs() << "Defined at " << Name
+                                         << ":"
+                                         << s.substr(i + 1) << ",";
+                        }
+                        else
+                            llvm::errs() << "Defined at an invalid SLoc,";
                     }
                     else
                         llvm::errs() << "Defined in a nameless file,";
