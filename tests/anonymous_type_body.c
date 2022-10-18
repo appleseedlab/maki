@@ -41,8 +41,9 @@ int main(int argc, char const *argv[])
     PTR(p);
 
     struct color_t c;
+    // Local/Anonymous types
     COLOR_GET_RGB(c);
-    // Anonymous types
+    // Local/Anonymous types
     COLOR_GET_RGB_PTR(&c);
 
     return 0;

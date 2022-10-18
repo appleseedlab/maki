@@ -47,8 +47,9 @@ int main(int argc, char const *argv[])
     c.rgb.g = 0x255;
     c.rgb.b = 0;
 
+    // Local/Anonymous types
     RGB_GET_R(c.rgb);
-    // Anonymous types
+    // Local/Anonymous types
     RGB_PTR_GET_R(&c.rgb);
 
     return 0;
