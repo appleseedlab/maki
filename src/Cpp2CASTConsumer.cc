@@ -99,6 +99,22 @@ namespace cpp2c
                 containsLocalType(T->getPointeeOrArrayElementType()));
     }
 
+    // Adds the definition location of each invoked macro in the given
+    // expansion tree to the given vector of SourceLocations
+    void collectExpansionDefLocs(
+        clang::SourceManager &SM,
+        std::vector<clang::SourceLocation> &DefLocs,
+        cpp2c::MacroExpansionNode *Expansion)
+    {
+        if (nullptr == Expansion)
+            return;
+
+        DefLocs.push_back(SM.getFileLoc(Expansion->MI->getDefinitionLoc()));
+
+        for (auto &&Child : Expansion->Children)
+            collectExpansionDefLocs(SM, DefLocs, Child);
+    }
+
     Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI)
     {
         clang::Preprocessor &PP = CI.getPreprocessor();
@@ -352,8 +368,24 @@ namespace cpp2c
             if (TLE->HasTokenPasting)
                 llvm::errs() << "Token-pasting,";
 
+            // Check that any macros this macro invokes were defined before
+            // this macro was
+            clang::SourceLocation DefLoc = SM.getFileLoc(
+                TLE->MI->getDefinitionLoc());
+            std::vector<clang::SourceLocation> DescendantMacroDefLocs;
+            for (auto &&Child : TLE->Children)
+                collectExpansionDefLocs(SM, DescendantMacroDefLocs, Child);
+            if (!std::all_of(DescendantMacroDefLocs.begin(),
+                             DescendantMacroDefLocs.end(),
+                             [&SM, &DefLoc](clang::SourceLocation L)
+                             {
+                                 return SM.isBeforeInTranslationUnit(L, DefLoc);
+                             }))
+                llvm::errs() << "Invokes a non-predefined macro,";
+
             if (TLE->ASTRoots.empty())
-                llvm::errs() << "No aligned body,";
+                llvm::errs()
+                    << "No aligned body,";
             else if (TLE->ASTRoots.size() > 1)
                 llvm::errs() << "Multiple aligned bodies,";
             else
@@ -479,7 +511,7 @@ namespace cpp2c
                                     }
                                     else if (containsAnonymousType(T))
                                     {
-                                        llvm::errs() << "Anonymous type "
+                                        llvm::errs() << "Anonymous type"
                                                         " argument,";
                                         break;
                                     }
