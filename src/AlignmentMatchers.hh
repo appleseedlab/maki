@@ -34,8 +34,9 @@ namespace cpp2c
             MatchedTypeLocs.insert(DSTL.TL);
     }
 
-    // Matches all AST nodes who expand to a source range that shares
-    // begin/end with the given range
+    // Matches all AST nodes that align perfectly with the body of the given
+    // macro expansion.
+    // Only tested to work with top-level, non-argument expansions.
     AST_POLYMORPHIC_MATCHER_P2(
         alignsWithExpansion,
         AST_POLYMORPHIC_SUPPORTED_TYPES(clang::Decl,
@@ -50,17 +51,33 @@ namespace cpp2c
         static std::set<const clang::Decl *> MatchedDecls;
         static std::set<const clang::TypeLoc *> MatchedTypeLocs;
 
+        // Collect a bunch of SourceLocation information up front that may be
+        // useful later
+
         auto &SM = Ctx->getSourceManager();
         auto DefB = Expansion->DefinitionTokens.front().getLocation();
         auto DefE = Expansion->DefinitionTokens.back().getLocation();
         auto NodeSpB = SM.getSpellingLoc(Node.getBeginLoc());
         auto NodeSpE = SM.getSpellingLoc(Node.getEndLoc());
-        // auto NodeExB = SM.getExpansionLoc(Node.getBeginLoc());
+        auto NodeExB = SM.getExpansionLoc(Node.getBeginLoc());
         auto NodeExE = SM.getExpansionLoc(Node.getEndLoc());
+        auto ImmMacroCallerLocSpB = SM.getSpellingLoc(
+            SM.getImmediateMacroCallerLoc(Node.getBeginLoc()));
+        auto ImmMacroCallerLocSpE = SM.getSpellingLoc(
+            SM.getImmediateMacroCallerLoc(Node.getEndLoc()));
+        auto ImmMacroCallerLocExB = SM.getExpansionLoc(
+            SM.getImmediateMacroCallerLoc(Node.getBeginLoc()));
+        auto ImmMacroCallerLocExE = SM.getExpansionLoc(
+            SM.getImmediateMacroCallerLoc(Node.getEndLoc()));
+        auto ImmSpellingLoc = SM.getImmediateSpellingLoc(Node.getBeginLoc());
+        auto ImmSpellingEndLoc = SM.getImmediateSpellingLoc(Node.getEndLoc());
         DeclStmtTypeLoc DSTL(&Node);
 
-        constexpr bool debug = false;
+        static const constexpr bool debug = false;
 
+        // Preliminary check to ensure that the spelling range of the top
+        // level expansion includes the expansion range of the given node
+        // NOTE: We may not need this check, but I should doublecheck
         if (!Expansion->SpellingRange.fullyContains(NodeExE))
         {
             if (DSTL.ST && debug)
@@ -77,32 +94,98 @@ namespace cpp2c
             return false;
         }
 
-        bool frontAligned = ((Expansion->ArgDefBeginsWith) &&
-                             (!(Expansion->ArgDefBeginsWith->Tokens.empty()) &&
-                              (NodeSpB ==
-                               SM.getSpellingLoc(Expansion->ArgDefBeginsWith->Tokens.front()
-                                                     .getLocation())))) ||
-                            (NodeSpB == DefB);
+        // Check that the beginning of the node we are considering
+        // aligns with the beginning of the macro expansion.
+        // There are three cases to consider:
+        // 1. The node begins with a token that that comes directly from
+        //    the body of the macro's definition
+        // 2. The node begins with a token that comes from an expansion of
+        //    an argument passed to the call to the macro
+        // 3. The node begins with a token that comes from an expansion of a
+        //    nested macro invocation in the body of the macro's definition
 
-        bool backAligned = ((Expansion->ArgDefEndsWith) &&
-                            (!(Expansion->ArgDefEndsWith->Tokens.empty()) &&
-                             (NodeSpE ==
-                              SM.getSpellingLoc(Expansion->ArgDefEndsWith->Tokens.back()
-                                                    .getLocation())))) ||
-                           (NodeSpE == DefE);
+        // Set up case 3
+        clang::SourceLocation B = Node.getBeginLoc();
+        while (SM.getImmediateMacroCallerLoc(B).isMacroID())
+            B = SM.getImmediateMacroCallerLoc(B);
+        B = SM.getSpellingLoc(B);
+
+        clang::SourceLocation E = Node.getEndLoc();
+        while (SM.getImmediateMacroCallerLoc(E).isMacroID())
+            E = SM.getImmediateMacroCallerLoc(E);
+        E = SM.getSpellingLoc(E);
+
+        bool frontAligned =
+            // Case 1
+            (DefB == NodeSpB) ||
+            // Case 2
+            ((Expansion->ArgDefBeginsWith) &&
+             (!(Expansion->ArgDefBeginsWith->Tokens.empty()) &&
+              (NodeSpB ==
+               SM.getSpellingLoc(Expansion->ArgDefBeginsWith
+                                     ->Tokens.front()
+                                     .getLocation())))) ||
+            // Case 3
+            (DefB == B);
+
+        bool backAligned =
+            // Case 1
+            (NodeSpE == DefE) ||
+            // Case 2
+            ((Expansion->ArgDefEndsWith) &&
+             (!(Expansion->ArgDefEndsWith->Tokens.empty()) &&
+              (NodeSpE ==
+               SM.getSpellingLoc(Expansion->ArgDefEndsWith
+                                     ->Tokens.back()
+                                     .getLocation())))) ||
+            // Case 3
+            (DefE == E);
 
         // Either the node aligns with the macro itself,
         // or one of its arguments.
         if (!frontAligned)
         {
-            if (DSTL.ST && debug)
+            if (debug)
             {
                 llvm::errs() << "Node mismatch <not front aligned>\n";
-                DSTL.ST->dumpColor();
+                if (DSTL.ST)
+                    DSTL.ST->dumpColor();
+                else if (DSTL.D)
+                    DSTL.D->dumpColor();
+                else if (DSTL.TL)
+                {
+                    if (auto T = DSTL.TL->getTypePtr())
+                        T->dump();
+                    else
+                        llvm::errs() << "(TypeLoc with null type)\n";
+                }
+
                 llvm::errs() << "Node begin loc: ";
                 Node.getBeginLoc().dump(SM);
+                llvm::errs() << "NodeExB: ";
+                NodeExB.dump(SM);
                 llvm::errs() << "NodeSpB: ";
                 NodeSpB.dump(SM);
+                auto L1 = SM.getImmediateMacroCallerLoc(Node.getBeginLoc());
+                auto L2 = SM.getImmediateMacroCallerLoc(L1);
+                auto L3 = SM.getImmediateMacroCallerLoc(L2);
+                auto L4 = SM.getImmediateMacroCallerLoc(L3);
+                llvm::errs() << "Imm macro caller loc x1 (macro id: " << L1.isMacroID() << "): ";
+                L1.dump(SM);
+                llvm::errs() << "Imm macro caller loc x2 (macro id: " << L2.isMacroID() << "): ";
+                L2.dump(SM);
+                llvm::errs() << "Imm macro caller loc x3 (macro id: " << L3.isMacroID() << "): ";
+                L3.dump(SM);
+                llvm::errs() << "Imm macro caller loc x4 (macro id: " << L4.isMacroID() << "): ";
+                L4.dump(SM);
+                llvm::errs() << "Top macro caller loc: ";
+                SM.getTopMacroCallerLoc(Node.getBeginLoc()).dump(SM);
+                llvm::errs() << "Imm macro caller expansion loc: ";
+                ImmMacroCallerLocExB.dump(SM);
+                llvm::errs() << "Imm macro caller spelling loc: ";
+                ImmMacroCallerLocSpB.dump(SM);
+                llvm::errs() << "Immediate spelling loc: ";
+                ImmSpellingLoc.dump(SM);
                 llvm::errs() << "DefB: ";
                 DefB.dump(SM);
                 if (Expansion->ArgDefBeginsWith &&
@@ -118,10 +201,45 @@ namespace cpp2c
         }
         if (!backAligned)
         {
-            if (DSTL.ST && debug)
+            if (debug)
             {
                 llvm::errs() << "Node mismatch <not back aligned>\n";
-                DSTL.ST->dumpColor();
+                if (DSTL.ST)
+                    DSTL.ST->dumpColor();
+                else if (DSTL.D)
+                    DSTL.D->dumpColor();
+                else if (DSTL.TL)
+                {
+                    if (auto T = DSTL.TL->getTypePtr())
+                        T->dump();
+                    else
+                        llvm::errs() << "(TypeLoc with null type)\n";
+                }
+
+                llvm::errs() << "Node end loc: ";
+                Node.getEndLoc().dump(SM);
+                llvm::errs() << "NodeExE: ";
+                NodeExE.dump(SM);
+                llvm::errs() << "NodeSpE: ";
+                NodeSpE.dump(SM);
+                llvm::errs() << "Imm macro caller end loc: ";
+                SM.getImmediateMacroCallerLoc(Node.getEndLoc()).dump(SM);
+                llvm::errs() << "Imm macro caller expansion end loc: ";
+                ImmMacroCallerLocExE.dump(SM);
+                llvm::errs() << "Imm macro caller spelling end loc: ";
+                ImmMacroCallerLocSpE.dump(SM);
+                llvm::errs() << "Immediate spelling end loc: ";
+                ImmSpellingEndLoc.dump(SM);
+                llvm::errs() << "DefE: ";
+                DefE.dump(SM);
+                if (Expansion->ArgDefEndsWith &&
+                    !(Expansion->ArgDefEndsWith->Tokens.empty()))
+                {
+                    llvm::errs() << "ArgDefEndsWith back token loc: ";
+                    Expansion->ArgDefEndsWith->Tokens.back()
+                        .getLocation()
+                        .dump(SM);
+                }
             }
             return false;
         }
@@ -185,7 +303,7 @@ namespace cpp2c
         static std::set<const clang::Decl *> MatchedDecls;
         static std::set<const clang::TypeLoc *> MatchedTypeLocs;
 
-        constexpr bool debug = false;
+        static const constexpr bool debug = false;
 
         auto &SM = Ctx->getSourceManager();
         auto NodeB = SM.getFileLoc(Node.getBeginLoc());
