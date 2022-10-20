@@ -572,6 +572,13 @@ namespace cpp2c
                                                         " argument,";
                                         break;
                                     }
+                                    else if (containsTypeDefinedAfter(
+                                                 T, SM, DefLoc))
+                                    {
+                                        llvm::errs() << "Type defined "
+                                                        "after macro argument,";
+                                        break;
+                                    }
                                 }
                                 else
                                 {
