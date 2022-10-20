@@ -499,6 +499,22 @@ namespace cpp2c
                             }))
                         llvm::errs() << "Decl declared after macro,";
 
+                    // Check if any subexpression of this expansion is of a type
+                    // that was defined after this macro was defined
+                    if (isInTree(
+                            ST,
+                            [&SM, &DefLoc](const clang::Stmt *ST)
+                            {
+                                if (auto E =
+                                        clang::dyn_cast<clang::Expr>(ST))
+                                    if (auto T =
+                                            E->getType().getTypePtrOrNull())
+                                        return containsTypeDefinedAfter(T, SM,
+                                                                        DefLoc);
+                                return false;
+                            }))
+                        llvm::errs() << "Type defined after macro subexpr,";
+
                     if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
                         // Type information about the entire expansion
