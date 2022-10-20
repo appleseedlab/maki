@@ -514,18 +514,21 @@ namespace cpp2c
                                      clang::BinaryOperator::Opcode::BO_LOr)))
                         llvm::errs() << "BinaryOperator::Opcode::BO_LOr,";
 
+                    auto ArgStmts = collectStmtsFromArguments(TLE);
+
                     // Check if any subtree of the entire expansion
-                    // is an expression with a locally-defined type
-                    // TODO: Check if it matters if this comes from an argument
+                    // that was not parsed from an argument is an expression
+                    // whose type is a locally-defined type
                     if (isInTree(
                             ST,
-                            [](const clang::Stmt *ST)
+                            [&ArgStmts](const clang::Stmt *ST)
                             {
-                                if (auto E =
-                                        clang::dyn_cast<clang::Expr>(ST))
-                                    if (auto T = E->getType()
-                                                     .getTypePtrOrNull())
-                                        return containsLocalType(T);
+                                if (ArgStmts.find(ST) == ArgStmts.end())
+                                    if (auto E =
+                                            clang::dyn_cast<clang::Expr>(ST))
+                                        if (auto T = E->getType()
+                                                         .getTypePtrOrNull())
+                                            return containsLocalType(T);
                                 return false;
                             }))
                         llvm::errs() << "Local type subexpr,";
@@ -533,46 +536,60 @@ namespace cpp2c
                     // Check if any variable or function this macro references
                     // that is not part of an argument was declared after this
                     // macro was defined
-                    auto ArgStmts = collectStmtsFromArguments(TLE);
-
                     if (isInTree(
                             ST,
                             [&SM, &ArgStmts, DefLoc](const clang::Stmt *ST)
                             {
-                                if (ArgStmts.find(ST) !=
-                                    ArgStmts.end())
-                                    return false;
-                                auto DRE =
-                                    clang::dyn_cast<clang::DeclRefExpr>(ST);
-                                if (!DRE)
-                                    return false;
-
-                                if (auto D = DRE->getDecl())
-                                {
-                                    return SM.isBeforeInTranslationUnit(
-                                        DefLoc,
-                                        SM.getFileLoc(D->getLocation()));
-                                }
+                                if (ArgStmts.find(ST) == ArgStmts.end())
+                                    if (auto DRE =
+                                            clang::dyn_cast<
+                                                clang::DeclRefExpr>(ST))
+                                        if (auto D = DRE->getDecl())
+                                            return SM.isBeforeInTranslationUnit(
+                                                DefLoc,
+                                                SM.getFileLoc(D->getLocation()));
                                 return false;
                             }))
                         llvm::errs() << "Decl not from argument defined "
                                         "after macro,";
 
-                    // Check if any subexpression of this expansion is of a type
-                    // that was defined after this macro was defined
+                    // Check if any subtree of the entire expansion
+                    // that was not parsed from an argument is an expression
+                    // whose type is a type that was defined after the macro
+                    // was defined
                     if (isInTree(
                             ST,
-                            [&SM, &DefLoc](const clang::Stmt *ST)
+                            [&SM, &ArgStmts, &DefLoc](const clang::Stmt *ST)
                             {
-                                if (auto E =
-                                        clang::dyn_cast<clang::Expr>(ST))
-                                    if (auto T =
-                                            E->getType().getTypePtrOrNull())
-                                        return containsTypeDefinedAfter(T, SM,
-                                                                        DefLoc);
+                                if (ArgStmts.find(ST) == ArgStmts.end())
+                                    if (auto E =
+                                            clang::dyn_cast<clang::Expr>(ST))
+                                        if (auto T =
+                                                E->getType().getTypePtrOrNull())
+                                            return containsTypeDefinedAfter(
+                                                T, SM, DefLoc);
                                 return false;
                             }))
                         llvm::errs() << "Type defined after macro subexpr,";
+
+                    // Check if any subtree of the entire expansion
+                    // that was not parsed from an argument is an expression
+                    // whose type is a typedef type that was defined after the
+                    // macro was defined
+                    if (isInTree(
+                            ST,
+                            [&SM, &ArgStmts, &DefLoc](const clang::Stmt *ST)
+                            {
+                                if (ArgStmts.find(ST) == ArgStmts.end())
+                                    if (auto E =
+                                            clang::dyn_cast<clang::Expr>(ST))
+                                        if (auto T =
+                                                E->getType().getTypePtrOrNull())
+                                            return containsTypedefDefinedAfter(
+                                                T, SM, DefLoc);
+                                return false;
+                            }))
+                        llvm::errs() << "Typedef defined after macro subexpr,";
 
                     if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
