@@ -78,25 +78,64 @@ namespace cpp2c
         return false;
     }
 
+    // Returns true if the given predicate returns true for any type
+    // contained in the given type
+    inline bool isInType(
+        const clang::Type *T,
+        std::function<bool(const clang::Type *)> pred)
+    {
+        assert(T);
+        const clang::Type *Cur = T;
+        while (Cur)
+            if (pred(Cur))
+                return true;
+            else if (Cur->isAnyPointerType() || Cur->isArrayType())
+                Cur = Cur->getPointeeOrArrayElementType();
+            else
+                Cur = nullptr;
+        return false;
+    }
+
     // Returns true if the given type contains an anonymous type
     inline bool containsAnonymousType(const clang::Type *T)
     {
-        assert(T);
-        return (T->getAsTagDecl() &&
-                T->getAsTagDecl()->getName().empty()) ||
-               ((T->isAnyPointerType() || T->isArrayType()) &&
-                containsAnonymousType(T->getPointeeOrArrayElementType()));
+        return isInType(
+            T,
+            [](const clang::Type *T)
+            { return T->getAsTagDecl() &&
+                     T->getAsTagDecl()->getName().empty(); });
     }
 
     // Returns true if the given type contains a locally-defined type
     inline bool containsLocalType(const clang::Type *T)
     {
-        assert(T);
-        return (T->getAsTagDecl() &&
-                ((!T->getAsTagDecl()->getDeclContext()) ||
-                 !(T->getAsTagDecl()->getDeclContext()->isTranslationUnit()))) ||
-               ((T->isAnyPointerType() || T->isArrayType()) &&
-                containsLocalType(T->getPointeeOrArrayElementType()));
+        return isInType(
+            T,
+            [](const clang::Type *T)
+            {
+                return T->getAsTagDecl() &&
+                       ((!T->getAsTagDecl()->getDeclContext()) ||
+                        !(T->getAsTagDecl()
+                              ->getDeclContext()
+                              ->isTranslationUnit()));
+            });
+    }
+
+    // Returns true if any type in T was defined after L
+    inline bool containsTypeDefinedAfter(
+        const clang::Type *T,
+        clang::SourceManager &SM,
+        clang::SourceLocation L)
+    {
+        return isInType(
+            T,
+            [&SM, &L](const clang::Type *T)
+            {
+                return T->getAsTagDecl() &&
+                       SM.isBeforeInTranslationUnit(
+                           L,
+                           SM.getFileLoc(T->getAsTagDecl()->getLocation()));
+            });
     }
 
     // Adds the definition location of each invoked macro in the given
@@ -471,6 +510,8 @@ namespace cpp2c
                                 llvm::errs() << "Local type,";
                             else if (containsAnonymousType(T))
                                 llvm::errs() << "Anonymous type,";
+                            else if (containsTypeDefinedAfter(T, SM, DefLoc))
+                                llvm::errs() << "Type defined after macro,";
                         }
                         else
                             llvm::errs() << "No type,";
