@@ -78,6 +78,31 @@ namespace cpp2c
         return false;
     }
 
+    // Returns a set of all Stmts parsed from the given expansion's arguments
+    std::set<const clang::Stmt *>
+    collectStmtsFromArguments(MacroExpansionNode *Expansion)
+    {
+        std::set<const clang::Stmt *> Result;
+        for (auto &&Arg : Expansion->Arguments)
+            for (auto &&R : Arg.AlignedRoots)
+            {
+                if (R.ST)
+                {
+                    std::queue<const clang::Stmt *> Q;
+                    Q.push(R.ST);
+                    while (!Q.empty())
+                    {
+                        auto Cur = Q.front();
+                        Q.pop();
+                        Result.insert(Cur);
+                        for (auto &&Child : Cur->children())
+                            Q.push(Child);
+                    }
+                }
+            }
+        return Result;
+    }
+
     // Returns true if the given predicate returns true for any type
     // contained in the given type
     inline bool isInType(
@@ -491,6 +516,7 @@ namespace cpp2c
 
                     // Check if any subtree of the entire expansion
                     // is an expression with a locally-defined type
+                    // TODO: Check if it matters if this comes from an argument
                     if (isInTree(
                             ST,
                             [](const clang::Stmt *ST)
@@ -505,20 +531,32 @@ namespace cpp2c
                         llvm::errs() << "Local type subexpr,";
 
                     // Check if any variable or function this macro references
-                    // was defined after this macro was defined
+                    // that is not part of an argument was declared after this
+                    // macro was defined
+                    auto ArgStmts = collectStmtsFromArguments(TLE);
+
                     if (isInTree(
                             ST,
-                            [&SM, &DefLoc](const clang::Stmt *ST)
+                            [&SM, &ArgStmts, DefLoc](const clang::Stmt *ST)
                             {
-                                if (auto DRE =
-                                        clang::dyn_cast<clang::DeclRefExpr>(ST))
-                                    if (auto D = DRE->getDecl())
-                                        return SM.isBeforeInTranslationUnit(
-                                            DefLoc,
-                                            SM.getFileLoc(D->getLocation()));
+                                if (ArgStmts.find(ST) !=
+                                    ArgStmts.end())
+                                    return false;
+                                auto DRE =
+                                    clang::dyn_cast<clang::DeclRefExpr>(ST);
+                                if (!DRE)
+                                    return false;
+
+                                if (auto D = DRE->getDecl())
+                                {
+                                    return SM.isBeforeInTranslationUnit(
+                                        DefLoc,
+                                        SM.getFileLoc(D->getLocation()));
+                                }
                                 return false;
                             }))
-                        llvm::errs() << "Decl declared after macro,";
+                        llvm::errs() << "Decl not from argument defined "
+                                        "after macro,";
 
                     // Check if any subexpression of this expansion is of a type
                     // that was defined after this macro was defined
@@ -615,6 +653,13 @@ namespace cpp2c
                                                  T, SM, DefLoc))
                                     {
                                         llvm::errs() << "Type defined "
+                                                        "after macro argument,";
+                                        break;
+                                    }
+                                    else if (containsTypedefDefinedAfter(
+                                                 T, SM, DefLoc))
+                                    {
+                                        llvm::errs() << "Typedef defined "
                                                         "after macro argument,";
                                         break;
                                     }
