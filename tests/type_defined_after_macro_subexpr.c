@@ -1,5 +1,6 @@
 #define M 1 + ((struct A){.x = 1}.x)
 #define F(a) 1 + a.x
+#define ADD(a, b) ((a) + (b))
 
 struct A
 {
@@ -21,6 +22,12 @@ int main(int argc, char const *argv[])
 #undef F
 #define M 1 + ((struct A){.x = 1}.x)
 #define F(a) 1 + a.x
+
+    // Type defined before macro subexpr
+    // (although the subexpr `a` has the type `struct A`, which was defined
+    // before the definition of ADD, this is fine since the expr was passed
+    // as part of an argument)
+    ADD(1, a.x);
 
     // Type defined before macro subexpr
     M;
