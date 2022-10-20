@@ -138,6 +138,27 @@ namespace cpp2c
             });
     }
 
+    // Returns true if any typedef in T was defined after L
+    inline bool containsTypedefDefinedAfter(
+        const clang::Type *T,
+        clang::SourceManager &SM,
+        clang::SourceLocation L)
+    {
+        return isInType(
+            T,
+            [&SM, &L](const clang::Type *T)
+            {
+                return clang::isa<clang::TypedefType>(T) &&
+                       clang::dyn_cast<clang::TypedefType>(T)->getDecl() &&
+                       SM.isBeforeInTranslationUnit(
+                           L,
+                           SM.getFileLoc(
+                               clang::dyn_cast<clang::TypedefType>(T)
+                                   ->getDecl()
+                                   ->getLocation()));
+            });
+    }
+
     // Adds the definition location of each invoked macro in the given
     // expansion tree to the given vector of SourceLocations
     void collectExpansionDefLocs(
@@ -528,6 +549,8 @@ namespace cpp2c
                                 llvm::errs() << "Anonymous type,";
                             else if (containsTypeDefinedAfter(T, SM, DefLoc))
                                 llvm::errs() << "Type defined after macro,";
+                            else if (containsTypedefDefinedAfter(T, SM, DefLoc))
+                                llvm::errs() << "Typedef defined after macro,";
                         }
                         else
                             llvm::errs() << "No type,";
