@@ -431,18 +431,34 @@ namespace cpp2c
 
                     // Check if any subtree of the entire expansion
                     // is an expression with a locally-defined type
-                    if (isInTree(ST,
-                                 [](const clang::Stmt *ST)
-                                 {
-                                     if (auto E =
-                                             clang::dyn_cast<clang::Expr>(ST))
-                                         if (auto T =
-                                                 E->getType()
+                    if (isInTree(
+                            ST,
+                            [](const clang::Stmt *ST)
+                            {
+                                if (auto E =
+                                        clang::dyn_cast<clang::Expr>(ST))
+                                    if (auto T = E->getType()
                                                      .getTypePtrOrNull())
-                                             return containsLocalType(T);
-                                     return false;
-                                 }))
+                                        return containsLocalType(T);
+                                return false;
+                            }))
                         llvm::errs() << "Local type subexpr,";
+
+                    // Check if any variable or function this macro references
+                    // was defined after this macro was defined
+                    if (isInTree(
+                            ST,
+                            [&SM, &DefLoc](const clang::Stmt *ST)
+                            {
+                                if (auto DRE =
+                                        clang::dyn_cast<clang::DeclRefExpr>(ST))
+                                    if (auto D = DRE->getDecl())
+                                        return SM.isBeforeInTranslationUnit(
+                                            DefLoc,
+                                            SM.getFileLoc(D->getLocation()));
+                                return false;
+                            }))
+                        llvm::errs() << "Decl declared after macro,";
 
                     if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
