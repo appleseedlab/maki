@@ -29,14 +29,14 @@ namespace cpp2c
     inline void printIfIsOneOf(const clang::Stmt *ST)
     {
         if (clang::isa<T>(ST))
-            llvm::errs() << typeid(T).name() << ",";
+            llvm::outs() << typeid(T).name() << ",";
     }
 
     template <typename T1, typename T2, typename... Ts>
     inline void printIfIsOneOf(const clang::Stmt *ST)
     {
         if (clang::isa<T1>(ST))
-            llvm::errs() << typeid(T1).name() << ",";
+            llvm::outs() << typeid(T1).name() << ",";
         printIfIsOneOf<T2, Ts...>(ST);
     }
 
@@ -239,35 +239,35 @@ namespace cpp2c
                 auto FE = Item.first;
                 auto HashLoc = Item.second;
 
-                llvm::errs() << "#include,";
+                llvm::outs() << "#include,";
 
                 // TODO: Would be really nice to have a monad here...
                 auto IncludedInFID = SM.getFileID(HashLoc);
                 bool valid = IncludedInFID.isValid();
                 if (valid)
                 {
-                    llvm::errs() << "IncludedInFID,";
+                    llvm::outs() << "IncludedInFID,";
                     auto IncludedInFE = SM.getFileEntryForID(IncludedInFID);
                     valid = IncludedInFE != nullptr;
                     if (valid)
                     {
-                        llvm::errs() << "IncludedInFE,";
+                        llvm::outs() << "IncludedInFE,";
                         auto IncludedInRealpath = IncludedInFE->tryGetRealPathName();
                         valid = !IncludedInRealpath.empty();
                         if (valid)
                         {
-                            llvm::errs() << "IncludedInRealpath,";
+                            llvm::outs() << "IncludedInRealpath,";
                             auto IncludedFileRealpath = FE->tryGetRealPathName();
                             valid = !IncludedFileRealpath.empty();
                             if (valid)
                             {
-                                llvm::errs() << "IncludedFileRealpath,";
+                                llvm::outs() << "IncludedFileRealpath,";
                                 valid =
                                     NonGlobalIncludes.find(IncludedInRealpath) ==
                                     NonGlobalIncludes.end();
                                 if (valid)
                                 {
-                                    llvm::errs() << "Not included in a non-globally included file,";
+                                    llvm::outs() << "Not included in a non-globally included file,";
                                     valid = !std::any_of(
                                         Decls.begin(),
                                         Decls.end(),
@@ -283,9 +283,10 @@ namespace cpp2c
                                             // that's fine since it would be a non-global
                                             // location anyway
                                             if (auto Tok = clang::Lexer::findNextToken(
-                                                               Range.getEnd(), SM, LO)
-                                                               .getPointer())
-                                                Range.setEnd(SM.getFileLoc(Tok->getEndLoc()));
+                                                    Range.getEnd(), SM, LO))
+                                                if (Tok.hasValue())
+                                                    Range.setEnd(SM.getFileLoc(
+                                                        Tok.getValue().getEndLoc()));
                                             auto L = SM.getFileLoc(Item.second);
                                             return Range.fullyContains(L);
                                         });
@@ -296,7 +297,7 @@ namespace cpp2c
                         }
                     }
                 }
-                llvm::errs() << (valid ? "Included at global scope,"
+                llvm::outs() << (valid ? "Included at global scope,"
                                        : "Included at non-global scope,")
                              << "\n";
             }
@@ -405,17 +406,17 @@ namespace cpp2c
 
             //// Print macro info
 
-            // TLE->dumpMacroInfo(llvm::errs());
+            // TLE->dumpMacroInfo(llvm::outs());
 
-            // TLE->dumpASTInfo(llvm::errs(),
+            // TLE->dumpASTInfo(llvm::outs(),
             //                  Ctx.getSourceManager(), Ctx.getLangOpts());
 
-            llvm::errs() << TLE->Name << ",";
+            llvm::outs() << "Invocation," << TLE->Name << ",";
 
             if (TLE->MI->isObjectLike())
-                llvm::errs() << "Object-like,";
+                llvm::outs() << "Object-like,";
             else
-                llvm::errs() << "Function-like,";
+                llvm::outs() << "Function-like,";
 
             auto FID = SM.getFileID(TLE->MI->getDefinitionLoc());
             if (FID.isValid())
@@ -432,26 +433,57 @@ namespace cpp2c
                             auto s = DefLoc.printToString(SM);
                             // Find second-to-last colon
                             auto i = s.rfind(':', s.rfind(':') - 1);
-                            llvm::errs() << "Defined at " << Name
+                            llvm::outs() << "Defined at " << Name
                                          << ":"
                                          << s.substr(i + 1) << ",";
                         }
                         else
-                            llvm::errs() << "Defined at an invalid SLoc,";
+                            llvm::outs() << "Defined at an invalid SLoc,";
                     }
                     else
-                        llvm::errs() << "Defined in a nameless file,";
+                        llvm::outs() << "Defined in a nameless file,";
                 }
                 else
-                    llvm::errs() << "Defined in file without FileEntry,";
+                    llvm::outs() << "Defined in file without FileEntry,";
             }
             else
-                llvm::errs() << "Defined in file with invalid ID,";
+                llvm::outs() << "Defined in file with invalid ID,";
+
+            FID = SM.getFileID(SM.getFileLoc(TLE->SpellingRange.getBegin()));
+            if (FID.isValid())
+            {
+                auto FE = SM.getFileEntryForID(FID);
+                if (FE)
+                {
+                    auto Name = FE->tryGetRealPathName();
+                    if (!Name.empty())
+                    {
+                        auto L = SM.getFileLoc(TLE->SpellingRange.getBegin());
+                        if (L.isValid())
+                        {
+                            auto s = L.printToString(SM);
+                            // Find second-to-last colon
+                            auto i = s.rfind(':', s.rfind(':') - 1);
+                            llvm::outs() << "Invoked at " << Name
+                                         << ":"
+                                         << s.substr(i + 1) << ",";
+                        }
+                        else
+                            llvm::outs() << "Invoked at an invalid SLoc,";
+                    }
+                    else
+                        llvm::outs() << "Invoked in a nameless file,";
+                }
+                else
+                    llvm::outs() << "Invoked in file without FileEntry,";
+            }
+            else
+                llvm::outs() << "Invoked in file with invalid ID,";
 
             if (TLE->HasStringification)
-                llvm::errs() << "Stringification,";
+                llvm::outs() << "Stringification,";
             if (TLE->HasTokenPasting)
-                llvm::errs() << "Token-pasting,";
+                llvm::outs() << "Token-pasting,";
 
             // Check that any macros this macro invokes were defined before
             // this macro was
@@ -466,16 +498,16 @@ namespace cpp2c
                              {
                                  return SM.isBeforeInTranslationUnit(L, DefLoc);
                              }))
-                llvm::errs() << "Invokes a non-predefined macro,";
+                llvm::outs() << "Invokes a non-predefined macro,";
 
             if (TLE->ASTRoots.empty())
-                llvm::errs()
+                llvm::outs()
                     << "No aligned body,";
             else if (TLE->ASTRoots.size() > 1)
-                llvm::errs() << "Multiple aligned bodies,";
+                llvm::outs() << "Multiple aligned bodies,";
             else
             {
-                llvm::errs() << "Single aligned body,";
+                llvm::outs() << "Single aligned body,";
                 auto D = TLE->AlignedRoot->D;
                 auto ST = TLE->AlignedRoot->ST;
                 auto TL = TLE->AlignedRoot->TL;
@@ -483,7 +515,7 @@ namespace cpp2c
                 if (ST)
                 {
 
-                    llvm::errs() << "Stmt,";
+                    llvm::outs() << "Stmt,";
 
                     printIfIsOneOf<clang::DoStmt,
                                    clang::ContinueStmt,
@@ -501,18 +533,18 @@ namespace cpp2c
                                    clang::CompoundLiteralExpr>(ST);
 
                     if (isInTree(ST, stmtIsA<clang::DeclRefExpr>()))
-                        llvm::errs() << "DeclRefExpr,";
+                        llvm::outs() << "DeclRefExpr,";
 
                     if (isInTree(ST, stmtIsA<clang::ConditionalOperator>()))
-                        llvm::errs() << "ConditionalOperator,";
+                        llvm::outs() << "ConditionalOperator,";
                     if (isInTree(ST,
                                  stmtIsBinOp(
                                      clang::BinaryOperator::Opcode::BO_LAnd)))
-                        llvm::errs() << "BinaryOperator::Opcode::BO_LAnd,";
+                        llvm::outs() << "BinaryOperator::Opcode::BO_LAnd,";
                     if (isInTree(ST,
                                  stmtIsBinOp(
                                      clang::BinaryOperator::Opcode::BO_LOr)))
-                        llvm::errs() << "BinaryOperator::Opcode::BO_LOr,";
+                        llvm::outs() << "BinaryOperator::Opcode::BO_LOr,";
 
                     auto ArgStmts = collectStmtsFromArguments(TLE);
 
@@ -531,7 +563,7 @@ namespace cpp2c
                                             return containsLocalType(T);
                                 return false;
                             }))
-                        llvm::errs() << "Local type subexpr,";
+                        llvm::outs() << "Local type subexpr,";
 
                     // Check if any variable or function this macro references
                     // that is not part of an argument was declared after this
@@ -550,7 +582,7 @@ namespace cpp2c
                                                 SM.getFileLoc(D->getLocation()));
                                 return false;
                             }))
-                        llvm::errs() << "Decl not from argument defined "
+                        llvm::outs() << "Decl not from argument defined "
                                         "after macro,";
 
                     // Check if any subtree of the entire expansion
@@ -570,7 +602,7 @@ namespace cpp2c
                                                 T, SM, DefLoc);
                                 return false;
                             }))
-                        llvm::errs() << "Type defined after macro subexpr,";
+                        llvm::outs() << "Type defined after macro subexpr,";
 
                     // Check if any subtree of the entire expansion
                     // that was not parsed from an argument is an expression
@@ -589,7 +621,7 @@ namespace cpp2c
                                                 T, SM, DefLoc);
                                 return false;
                             }))
-                        llvm::errs() << "Typedef defined after macro subexpr,";
+                        llvm::outs() << "Typedef defined after macro subexpr,";
 
                     if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
@@ -597,42 +629,42 @@ namespace cpp2c
                         if (auto T = E->getType().getTypePtrOrNull())
                         {
                             if (T->isVoidType())
-                                llvm::errs() << "Void type,";
+                                llvm::outs() << "Void type,";
                             else if (containsLocalType(T))
-                                llvm::errs() << "Local type,";
+                                llvm::outs() << "Local type,";
                             else if (containsAnonymousType(T))
-                                llvm::errs() << "Anonymous type,";
+                                llvm::outs() << "Anonymous type,";
                             else if (containsTypeDefinedAfter(T, SM, DefLoc))
-                                llvm::errs() << "Type defined after macro,";
+                                llvm::outs() << "Type defined after macro,";
                             else if (containsTypedefDefinedAfter(T, SM, DefLoc))
-                                llvm::errs() << "Typedef defined after macro,";
+                                llvm::outs() << "Typedef defined after macro,";
                         }
                         else
-                            llvm::errs() << "No type,";
+                            llvm::outs() << "No type,";
 
                         // Whether the expression was expanded where a constant
                         // expression is required
                         if (descendantOfConstantExpression(Ctx, E))
-                            llvm::errs() << "Must be constant expression,";
+                            llvm::outs() << "Must be constant expression,";
                     }
                 }
 
                 if (D)
-                    llvm::errs() << "Decl,";
+                    llvm::outs() << "Decl,";
 
                 if (TL)
                 {
-                    llvm::errs() << "TypeLoc,";
+                    llvm::outs() << "TypeLoc,";
                     // Check that this type specifier list does not include
                     // a typedef that was defined after the macro was defined
                     if (auto T = TL->getTypePtr())
                     {
                         if (containsTypedefDefinedAfter(T, SM, DefLoc))
-                            llvm::errs() << "Type list contains typedef "
+                            llvm::outs() << "Type list contains typedef "
                                             "defined after macro was defined,";
                     }
                     else
-                        llvm::errs() << "Null type,";
+                        llvm::outs() << "Null type,";
                 }
             }
 
@@ -640,7 +672,7 @@ namespace cpp2c
             // equals the number of times that argument was expanded
             if (TLE->Arguments.empty())
             {
-                llvm::errs() << "No arguments,";
+                llvm::outs() << "No arguments,";
             }
             else
             {
@@ -650,7 +682,7 @@ namespace cpp2c
                                 { return Arg.AlignedRoots.size() ==
                                          Arg.numberOfTimesExpanded; }))
                 {
-                    llvm::errs() << "Aligned arguments,";
+                    llvm::outs() << "Aligned arguments,";
 
                     for (auto &&Arg : TLE->Arguments)
                     {
@@ -664,56 +696,56 @@ namespace cpp2c
                                 {
                                     if (T->isVoidType())
                                     {
-                                        llvm::errs() << "Void argument,";
+                                        llvm::outs() << "Void argument,";
                                         break;
                                     }
                                     else if (containsLocalType(T))
                                     {
-                                        llvm::errs() << "Local type argument,";
+                                        llvm::outs() << "Local type argument,";
                                         break;
                                     }
                                     else if (containsAnonymousType(T))
                                     {
-                                        llvm::errs() << "Anonymous type"
+                                        llvm::outs() << "Anonymous type"
                                                         " argument,";
                                         break;
                                     }
                                     else if (containsTypeDefinedAfter(
                                                  T, SM, DefLoc))
                                     {
-                                        llvm::errs() << "Type defined "
+                                        llvm::outs() << "Type defined "
                                                         "after macro argument,";
                                         break;
                                     }
                                     else if (containsTypedefDefinedAfter(
                                                  T, SM, DefLoc))
                                     {
-                                        llvm::errs() << "Typedef defined "
+                                        llvm::outs() << "Typedef defined "
                                                         "after macro argument,";
                                         break;
                                     }
                                 }
                                 else
                                 {
-                                    llvm::errs() << "Untyped argument,";
+                                    llvm::outs() << "Untyped argument,";
                                     break;
                                 }
                             }
                             else
                             {
-                                llvm::errs() << "Non-expr argument,";
+                                llvm::outs() << "Non-expr argument,";
                                 break;
                             }
                         }
                         else
                         {
-                            llvm::errs() << "Unexpanded argument,";
+                            llvm::outs() << "Unexpanded argument,";
                             break;
                         }
                     }
                 }
                 else
-                    llvm::errs() << "Unaligned arguments,";
+                    llvm::outs() << "Unaligned arguments,";
             }
 
             // Check for semantic properties of interface-equivalence
@@ -723,20 +755,20 @@ namespace cpp2c
                 TLE->AlignedRoot->ST)
             {
                 if (isHygienic(Ctx, TLE))
-                    llvm::errs() << "Hygienic,";
+                    llvm::outs() << "Hygienic,";
                 else
-                    llvm::errs() << "Unhygienic,";
+                    llvm::outs() << "Unhygienic,";
                 if (isParameterSideEffectFree(Ctx, TLE))
-                    llvm::errs() << "Parameter side-effect free,";
+                    llvm::outs() << "Parameter side-effect free,";
                 else
-                    llvm::errs() << "Parameter side-effects,";
+                    llvm::outs() << "Parameter side-effects,";
                 if (isLValueIndependent(Ctx, TLE))
-                    llvm::errs() << "L-value independent,";
+                    llvm::outs() << "L-value independent,";
                 else
-                    llvm::errs() << "L-value dependent,";
+                    llvm::outs() << "L-value dependent,";
             }
 
-            llvm::errs() << "\n";
+            llvm::outs() << "\n";
 
             delete TLE;
         }
