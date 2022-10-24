@@ -621,7 +621,19 @@ namespace cpp2c
                     llvm::errs() << "Decl,";
 
                 if (TL)
+                {
                     llvm::errs() << "TypeLoc,";
+                    // Check that this type specifier list does not include
+                    // a typedef that was defined after the macro was defined
+                    if (auto T = TL->getTypePtr())
+                    {
+                        if (containsTypedefDefinedAfter(T, SM, DefLoc))
+                            llvm::errs() << "Type list contains typedef "
+                                            "defined after macro was defined,";
+                    }
+                    else
+                        llvm::errs() << "Null type,";
+                }
             }
 
             // Check that the number of AST nodes aligned with each argument
