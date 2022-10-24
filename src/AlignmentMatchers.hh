@@ -23,15 +23,27 @@ namespace cpp2c
             {
                 auto Cur = Descendants.top();
                 Descendants.pop();
+                // llvm::errs() << "Inserting:\n";
+                // Cur->dumpColor();
                 MatchedStmts.insert(Cur);
                 for (auto Child : Cur->children())
                     Descendants.push(Child);
             }
         }
         else if (DSTL.D)
+        {
+            // llvm::errs() << "Inserting:\n";
+            // DSTL.D->dump();
             MatchedDecls.insert(DSTL.D);
-        else if (DSTL.TL)
-            MatchedTypeLocs.insert(DSTL.TL);
+        }
+        // else if (DSTL.TL)
+        // {
+        //     // TODO: Determine why this must be commented out to be able to
+        //     //       correctly match TypeLocs
+        //     // llvm::errs() << "Inserting:\n";
+        //     // DSTL.TL->getTypePtr()->dump();
+        //     MatchedTypeLocs.insert(DSTL.TL);
+        // }
     }
 
     // Matches all AST nodes that align perfectly with the body of the given
@@ -80,16 +92,33 @@ namespace cpp2c
         // NOTE: We may not need this check, but I should doublecheck
         if (!Expansion->SpellingRange.fullyContains(NodeExE))
         {
-            if (DSTL.ST && debug)
+            if (debug)
             {
-                llvm::errs() << "Node mismatch <exp end not in spelling range>\n";
-                DSTL.ST->dumpColor();
-                llvm::errs() << "Spelling range: ";
+                llvm::errs() << "Node mismatch <exp end not in expansion "
+                                "spelling range>\n";
+                if (DSTL.ST)
+                    DSTL.ST->dumpColor();
+                else if (DSTL.D)
+                    DSTL.D->dumpColor();
+                else if (DSTL.TL)
+                {
+                    if (auto T = DSTL.TL->getTypePtr())
+                        T->dump();
+                    else
+                        llvm::errs() << "(TypeLoc with null type)\n";
+                }
+                llvm::errs() << "Expansion spelling range: ";
                 Expansion->SpellingRange.dump(SM);
+                llvm::errs() << "NodeSpB: ";
+                NodeSpB.dump(SM);
+                llvm::errs() << "NodeSpE: ";
+                NodeSpE.dump(SM);
                 llvm::errs() << "Expansion end: ";
                 NodeExE.dump(SM);
+                llvm::errs() << "Imm macro caller loc: ";
+                SM.getImmediateMacroCallerLoc(Node.getBeginLoc()).dump(SM);
                 llvm::errs() << "Imm macro caller loc end: ";
-                SM.getImmediateMacroCallerLoc(NodeExE).dump(SM);
+                SM.getImmediateMacroCallerLoc(Node.getEndLoc()).dump(SM);
             }
             return false;
         }
@@ -245,38 +274,83 @@ namespace cpp2c
         }
 
         // Check that this node has not been matched before
+        bool foundNodeBefore = false;
         if (DSTL.ST && MatchedStmts.find(DSTL.ST) != MatchedStmts.end())
-            return false;
+            foundNodeBefore = true;
         else if (DSTL.D && MatchedDecls.find(DSTL.D) != MatchedDecls.end())
-            return false;
+            foundNodeBefore = true;
         else if (DSTL.TL &&
                  MatchedTypeLocs.find(DSTL.TL) != MatchedTypeLocs.end())
+            foundNodeBefore = true;
+        if (foundNodeBefore)
+        {
+            if (debug)
+            {
+                llvm::errs() << "Found node before\n";
+                if (DSTL.ST)
+                    DSTL.ST->dumpColor();
+                else if (DSTL.D)
+                    DSTL.D->dumpColor();
+                else if (DSTL.TL)
+                {
+                    if (auto T = DSTL.TL->getTypePtr())
+                        T->dump();
+                    else
+                        llvm::errs() << "(TypeLoc with null type)\n";
+                }
+            }
             return false;
+        }
 
         // Check that this node is not a proper subtree of an aligned node
         // that we already found.
+        bool foundParentBefore = false;
         for (auto P : Ctx->getParents(Node))
         {
             if (auto PST = P.template get<clang::Stmt>())
             {
                 if (MatchedStmts.find(PST) != MatchedStmts.end())
-                    return false;
+                    foundParentBefore = true;
             }
             else if (auto DP = P.template get<clang::Decl>())
             {
                 if (MatchedDecls.find(DP) != MatchedDecls.end())
-                    return false;
+                    foundParentBefore = true;
             }
             else if (auto DTL = P.template get<clang::TypeLoc>())
             {
                 if (MatchedTypeLocs.find(DTL) != MatchedTypeLocs.end())
-                    return false;
+                    foundParentBefore = true;
             }
+        }
+        if (foundParentBefore)
+        {
+            if (debug)
+            {
+                llvm::errs() << "Found parent before\n";
+            }
+            return false;
         }
 
         // Store this node and its children in the set of aligned subtrees
         // we've found
         storeChildren(DSTL, MatchedStmts, MatchedDecls, MatchedTypeLocs);
+
+        if (debug)
+        {
+            llvm::errs() << "Matched " << Expansion->Name << " with:\n";
+            if (DSTL.ST)
+                DSTL.ST->dumpColor();
+            else if (DSTL.D)
+                DSTL.D->dumpColor();
+            else if (DSTL.TL)
+            {
+                if (auto T = DSTL.TL->getTypePtr())
+                    T->dump();
+                else
+                    llvm::errs() << "(TypeLoc with null type)\n";
+            }
+        }
         return true;
     }
 
@@ -338,7 +412,6 @@ namespace cpp2c
                   ExpImmMacroCallerRange.fullyContains(
                       SM.getExpansionLoc(Tok.getLocation()))))
             {
-                DeclStmtTypeLoc DSTL(&Node);
                 if (DSTL.ST && debug)
                 {
                     llvm::errs() << "Node mismatch <token not in range>\n";
@@ -359,7 +432,6 @@ namespace cpp2c
         // as the given token list
         if (NodeB != TokB || NodeE != TokE)
         {
-            DeclStmtTypeLoc DSTL(&Node);
             if (DSTL.ST && debug)
             {
                 llvm::errs() << "Node mismatch <range mismatch>:\n";
