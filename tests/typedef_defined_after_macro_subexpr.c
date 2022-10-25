@@ -1,5 +1,5 @@
 #define M 1 + ((A){.x = 1}.x)
-#define F(a) 1 + a.x
+#define F(i) i + ((A){.x = 1}.x)
 #define ADD(a, b) ((a) + (b))
 #define ONE_PLUS_INT(i) (1 + ((Int)i))
 
@@ -19,7 +19,7 @@ int main(int argc, char const *argv[])
     M;
 
     // Type defined after macro subexpr
-    F(a);
+    F(1);
 
     // Typedef defined after macro subexpr
     ONE_PLUS_INT(1);

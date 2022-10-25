@@ -1,7 +1,7 @@
 #define F(a) (a).x
 #define G(a) (*(a)).x
 #define H(a) (a[0]).x
-#define I(i) ((Int)i)
+#define I(i) (i)
 
 typedef struct A
 {
@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
     // Typedef (type) defined after macro argument
     H(c);
     // Typedef defined after macro argument
-    I(1);
+    I((Int)1);
 
 #undef F
 #undef G
