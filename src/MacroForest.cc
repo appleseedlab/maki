@@ -49,6 +49,7 @@ namespace cpp2c
         Expansion->SpellingRange = getSpellingRange(Ctx,
                                                     Range.getBegin(),
                                                     Range.getEnd());
+        Expansion->InMacroArg = InMacroArg;
 
         // Add the expansion to the forest
 
@@ -60,11 +61,8 @@ namespace cpp2c
             InvocationStack.pop();
 
         if (InvocationStack.empty())
-        {
             // New root expansion
             Expansion->Depth = 0;
-            TopLevelExpansions.push_back(Expansion);
-        }
         else
         {
             // New child expansion
@@ -72,12 +70,17 @@ namespace cpp2c
             Expansion->Parent->Children.push_back(Expansion);
             Expansion->Depth = Expansion->Parent->Depth + 1;
         }
+        Expansions.push_back(Expansion);
 
         // Add this expansion to the stack
         InvocationStack.push(Expansion);
 
         if (Args != nullptr)
         {
+            // Save whatever the state of being in a macro argument is
+            // before iterating arguments
+            bool InMacroArgBefore = InMacroArg;
+            InMacroArg = true;
             // Expand this expansion's arguments
             for (unsigned int i = 0; i < Args->getNumMacroArguments(); i++)
             {
@@ -122,14 +125,15 @@ namespace cpp2c
 
                 // Count how many times this argument is expanded in
                 // the macro body
-                for (auto Tok : MI->tokens())
-                    if (clang::Lexer::getSpelling(Tok, SM, LO) ==
-                        Arg.Name.str())
-                        Arg.numberOfTimesExpanded++;
+                for (auto Tk : MI->tokens())
+                    if (clang::Lexer::getSpelling(Tk, SM, LO) == Arg.Name.str())
+                        Arg.NumExpansions++;
 
                 // Add the argument to the list of arguments for this expansion
                 Expansion->Arguments.push_back(Arg);
             }
+            // Restore state of being in a macro argument
+            InMacroArg = InMacroArgBefore;
         }
 
         if (!MI->tokens_empty())
