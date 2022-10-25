@@ -19,24 +19,200 @@
 
 #include "assert.h"
 
+// TODO:    Collect names of macros which appear in #ifdefs and #undefs
+
 // NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
 //          paren exprs
 
 namespace cpp2c
 {
+    static const constexpr char *delim = "\t";
+    static const constexpr char *argsDelim = "++++";
+    inline std::string fmt(std::string s) { return s; }
+    inline std::string fmt(const char *s) { return std::string(s); }
+    inline std::string fmt(bool b) { return b ? "True" : "False"; }
+    inline std::string fmt(unsigned int i) { return std::to_string(i); }
+
+    template <typename T>
+    inline void print(T t, const char *end = delim)
+    {
+        llvm::outs() << fmt(t) << end;
+    }
+
+    inline void delimit() { print(delim, ""); }
+
+    struct MacroFacts
+    {
+        std::string
+            Name,
+            DefLocOrError,
+            InvokeLocOrError,
+            ASTKind;
+
+        unsigned int
+            Depth,
+            NumASTRoots;
+
+        bool
+            // All macros
+            IsObjectLike,
+            InMacroArg,
+            ValidDefLoc,
+            ValidInvokeLoc,
+            HasStringification,
+            HasTokenPasting,
+            InvokesLaterDefinedMacro,
+            // InStaticConditional,
+            // InUndef,
+
+            // Stmt/Expr macros
+            ContainsDeclRefExpr,
+            ContainsConditionalEvaluation,
+            ContainsSubExprFromBodyWithLocallyDefinedType,
+            ContainsDeclFromBodyDefinedAfterMacro,
+            ContainsSubExprFromBodyWithTypeDefinedAfterMacro,
+            ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro,
+            ExpansionHasType,
+
+            // Semantic properties for Stmt/Expr macros
+            IsHygienic,
+            IsParameterSideEffectFree,
+            IsLValueIndependent,
+
+            // Expr macros
+            IsExpansionVoidType,
+            IsExpansionLocallyDefinedType,
+            IsExpansionAnonymousType,
+            ExpansionContainsTypeDefinedAfterMacroWasDefined,
+            ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined,
+            ExpandedWhereConstExprRequired,
+
+            // TypeLoc macros
+            IsNullType,
+            ContainsTypedefDefinedAfterMacroWasDefined,
+
+            // Macro arguments
+            HasArguments,
+            HasAlignedArguments,
+            HasUnexpandedArgument,
+            HasNonExprArgument,
+            HasUntypedArgument,
+            HasArgumentWithVoidType,
+            HasArgumentWithLocallyDefinedType,
+            HasArgumentWithAnonymousType,
+            HasArgumentWithTypeDefinedAfterMacro,
+            HasArgumentWithTypedefTypeDefinedAfterMacro;
+    };
+
+    void printFacts(struct MacroFacts F)
+    {
+        print("Invocation");
+
+        print(F.Name);
+        print(F.DefLocOrError);
+        print(F.InvokeLocOrError);
+
+        print(F.Depth);
+
+        print(F.IsObjectLike);
+        print(F.InMacroArg);
+        print(F.ValidDefLoc);
+        print(F.ValidInvokeLoc);
+        print(F.HasStringification);
+        print(F.HasTokenPasting);
+        print(F.InvokesLaterDefinedMacro, "");
+
+        if (F.Depth != 0 || F.InMacroArg)
+        {
+            print("\n", "");
+            return;
+        }
+        else
+            delimit();
+
+        print(F.NumASTRoots, "");
+
+        if (F.NumASTRoots == 1)
+        {
+            delimit();
+
+            print(F.ASTKind, "");
+            if (F.ASTKind == "Stmt" || F.ASTKind == "Expr")
+            {
+                delimit();
+
+                print(F.ContainsDeclRefExpr);
+                print(F.ContainsConditionalEvaluation);
+                print(F.ContainsSubExprFromBodyWithLocallyDefinedType);
+                print(F.ContainsDeclFromBodyDefinedAfterMacro);
+                print(F.ContainsSubExprFromBodyWithTypeDefinedAfterMacro);
+                print(F.ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro);
+
+                print(F.IsHygienic);
+                print(F.IsParameterSideEffectFree);
+                print(F.IsLValueIndependent);
+
+                print(F.ExpansionHasType, "");
+
+                if (F.ASTKind == "Expr" && F.ExpansionHasType)
+                {
+                    delimit();
+
+                    print(F.IsExpansionVoidType);
+                    print(F.IsExpansionLocallyDefinedType);
+                    print(F.IsExpansionAnonymousType);
+                    print(F.ExpansionContainsTypeDefinedAfterMacroWasDefined);
+                    print(F.ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined);
+                    print(F.ExpandedWhereConstExprRequired, "");
+                }
+            }
+            else if (F.ASTKind == "Decl")
+            {
+                // Do nothing
+            }
+            else if (F.ASTKind == "TypeLoc")
+            {
+                delimit();
+
+                print(F.IsNullType);
+                print(F.ContainsTypedefDefinedAfterMacroWasDefined, "");
+            }
+        }
+
+        // Separate body facts from argument facts
+        print(argsDelim, "");
+
+        print(F.HasArguments, "");
+        if (F.HasArguments)
+        {
+            delimit();
+
+            print(F.HasAlignedArguments);
+            print(F.HasUnexpandedArgument);
+            print(F.HasNonExprArgument);
+            print(F.HasUntypedArgument);
+            print(F.HasArgumentWithVoidType);
+            print(F.HasArgumentWithLocallyDefinedType);
+            print(F.HasArgumentWithAnonymousType);
+            print(F.HasArgumentWithTypeDefinedAfterMacro);
+            print(F.HasArgumentWithTypedefTypeDefinedAfterMacro, "");
+        }
+
+        print("\n", "");
+    }
 
     template <typename T>
     inline void printIfIsOneOf(const clang::Stmt *ST)
     {
         if (clang::isa<T>(ST))
-            llvm::outs() << typeid(T).name() << ",";
+            print(typeid(T).name());
     }
 
     template <typename T1, typename T2, typename... Ts>
     inline void printIfIsOneOf(const clang::Stmt *ST)
     {
         if (clang::isa<T1>(ST))
-            llvm::outs() << typeid(T1).name() << ",";
+            print(typeid(T1).name());
         printIfIsOneOf<T2, Ts...>(ST);
     }
 
@@ -200,6 +376,103 @@ namespace cpp2c
             collectExpansionDefLocs(SM, DefLocs, Child);
     }
 
+    std::pair<bool, std::string> tryGetFullSourceLoc(
+        clang::SourceManager &SM,
+        clang::SourceLocation L)
+    {
+        auto FID = SM.getFileID(L);
+        if (FID.isValid())
+        {
+            if (auto FE = SM.getFileEntryForID(FID))
+            {
+                auto Name = FE->tryGetRealPathName();
+                if (!Name.empty())
+                {
+                    auto FLoc = SM.getFileLoc(L);
+                    if (FLoc.isValid())
+                    {
+                        auto s = FLoc.printToString(SM);
+                        // Find second-to-last colon
+                        auto i = s.rfind(':', s.rfind(':') - 1);
+                        return {true, Name.str() + ":" + s.substr(i + 1)};
+                    }
+                    return {false, "Invalid SLoc"};
+                }
+                return {false, "Nameless file"};
+            }
+            return {false, "File without FileEntry"};
+        }
+        return {false, "Invalid file ID"};
+    }
+
+    // Checks if the included file is a globally included file.
+    // The first element of the return result if false if not;
+    // true otherwise.
+    // The second element is the name of the included file.
+    std::pair<bool, llvm::StringRef> isGlobalInclude(
+        clang::SourceManager &SM,
+        const clang::LangOptions &LO,
+        std::pair<const clang::FileEntry *, clang::SourceLocation> &IEL,
+        std::set<llvm::StringRef> &LocalIncludes,
+        std::vector<const clang::Decl *> &Decls)
+    {
+        auto FE = IEL.first;
+        auto HashLoc = IEL.second;
+
+        // Check that the included file actually has a name
+        auto IncludedFileRealpath = FE->tryGetRealPathName();
+        if (IncludedFileRealpath.empty())
+            return {false, IncludedFileRealpath};
+
+        // Check that the file the file is included in is valid
+        auto IncludedInFID = SM.getFileID(HashLoc);
+        if (IncludedInFID.isInvalid())
+            return {false, IncludedFileRealpath};
+
+        // Check that a file entry exists for the  file the file is included in
+        auto IncludedInFE = SM.getFileEntryForID(IncludedInFID);
+        if (!IncludedInFE)
+            return {false, IncludedFileRealpath};
+
+        // Check that a real path exists for the file the file is included in
+        auto IncludedInRealpath = IncludedInFE->tryGetRealPathName();
+        if (IncludedInRealpath.empty())
+            return {false, IncludedFileRealpath};
+
+        // Check that the file the file is included in is not in turn included
+        // in a file included in a non-global scope
+        if (LocalIncludes.find(IncludedInRealpath) !=
+            LocalIncludes.end())
+            return {false, IncludedFileRealpath};
+
+        // Check that the include does not appear within the range of any
+        // declaration in the file
+        auto L = SM.getFileLoc(IEL.second);
+        if (std::any_of(
+                Decls.begin(),
+                Decls.end(),
+                [&SM, &LO, &L](const clang::Decl *D)
+                {
+                    auto B = SM.getFileLoc(D->getBeginLoc());
+                    auto E = SM.getFileLoc(D->getEndLoc());
+
+                    // Include the location just after the declaration
+                    // to account for semicolons.
+                    // If the decl does not have semicolon after it,
+                    // that's fine since it would be a non-global
+                    // location anyway
+                    if (auto Tok = clang::Lexer::findNextToken(E, SM, LO))
+                        if (Tok.hasValue())
+                            E = SM.getFileLoc(Tok.getValue().getEndLoc());
+
+                    return clang::SourceRange(B, E).fullyContains(L);
+                }))
+            return {false, IncludedFileRealpath};
+
+        // Success
+        return {true, IncludedFileRealpath};
+    }
+
     Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI)
     {
         clang::Preprocessor &PP = CI.getPreprocessor();
@@ -218,148 +491,147 @@ namespace cpp2c
         auto &LO = Ctx.getLangOpts();
 
         // Collect declaration ranges
-        std::vector<const clang::Decl *> Decls;
-        {
-            MatchFinder Finder;
-            DeclCollectorMatchHandler Handler;
-            auto Matcher = decl(unless(anyOf(
-                                    isImplicit(),
-                                    translationUnitDecl())))
-                               .bind("root");
-            Finder.addMatcher(Matcher, &Handler);
-            Finder.matchAST(Ctx);
-            Decls = Handler.Decls;
-        };
+        std::vector<const clang::Decl *> Decls =
+            ({
+                MatchFinder Finder;
+                DeclCollectorMatchHandler Handler;
+                auto Matcher = decl(unless(anyOf(
+                                        isImplicit(),
+                                        translationUnitDecl())))
+                                   .bind("root");
+                Finder.addMatcher(Matcher, &Handler);
+                Finder.matchAST(Ctx);
+                Handler.Decls;
+            });
 
-        // Dump include-directive information
+        // Print include-directive information
         {
-            std::set<llvm::StringRef> NonGlobalIncludes;
-            for (auto &&Item : IC->IncludeEntriesLocs)
+            std::set<llvm::StringRef> LocalIncludes;
+            for (auto &&IEL : IC->IncludeEntriesLocs)
             {
-                auto FE = Item.first;
-                auto HashLoc = Item.second;
+                // Facts for includes
+                bool Valid;
+                std::string IncludeName;
 
-                llvm::outs() << "#include,";
+                // Check if included at global scope or not
+                auto Res = isGlobalInclude(SM, LO, IEL, LocalIncludes, Decls);
+                if (!Res.first && !Res.second.empty())
+                    LocalIncludes.insert(Res.second);
 
-                // TODO: Would be really nice to have a monad here...
-                auto IncludedInFID = SM.getFileID(HashLoc);
-                bool valid = IncludedInFID.isValid();
-                if (valid)
-                {
-                    llvm::outs() << "IncludedInFID,";
-                    auto IncludedInFE = SM.getFileEntryForID(IncludedInFID);
-                    valid = IncludedInFE != nullptr;
-                    if (valid)
-                    {
-                        llvm::outs() << "IncludedInFE,";
-                        auto IncludedInRealpath = IncludedInFE->tryGetRealPathName();
-                        valid = !IncludedInRealpath.empty();
-                        if (valid)
-                        {
-                            llvm::outs() << "IncludedInRealpath,";
-                            auto IncludedFileRealpath = FE->tryGetRealPathName();
-                            valid = !IncludedFileRealpath.empty();
-                            if (valid)
-                            {
-                                llvm::outs() << "IncludedFileRealpath,";
-                                valid =
-                                    NonGlobalIncludes.find(IncludedInRealpath) ==
-                                    NonGlobalIncludes.end();
-                                if (valid)
-                                {
-                                    llvm::outs() << "Not included in a non-globally included file,";
-                                    valid = !std::any_of(
-                                        Decls.begin(),
-                                        Decls.end(),
-                                        [&Item, &SM, &LO](const clang::Decl *D)
-                                        {
-                                            auto Range =
-                                                clang::SourceRange(
-                                                    SM.getFileLoc(D->getBeginLoc()),
-                                                    SM.getFileLoc(D->getEndLoc()));
-                                            // Include the location just after the declaration
-                                            // to account for semicolons.
-                                            // If the decl does not have semicolon after it,
-                                            // that's fine since it would be a non-global
-                                            // location anyway
-                                            if (auto Tok = clang::Lexer::findNextToken(
-                                                    Range.getEnd(), SM, LO))
-                                                if (Tok.hasValue())
-                                                    Range.setEnd(SM.getFileLoc(
-                                                        Tok.getValue().getEndLoc()));
-                                            auto L = SM.getFileLoc(Item.second);
-                                            return Range.fullyContains(L);
-                                        });
-                                    if (!valid)
-                                        NonGlobalIncludes.insert(IncludedFileRealpath);
-                                }
-                            }
-                        }
-                    }
-                }
-                llvm::outs() << (valid ? "Included at global scope,"
-                                       : "Included at non-global scope,")
-                             << "\n";
+                Valid = Res.first;
+                IncludeName = Res.second.empty() ? "None" : Res.second.str();
+
+                print("Include");
+                print(Valid);
+                print(IncludeName);
+
+                llvm::outs() << "\n";
             }
         }
 
-        // Dump macro expansion information
+        // Print macro expansion information
 
-        for (auto TLE : MF->TopLevelExpansions)
+        for (auto Exp : MF->Expansions)
         {
+            //// First get basic info about all macros
+            struct MacroFacts Facts = (struct MacroFacts){
+                .Name = Exp->Name.str(),
+
+                .Depth = Exp->Depth,
+
+                .IsObjectLike = Exp->MI->isObjectLike(),
+                .InMacroArg = Exp->InMacroArg,
+                .HasStringification = Exp->HasStringification,
+                .HasTokenPasting = Exp->HasTokenPasting,
+
+            };
+
+            // Definition location
+            auto Res = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionLoc());
+            Facts.ValidDefLoc = Res.first;
+            Facts.DefLocOrError = Res.second;
+
+            // Invocation location
+            Res = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
+            Facts.ValidInvokeLoc = Res.first;
+            Facts.InvokeLocOrError = Res.second;
+
+            auto DefLoc = SM.getFileLoc(Exp->MI->getDefinitionLoc());
+            // Check if any macros this macro invokes were defined after
+            // this macro was
+            Facts.InvokesLaterDefinedMacro = ({
+                std::vector<clang::SourceLocation> DescendantMacroDefLocs;
+                for (auto &&Child : Exp->Children)
+                    collectExpansionDefLocs(SM, DescendantMacroDefLocs, Child);
+                std::any_of(
+                    DescendantMacroDefLocs.begin(),
+                    DescendantMacroDefLocs.end(),
+                    [&SM, &DefLoc](clang::SourceLocation L)
+                    {
+                        return SM.isBeforeInTranslationUnit(DefLoc, L);
+                    });
+            });
+
+            // Stop here for nested macro invocations and macro arguments
+            if (Exp->Depth != 0 || Exp->InMacroArg)
+            {
+                printFacts(Facts);
+                continue;
+            }
+
+            // Next get AST information for top level invocations
+
             using namespace clang::ast_matchers;
-
-            //// Find potential AST roots of the entire expansion
-
             // Match stmts
-            if (!(TLE)->DefinitionTokens.empty())
+            if (!(Exp)->DefinitionTokens.empty())
             {
                 MatchFinder Finder;
                 ExpansionMatchHandler Handler;
                 auto Matcher = stmt(unless(anyOf(implicitCastExpr(),
                                                  implicitValueInitExpr())),
-                                    alignsWithExpansion(&Ctx, TLE))
+                                    alignsWithExpansion(&Ctx, Exp))
                                    .bind("root");
                 Finder.addMatcher(Matcher, &Handler);
                 Finder.matchAST(Ctx);
                 for (auto M : Handler.Matches)
-                    TLE->ASTRoots.push_back(M);
+                    Exp->ASTRoots.push_back(M);
             }
 
             // Match decls
-            if (!(TLE->DefinitionTokens.empty()))
+            if (!(Exp->DefinitionTokens.empty()))
             {
                 MatchFinder Finder;
                 ExpansionMatchHandler Handler;
-                auto Matcher = decl(alignsWithExpansion(&Ctx, TLE))
+                auto Matcher = decl(alignsWithExpansion(&Ctx, Exp))
                                    .bind("root");
                 Finder.addMatcher(Matcher, &Handler);
                 Finder.matchAST(Ctx);
                 for (auto M : Handler.Matches)
-                    TLE->ASTRoots.push_back(M);
+                    Exp->ASTRoots.push_back(M);
             }
 
             // Match type locs
-            if (!((TLE)->DefinitionTokens.empty()))
+            if (!((Exp)->DefinitionTokens.empty()))
             {
                 MatchFinder Finder;
                 ExpansionMatchHandler Handler;
-                auto Matcher = typeLoc(alignsWithExpansion(&Ctx, (TLE)))
+                auto Matcher = typeLoc(alignsWithExpansion(&Ctx, (Exp)))
                                    .bind("root");
                 Finder.addMatcher(Matcher, &Handler);
                 Finder.matchAST(Ctx);
                 for (auto M : Handler.Matches)
-                    TLE->ASTRoots.push_back(M);
+                    Exp->ASTRoots.push_back(M);
             }
 
             // If the expansion only aligns with one node, then set this
             // as its aligned root
-            if (TLE->ASTRoots.size() == 1)
-                TLE->AlignedRoot = &(TLE->ASTRoots.front());
+            Exp->AlignedRoot = (Exp->ASTRoots.size() == 1)
+                                   ? (&(Exp->ASTRoots.front()))
+                                   : nullptr;
 
             //// Find AST roots aligned with each of the expansion's arguments
 
-            for (auto &&Arg : TLE->Arguments)
+            for (auto &&Arg : Exp->Arguments)
             {
                 // Match stmts
                 if (!Arg.Tokens.empty())
@@ -406,152 +678,58 @@ namespace cpp2c
 
             //// Print macro info
 
-            // TLE->dumpMacroInfo(llvm::outs());
+            // Exp->dumpMacroInfo(llvm::outs());
 
-            // TLE->dumpASTInfo(llvm::outs(),
+            // Exp->dumpASTInfo(llvm::outs(),
             //                  Ctx.getSourceManager(), Ctx.getLangOpts());
 
-            llvm::outs() << "Invocation," << TLE->Name << ",";
+            // Number of AST roots
+            Facts.NumASTRoots = Exp->ASTRoots.size();
 
-            if (TLE->MI->isObjectLike())
-                llvm::outs() << "Object-like,";
-            else
-                llvm::outs() << "Function-like,";
-
-            auto FID = SM.getFileID(TLE->MI->getDefinitionLoc());
-            if (FID.isValid())
+            if (Exp->ASTRoots.size() == 1)
             {
-                auto FE = SM.getFileEntryForID(FID);
-                if (FE)
-                {
-                    auto Name = FE->tryGetRealPathName();
-                    if (!Name.empty())
-                    {
-                        auto DefLoc = SM.getFileLoc(TLE->MI->getDefinitionLoc());
-                        if (DefLoc.isValid())
-                        {
-                            auto s = DefLoc.printToString(SM);
-                            // Find second-to-last colon
-                            auto i = s.rfind(':', s.rfind(':') - 1);
-                            llvm::outs() << "Defined at " << Name
-                                         << ":"
-                                         << s.substr(i + 1) << ",";
-                        }
-                        else
-                            llvm::outs() << "Defined at an invalid SLoc,";
-                    }
-                    else
-                        llvm::outs() << "Defined in a nameless file,";
-                }
-                else
-                    llvm::outs() << "Defined in file without FileEntry,";
-            }
-            else
-                llvm::outs() << "Defined in file with invalid ID,";
-
-            FID = SM.getFileID(SM.getFileLoc(TLE->SpellingRange.getBegin()));
-            if (FID.isValid())
-            {
-                auto FE = SM.getFileEntryForID(FID);
-                if (FE)
-                {
-                    auto Name = FE->tryGetRealPathName();
-                    if (!Name.empty())
-                    {
-                        auto L = SM.getFileLoc(TLE->SpellingRange.getBegin());
-                        if (L.isValid())
-                        {
-                            auto s = L.printToString(SM);
-                            // Find second-to-last colon
-                            auto i = s.rfind(':', s.rfind(':') - 1);
-                            llvm::outs() << "Invoked at " << Name
-                                         << ":"
-                                         << s.substr(i + 1) << ",";
-                        }
-                        else
-                            llvm::outs() << "Invoked at an invalid SLoc,";
-                    }
-                    else
-                        llvm::outs() << "Invoked in a nameless file,";
-                }
-                else
-                    llvm::outs() << "Invoked in file without FileEntry,";
-            }
-            else
-                llvm::outs() << "Invoked in file with invalid ID,";
-
-            if (TLE->HasStringification)
-                llvm::outs() << "Stringification,";
-            if (TLE->HasTokenPasting)
-                llvm::outs() << "Token-pasting,";
-
-            // Check that any macros this macro invokes were defined before
-            // this macro was
-            clang::SourceLocation DefLoc = SM.getFileLoc(
-                TLE->MI->getDefinitionLoc());
-            std::vector<clang::SourceLocation> DescendantMacroDefLocs;
-            for (auto &&Child : TLE->Children)
-                collectExpansionDefLocs(SM, DescendantMacroDefLocs, Child);
-            if (!std::all_of(DescendantMacroDefLocs.begin(),
-                             DescendantMacroDefLocs.end(),
-                             [&SM, &DefLoc](clang::SourceLocation L)
-                             {
-                                 return SM.isBeforeInTranslationUnit(L, DefLoc);
-                             }))
-                llvm::outs() << "Invokes a non-predefined macro,";
-
-            if (TLE->ASTRoots.empty())
-                llvm::outs()
-                    << "No aligned body,";
-            else if (TLE->ASTRoots.size() > 1)
-                llvm::outs() << "Multiple aligned bodies,";
-            else
-            {
-                llvm::outs() << "Single aligned body,";
-                auto D = TLE->AlignedRoot->D;
-                auto ST = TLE->AlignedRoot->ST;
-                auto TL = TLE->AlignedRoot->TL;
+                auto D = Exp->AlignedRoot->D;
+                auto ST = Exp->AlignedRoot->ST;
+                auto TL = Exp->AlignedRoot->TL;
 
                 if (ST)
                 {
+                    Facts.ASTKind = "Stmt";
 
-                    llvm::outs() << "Stmt,";
+                    // TODO: Add this to facts?
+                    // printIfIsOneOf<clang::DoStmt,
+                    //                clang::ContinueStmt,
+                    //                clang::BreakStmt,
+                    //                clang::ReturnStmt,
+                    //                clang::GotoStmt,
 
-                    printIfIsOneOf<clang::DoStmt,
-                                   clang::ContinueStmt,
-                                   clang::BreakStmt,
-                                   clang::ReturnStmt,
-                                   clang::GotoStmt,
+                    //                clang::Expr,
+                    //                clang::CharacterLiteral,
+                    //                clang::IntegerLiteral,
+                    //                clang::FloatingLiteral,
+                    //                clang::FixedPointLiteral,
+                    //                clang::ImaginaryLiteral,
+                    //                clang::StringLiteral,
+                    //                clang::CompoundLiteralExpr>(ST);
 
-                                   clang::Expr,
-                                   clang::CharacterLiteral,
-                                   clang::IntegerLiteral,
-                                   clang::FloatingLiteral,
-                                   clang::FixedPointLiteral,
-                                   clang::ImaginaryLiteral,
-                                   clang::StringLiteral,
-                                   clang::CompoundLiteralExpr>(ST);
+                    Facts.ContainsDeclRefExpr =
+                        isInTree(ST, stmtIsA<clang::DeclRefExpr>());
 
-                    if (isInTree(ST, stmtIsA<clang::DeclRefExpr>()))
-                        llvm::outs() << "DeclRefExpr,";
+                    auto LogicalAnd = clang::BinaryOperator::Opcode::BO_LAnd;
+                    auto LogicalOr = clang::BinaryOperator::Opcode::BO_LOr;
 
-                    if (isInTree(ST, stmtIsA<clang::ConditionalOperator>()))
-                        llvm::outs() << "ConditionalOperator,";
-                    if (isInTree(ST,
-                                 stmtIsBinOp(
-                                     clang::BinaryOperator::Opcode::BO_LAnd)))
-                        llvm::outs() << "BinaryOperator::Opcode::BO_LAnd,";
-                    if (isInTree(ST,
-                                 stmtIsBinOp(
-                                     clang::BinaryOperator::Opcode::BO_LOr)))
-                        llvm::outs() << "BinaryOperator::Opcode::BO_LOr,";
+                    Facts.ContainsConditionalEvaluation =
+                        isInTree(ST, stmtIsA<clang::ConditionalOperator>()) ||
+                        isInTree(ST, stmtIsBinOp(LogicalAnd)) ||
+                        isInTree(ST, stmtIsBinOp(LogicalOr));
 
-                    auto ArgStmts = collectStmtsFromArguments(TLE);
+                    auto ArgStmts = collectStmtsFromArguments(Exp);
 
                     // Check if any subtree of the entire expansion
                     // that was not parsed from an argument is an expression
                     // whose type is a locally-defined type
-                    if (isInTree(
+                    Facts.ContainsSubExprFromBodyWithLocallyDefinedType =
+                        isInTree(
                             ST,
                             [&ArgStmts](const clang::Stmt *ST)
                             {
@@ -562,13 +740,13 @@ namespace cpp2c
                                                          .getTypePtrOrNull())
                                             return containsLocalType(T);
                                 return false;
-                            }))
-                        llvm::outs() << "Local type subexpr,";
+                            });
 
                     // Check if any variable or function this macro references
                     // that is not part of an argument was declared after this
                     // macro was defined
-                    if (isInTree(
+                    Facts.ContainsDeclFromBodyDefinedAfterMacro =
+                        isInTree(
                             ST,
                             [&SM, &ArgStmts, DefLoc](const clang::Stmt *ST)
                             {
@@ -581,15 +759,14 @@ namespace cpp2c
                                                 DefLoc,
                                                 SM.getFileLoc(D->getLocation()));
                                 return false;
-                            }))
-                        llvm::outs() << "Decl not from argument defined "
-                                        "after macro,";
+                            });
 
                     // Check if any subtree of the entire expansion
                     // that was not parsed from an argument is an expression
                     // whose type is a type that was defined after the macro
                     // was defined
-                    if (isInTree(
+                    Facts.ContainsSubExprFromBodyWithTypeDefinedAfterMacro =
+                        isInTree(
                             ST,
                             [&SM, &ArgStmts, &DefLoc](const clang::Stmt *ST)
                             {
@@ -601,14 +778,14 @@ namespace cpp2c
                                             return containsTypeDefinedAfter(
                                                 T, SM, DefLoc);
                                 return false;
-                            }))
-                        llvm::outs() << "Type defined after macro subexpr,";
+                            });
 
                     // Check if any subtree of the entire expansion
                     // that was not parsed from an argument is an expression
                     // whose type is a typedef type that was defined after the
                     // macro was defined
-                    if (isInTree(
+                    Facts.ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro =
+                        isInTree(
                             ST,
                             [&SM, &ArgStmts, &DefLoc](const clang::Stmt *ST)
                             {
@@ -620,157 +797,109 @@ namespace cpp2c
                                             return containsTypedefDefinedAfter(
                                                 T, SM, DefLoc);
                                 return false;
-                            }))
-                        llvm::outs() << "Typedef defined after macro subexpr,";
+                            });
 
                     if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
+                        Facts.ASTKind = "Expr";
+                        auto T = E->getType().getTypePtrOrNull();
+                        Facts.ExpansionHasType = T != nullptr;
                         // Type information about the entire expansion
-                        if (auto T = E->getType().getTypePtrOrNull())
+                        if (T)
                         {
-                            if (T->isVoidType())
-                                llvm::outs() << "Void type,";
-                            else if (containsLocalType(T))
-                                llvm::outs() << "Local type,";
-                            else if (containsAnonymousType(T))
-                                llvm::outs() << "Anonymous type,";
-                            else if (containsTypeDefinedAfter(T, SM, DefLoc))
-                                llvm::outs() << "Type defined after macro,";
-                            else if (containsTypedefDefinedAfter(T, SM, DefLoc))
-                                llvm::outs() << "Typedef defined after macro,";
+                            Facts.ExpansionHasType = true;
+                            Facts.IsExpansionVoidType = T->isVoidType();
+                            Facts.IsExpansionLocallyDefinedType = containsLocalType(T);
+                            Facts.IsExpansionAnonymousType = containsAnonymousType(T);
+                            Facts.ExpansionContainsTypeDefinedAfterMacroWasDefined =
+                                containsTypeDefinedAfter(T, SM, DefLoc);
+                            Facts.ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined =
+                                containsTypedefDefinedAfter(T, SM, DefLoc);
                         }
-                        else
-                            llvm::outs() << "No type,";
 
                         // Whether the expression was expanded where a constant
                         // expression is required
-                        if (descendantOfConstantExpression(Ctx, E))
-                            llvm::outs() << "Must be constant expression,";
+                        Facts.ExpandedWhereConstExprRequired =
+                            descendantOfConstantExpression(Ctx, E);
                     }
                 }
-
-                if (D)
-                    llvm::outs() << "Decl,";
-
-                if (TL)
+                else if (D)
+                    Facts.ASTKind = "Decl";
+                else if (TL)
                 {
-                    llvm::outs() << "TypeLoc,";
+                    Facts.ASTKind = "TypeLoc";
                     // Check that this type specifier list does not include
                     // a typedef that was defined after the macro was defined
                     if (auto T = TL->getTypePtr())
-                    {
-                        if (containsTypedefDefinedAfter(T, SM, DefLoc))
-                            llvm::outs() << "Type list contains typedef "
-                                            "defined after macro was defined,";
-                    }
+                        Facts.ContainsTypedefDefinedAfterMacroWasDefined =
+                            containsTypedefDefinedAfter(T, SM, DefLoc);
                     else
-                        llvm::outs() << "Null type,";
+                        Facts.IsNullType = true;
                 }
+                else
+                    assert("Aligns with node that is not a Decl/Stmt/TypeLoc");
             }
+
+            Facts.HasArguments = !Exp->Arguments.empty();
 
             // Check that the number of AST nodes aligned with each argument
             // equals the number of times that argument was expanded
-            if (TLE->Arguments.empty())
-            {
-                llvm::outs() << "No arguments,";
-            }
-            else
-            {
-                if (std::all_of(TLE->Arguments.begin(),
-                                TLE->Arguments.end(),
-                                [](MacroExpansionArgument Arg)
-                                { return Arg.AlignedRoots.size() ==
-                                         Arg.numberOfTimesExpanded; }))
-                {
-                    llvm::outs() << "Aligned arguments,";
+            Facts.HasAlignedArguments = std::all_of(
+                Exp->Arguments.begin(),
+                Exp->Arguments.end(),
+                [](MacroExpansionArgument Arg)
+                { return Arg.AlignedRoots.size() == Arg.NumExpansions; });
 
-                    for (auto &&Arg : TLE->Arguments)
-                    {
-                        if (!Arg.AlignedRoots.empty())
-                        {
-                            if (auto E = clang::dyn_cast_or_null<clang::Expr>(
-                                    Arg.AlignedRoots.front().ST))
-                            {
-                                // Type information about arguments
-                                if (auto T = E->getType().getTypePtrOrNull())
-                                {
-                                    if (T->isVoidType())
-                                    {
-                                        llvm::outs() << "Void argument,";
-                                        break;
-                                    }
-                                    else if (containsLocalType(T))
-                                    {
-                                        llvm::outs() << "Local type argument,";
-                                        break;
-                                    }
-                                    else if (containsAnonymousType(T))
-                                    {
-                                        llvm::outs() << "Anonymous type"
-                                                        " argument,";
-                                        break;
-                                    }
-                                    else if (containsTypeDefinedAfter(
-                                                 T, SM, DefLoc))
-                                    {
-                                        llvm::outs() << "Type defined "
-                                                        "after macro argument,";
-                                        break;
-                                    }
-                                    else if (containsTypedefDefinedAfter(
-                                                 T, SM, DefLoc))
-                                    {
-                                        llvm::outs() << "Typedef defined "
-                                                        "after macro argument,";
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    llvm::outs() << "Untyped argument,";
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                llvm::outs() << "Non-expr argument,";
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            llvm::outs() << "Unexpanded argument,";
-                            break;
-                        }
-                    }
-                }
-                else
-                    llvm::outs() << "Unaligned arguments,";
+            for (auto &&Arg : Exp->Arguments)
+            {
+                Facts.HasUnexpandedArgument = Arg.AlignedRoots.empty();
+
+                if (Arg.AlignedRoots.empty())
+                    continue;
+
+                auto Arg1stExpST = Arg.AlignedRoots.front().ST;
+                auto E = clang::dyn_cast_or_null<clang::Expr>(Arg1stExpST);
+
+                Facts.HasNonExprArgument = E == nullptr;
+
+                if (!E)
+                    continue;
+
+                auto T = E->getType().getTypePtrOrNull();
+
+                Facts.HasUntypedArgument = T == nullptr;
+
+                if (!T)
+                    continue;
+
+                // Type information about arguments
+                Facts.HasArgumentWithVoidType = T->isVoidType();
+                Facts.HasArgumentWithLocallyDefinedType = containsLocalType(T);
+                Facts.HasArgumentWithAnonymousType = containsAnonymousType(T);
+                Facts.HasArgumentWithTypeDefinedAfterMacro =
+                    containsTypeDefinedAfter(T, SM, DefLoc);
+                Facts.HasArgumentWithTypedefTypeDefinedAfterMacro =
+                    containsTypedefDefinedAfter(T, SM, DefLoc);
             }
 
             // Check for semantic properties of interface-equivalence
             // TODO: Check for these properties in decls as well?
-
-            if (TLE->AlignedRoot &&
-                TLE->AlignedRoot->ST)
+            //       Can decls ever be hygienic?
+            if (Exp->AlignedRoot && Exp->AlignedRoot->ST)
             {
-                if (isHygienic(Ctx, TLE))
-                    llvm::outs() << "Hygienic,";
-                else
-                    llvm::outs() << "Unhygienic,";
-                if (isParameterSideEffectFree(Ctx, TLE))
-                    llvm::outs() << "Parameter side-effect free,";
-                else
-                    llvm::outs() << "Parameter side-effects,";
-                if (isLValueIndependent(Ctx, TLE))
-                    llvm::outs() << "L-value independent,";
-                else
-                    llvm::outs() << "L-value dependent,";
+                Facts.IsHygienic = isHygienic(Ctx, Exp);
+                Facts.IsParameterSideEffectFree =
+                    isParameterSideEffectFree(Ctx, Exp);
+                Facts.IsLValueIndependent = isLValueIndependent(Ctx, Exp);
             }
 
-            llvm::outs() << "\n";
-
-            delete TLE;
+            printFacts(Facts);
         }
+
+        // Free top level expansions since the deconstructor will free
+        // nested expansions
+        for (auto &&Exp : MF->Expansions)
+            if (Exp->Depth == 0)
+                delete Exp;
     }
 } // namespace cpp2c
