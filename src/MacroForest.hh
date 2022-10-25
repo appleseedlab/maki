@@ -15,7 +15,10 @@ namespace cpp2c
     public:
         clang::Preprocessor &PP;
         clang::ASTContext &Ctx;
-        std::vector<cpp2c::MacroExpansionNode *> TopLevelExpansions;
+        std::vector<cpp2c::MacroExpansionNode *> Expansions;
+
+        // Whether or not the current expansion is within a macro argument
+        bool InMacroArg = false;
 
         // The stack of previous expansions.
         // The invocations in this stack should only ever be previous
