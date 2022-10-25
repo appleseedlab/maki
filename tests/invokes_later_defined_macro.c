@@ -23,31 +23,31 @@
 
 int main(int argc, char const *argv[])
 {
-    // Invokes a non-predefined macro
+    // Invokes a later defined macro
     L1;
 
-    // Invokes a non-predefined macro
+    // Invokes a later defined macro
     M2;
 
-    // Invokes a non-predefined macro
+    // Invokes a later defined macro
     N1;
 
-    // Invokes a non-predefined macro
+    // Invokes a later defined macro
     TAU;
 
 #include "one.h"
-    // Invokes a non-predefined macro
+    // Invokes a later defined macro
     O;
 
-    // Does not invoke a non-predefined macro
+    // Does not invoke a later defined macro
     // (we don't care if one of the macro's descendants invokes
-    // a macro that is non-predefined with respect to that descendant)
+    // a macro that is later defined with respect to that descendant)
     M1;
 
-    // Does not invoke a non-predefined macro
+    // Does not invoke a later defined macro
     MULT(PI, TWO);
 
-    // Does not invokes a non-predefined macro
+    // Does not invokes a later defined macro
     E;
 
     return 0;
