@@ -22,6 +22,7 @@ add_library(cpp2c SHARED
   ASTUtils.cc
   Cpp2CAction.cc
   Cpp2CASTConsumer.cc
+  DefinitionInfoCollector.cc
   DeclStmtTypeLoc.cc
   DeclCollectorMatchHandler.cc
   ExpansionMatchHandler.cc
