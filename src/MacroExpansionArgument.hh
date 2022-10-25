@@ -25,7 +25,7 @@ namespace cpp2c
         // If this argument is expanded properly, then this number
         // should be equal to the number of aligned AST roots for this
         // argument
-        unsigned int numberOfTimesExpanded = 0;
+        unsigned int NumExpansions = 0;
 
         // Prints information the AST nodes aligned with this argument
         void dumpASTInfo(llvm::raw_fd_ostream &OS,
