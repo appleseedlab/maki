@@ -60,6 +60,8 @@ namespace cpp2c
         bool HasStringification = false;
         // Whether this macro performs token-pasting
         bool HasTokenPasting = false;
+        // Whether this expansion is in of an argument of another invocation
+        bool InMacroArg;
 
         // Destructor should only be called on top-level expansions
         ~MacroExpansionNode();
