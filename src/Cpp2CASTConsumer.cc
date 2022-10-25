@@ -480,9 +480,11 @@ namespace cpp2c
 
         MF = new cpp2c::MacroForest(PP, Ctx);
         IC = new cpp2c::IncludeCollector();
+        DC = new cpp2c::DefinitionInfoCollector();
 
         PP.addPPCallbacks(std::unique_ptr<cpp2c::MacroForest>(MF));
         PP.addPPCallbacks(std::unique_ptr<cpp2c::IncludeCollector>(IC));
+        PP.addPPCallbacks(std::unique_ptr<cpp2c::DefinitionInfoCollector>(DC));
     }
 
     void Cpp2CASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx)

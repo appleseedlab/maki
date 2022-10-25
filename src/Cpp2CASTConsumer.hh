@@ -2,6 +2,7 @@
 
 #include "MacroForest.hh"
 #include "IncludeCollector.hh"
+#include "DefinitionInfoCollector.hh"
 
 #include "clang/Frontend/ASTConsumers.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -13,6 +14,7 @@ namespace cpp2c
     private:
         cpp2c::MacroForest *MF;
         cpp2c::IncludeCollector *IC;
+        cpp2c::DefinitionInfoCollector *DC;
 
     public:
         Cpp2CASTConsumer(clang::CompilerInstance &CI);
