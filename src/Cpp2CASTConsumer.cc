@@ -509,9 +509,7 @@ namespace cpp2c
 
         // Print names of macros inspected by the preprocessor
         for (auto &&Name : DC->InspectedMacroNames)
-        {
             print("Inspected by CPP", Name, "\n");
-        }
 
         // Print include-directive information
         {
