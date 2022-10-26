@@ -19,8 +19,6 @@
 
 #include "assert.h"
 
-// TODO:    Collect names of macros which appear in #ifdefs and #undefs
-
 // NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
 //          paren exprs
 
@@ -30,175 +28,169 @@ namespace cpp2c
     static const constexpr char *argsDelim = "++++";
     inline std::string fmt(std::string s) { return s; }
     inline std::string fmt(const char *s) { return std::string(s); }
-    inline std::string fmt(bool b) { return b ? "True" : "False"; }
+    inline std::string fmt(bool b) { return b ? "T" : "F"; }
     inline std::string fmt(unsigned int i) { return std::to_string(i); }
 
     template <typename T>
-    inline void print(T t, const char *end = delim)
+    inline void print(T t) { llvm::outs() << fmt(t); }
+
+    template <typename T, typename T2, typename... Ts>
+    inline void print(T t1, T2 t2, Ts... ts)
     {
-        llvm::outs() << fmt(t) << end;
+        llvm::outs() << fmt(t1) << delim;
+        print(t2, ts...);
     }
 
-    inline void delimit() { print(delim, ""); }
+    inline void delimit() { print(delim); }
 
     struct MacroFacts
     {
         std::string
-            Name,
-            DefLocOrError,
-            InvokeLocOrError,
-            ASTKind;
+            Name = "N/A",
+            DefLocOrError = "N/A",
+            InvokeLocOrError = "N/A",
+            ASTKind = "N/A";
 
         unsigned int
-            Depth,
-            NumASTRoots;
+            Depth = 404,
+            NumASTRoots = 404;
 
         bool
             // All macros
-            IsObjectLike,
-            InMacroArg,
-            ValidDefLoc,
-            ValidInvokeLoc,
-            HasStringification,
-            HasTokenPasting,
-            InvokesLaterDefinedMacro,
-            // InStaticConditional,
-            // InUndef,
+            IsObjectLike = false,
+            InMacroArg = false,
+            ValidDefLoc = false,
+            ValidInvokeLoc = false,
+            HasStringification = false,
+            HasTokenPasting = false,
+            InvokesLaterDefinedMacro = false,
+            IsNameInspectedByPreprocessor = false,
 
             // Stmt/Expr macros
-            ContainsDeclRefExpr,
-            ContainsConditionalEvaluation,
-            ContainsSubExprFromBodyWithLocallyDefinedType,
-            ContainsDeclFromBodyDefinedAfterMacro,
-            ContainsSubExprFromBodyWithTypeDefinedAfterMacro,
-            ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro,
-            ExpansionHasType,
+            ContainsDeclRefExpr = false,
+            ContainsConditionalEvaluation = false,
+            ContainsSubExprFromBodyWithLocallyDefinedType = false,
+            ContainsDeclFromBodyDefinedAfterMacro = false,
+            ContainsSubExprFromBodyWithTypeDefinedAfterMacro = false,
+            ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro = false,
+            ExpansionHasType = false,
 
             // Semantic properties for Stmt/Expr macros
-            IsHygienic,
-            IsParameterSideEffectFree,
-            IsLValueIndependent,
+            IsHygienic = false,
+            IsParameterSideEffectFree = false,
+            IsLValueIndependent = false,
 
-            // Expr macros
-            IsExpansionVoidType,
-            IsExpansionLocallyDefinedType,
-            IsExpansionAnonymousType,
-            ExpansionContainsTypeDefinedAfterMacroWasDefined,
-            ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined,
-            ExpandedWhereConstExprRequired,
+            // Expr macros whose type is not null
+            IsExpansionVoidType = false,
+            IsExpansionLocallyDefinedType = false,
+            IsExpansionAnonymousType = false,
+            ExpansionContainsTypeDefinedAfterMacroWasDefined = false,
+            ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined = false,
+            ExpandedWhereConstExprRequired = false,
 
             // TypeLoc macros
-            IsNullType,
-            ContainsTypedefDefinedAfterMacroWasDefined,
+            IsNullType = false,
+
+            // TypeLoc macros whose type is not null
+            ContainsTypedefDefinedAfterMacroWasDefined = false,
 
             // Macro arguments
-            HasArguments,
-            HasAlignedArguments,
-            HasUnexpandedArgument,
-            HasNonExprArgument,
-            HasUntypedArgument,
-            HasArgumentWithVoidType,
-            HasArgumentWithLocallyDefinedType,
-            HasArgumentWithAnonymousType,
-            HasArgumentWithTypeDefinedAfterMacro,
-            HasArgumentWithTypedefTypeDefinedAfterMacro;
+            HasArguments = false,
+            HasAlignedArguments = false,
+            HasUnexpandedArgument = false,
+            HasNonExprArgument = false,
+            HasUntypedArgument = false,
+            HasArgumentWithVoidType = false,
+            HasArgumentWithLocallyDefinedType = false,
+            HasArgumentWithAnonymousType = false,
+            HasArgumentWithTypeDefinedAfterMacro = false,
+            HasArgumentWithTypedefTypeDefinedAfterMacro = false;
     };
 
     void printFacts(struct MacroFacts F)
     {
-        print("Invocation");
+        bool
+            NestedOrArg = F.Depth != 0 || F.InMacroArg,
+            HasArguments = F.HasArguments,
+            AlignedRoot = F.NumASTRoots == 0,
+            Stmt = F.ASTKind == "Stmt",
+            Expr = F.ASTKind == "Expr",
+            Decl = F.ASTKind == "Decl",
+            TypeLoc = F.ASTKind == "TypeLoc",
+            HasType = F.ExpansionHasType,
+            IsNullType = F.IsNullType;
 
-        print(F.Name);
-        print(F.DefLocOrError);
-        print(F.InvokeLocOrError);
+        // First print all the boolean fields we will need in order which
+        // of the following facts are valid
+        print("Invocation",
+              NestedOrArg,
+              HasArguments,
+              AlignedRoot,
+              Stmt,
+              Expr,
+              Decl,
+              TypeLoc,
+              HasType,
+              IsNullType);
 
-        print(F.Depth);
+        delimit();
 
-        print(F.IsObjectLike);
-        print(F.InMacroArg);
-        print(F.ValidDefLoc);
-        print(F.ValidInvokeLoc);
-        print(F.HasStringification);
-        print(F.HasTokenPasting);
-        print(F.InvokesLaterDefinedMacro, "");
+        // Print macro facts
+        print(
+            F.Name,
+            F.DefLocOrError,
+            F.InvokeLocOrError,
+            F.ASTKind,
 
-        if (F.Depth != 0 || F.InMacroArg)
-        {
-            print("\n", "");
-            return;
-        }
-        else
-            delimit();
+            F.Depth,
+            F.NumASTRoots,
 
-        print(F.NumASTRoots, "");
+            F.IsObjectLike,
+            F.InMacroArg,
+            F.ValidDefLoc,
+            F.ValidInvokeLoc,
+            F.HasStringification,
+            F.HasTokenPasting,
+            F.InvokesLaterDefinedMacro,
+            F.IsNameInspectedByPreprocessor,
 
-        if (F.NumASTRoots == 1)
-        {
-            delimit();
+            F.ContainsDeclRefExpr,
+            F.ContainsConditionalEvaluation,
+            F.ContainsSubExprFromBodyWithLocallyDefinedType,
+            F.ContainsDeclFromBodyDefinedAfterMacro,
+            F.ContainsSubExprFromBodyWithTypeDefinedAfterMacro,
+            F.ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro,
+            F.ExpansionHasType,
 
-            print(F.ASTKind, "");
-            if (F.ASTKind == "Stmt" || F.ASTKind == "Expr")
-            {
-                delimit();
+            F.IsHygienic,
+            F.IsParameterSideEffectFree,
+            F.IsLValueIndependent,
 
-                print(F.ContainsDeclRefExpr);
-                print(F.ContainsConditionalEvaluation);
-                print(F.ContainsSubExprFromBodyWithLocallyDefinedType);
-                print(F.ContainsDeclFromBodyDefinedAfterMacro);
-                print(F.ContainsSubExprFromBodyWithTypeDefinedAfterMacro);
-                print(F.ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro);
+            F.IsExpansionVoidType,
+            F.IsExpansionLocallyDefinedType,
+            F.IsExpansionAnonymousType,
+            F.ExpansionContainsTypeDefinedAfterMacroWasDefined,
+            F.ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined,
+            F.ExpandedWhereConstExprRequired,
 
-                print(F.IsHygienic);
-                print(F.IsParameterSideEffectFree);
-                print(F.IsLValueIndependent);
+            F.IsNullType,
 
-                print(F.ExpansionHasType, "");
+            F.ContainsTypedefDefinedAfterMacroWasDefined);
 
-                if (F.ASTKind == "Expr" && F.ExpansionHasType)
-                {
-                    delimit();
-
-                    print(F.IsExpansionVoidType);
-                    print(F.IsExpansionLocallyDefinedType);
-                    print(F.IsExpansionAnonymousType);
-                    print(F.ExpansionContainsTypeDefinedAfterMacroWasDefined);
-                    print(F.ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined);
-                    print(F.ExpandedWhereConstExprRequired, "");
-                }
-            }
-            else if (F.ASTKind == "Decl")
-            {
-                // Do nothing
-            }
-            else if (F.ASTKind == "TypeLoc")
-            {
-                delimit();
-
-                print(F.IsNullType);
-                print(F.ContainsTypedefDefinedAfterMacroWasDefined, "");
-            }
-        }
-
-        // Separate body facts from argument facts
-        print(argsDelim, "");
-
-        print(F.HasArguments, "");
-        if (F.HasArguments)
-        {
-            delimit();
-
-            print(F.HasAlignedArguments);
-            print(F.HasUnexpandedArgument);
-            print(F.HasNonExprArgument);
-            print(F.HasUntypedArgument);
-            print(F.HasArgumentWithVoidType);
-            print(F.HasArgumentWithLocallyDefinedType);
-            print(F.HasArgumentWithAnonymousType);
-            print(F.HasArgumentWithTypeDefinedAfterMacro);
-            print(F.HasArgumentWithTypedefTypeDefinedAfterMacro, "");
-        }
-
-        print("\n", "");
+        // Print argument facts
+        print(argsDelim);
+        print(
+            F.HasArguments,
+            F.HasAlignedArguments,
+            F.HasUnexpandedArgument,
+            F.HasNonExprArgument,
+            F.HasUntypedArgument,
+            F.HasArgumentWithVoidType,
+            F.HasArgumentWithLocallyDefinedType,
+            F.HasArgumentWithAnonymousType,
+            F.HasArgumentWithTypeDefinedAfterMacro,
+            F.HasArgumentWithTypedefTypeDefinedAfterMacro,
+            "\n");
     }
 
     template <typename T>
@@ -376,6 +368,10 @@ namespace cpp2c
             collectExpansionDefLocs(SM, DefLocs, Child);
     }
 
+    // Tries to get the full real path and line + column number for a given
+    // source location.
+    // First element is whether the operation was successful, the second
+    // is the error if not and the full path if successful.
     std::pair<bool, std::string> tryGetFullSourceLoc(
         clang::SourceManager &SM,
         clang::SourceLocation L)
@@ -480,7 +476,7 @@ namespace cpp2c
 
         MF = new cpp2c::MacroForest(PP, Ctx);
         IC = new cpp2c::IncludeCollector();
-        DC = new cpp2c::DefinitionInfoCollector();
+        DC = new cpp2c::DefinitionInfoCollector(Ctx);
 
         PP.addPPCallbacks(std::unique_ptr<cpp2c::MacroForest>(MF));
         PP.addPPCallbacks(std::unique_ptr<cpp2c::IncludeCollector>(IC));
@@ -492,22 +488,47 @@ namespace cpp2c
         auto &SM = Ctx.getSourceManager();
         auto &LO = Ctx.getLangOpts();
 
-        // Collect declaration ranges
-        std::vector<const clang::Decl *> Decls =
-            ({
-                MatchFinder Finder;
-                DeclCollectorMatchHandler Handler;
-                auto Matcher = decl(unless(anyOf(
-                                        isImplicit(),
-                                        translationUnitDecl())))
-                                   .bind("root");
-                Finder.addMatcher(Matcher, &Handler);
-                Finder.matchAST(Ctx);
-                Handler.Decls;
-            });
+        // Print definition information
+        for (auto &&Entry : DC->MacroNamesDefinitions)
+        {
+            std::string Name = Entry.first,
+                        DefLocOrError;
+            bool Valid;
+
+            auto MD = Entry.second;
+            auto DefLoc = SM.getFileLoc(MD->getDefinition().getLocation());
+            Valid = DefLoc.isValid();
+
+            // Try to get the full path to the DefLoc
+            auto Res = tryGetFullSourceLoc(SM, DefLoc);
+            Valid &= Res.first;
+            DefLocOrError = Res.second;
+
+            print("Definition", Name, Valid, DefLocOrError, "\n");
+        }
+
+        // Print names of macros inspected by the preprocessor
+        for (auto &&Name : DC->InspectedMacroNames)
+        {
+            print("Inspected by CPP", Name, "\n");
+        }
 
         // Print include-directive information
         {
+            // Collect declaration ranges
+            std::vector<const clang::Decl *> Decls =
+                ({
+                    MatchFinder Finder;
+                    DeclCollectorMatchHandler Handler;
+                    auto Matcher = decl(unless(anyOf(
+                                            isImplicit(),
+                                            translationUnitDecl())))
+                                       .bind("root");
+                    Finder.addMatcher(Matcher, &Handler);
+                    Finder.matchAST(Ctx);
+                    Handler.Decls;
+                });
+
             std::set<llvm::StringRef> LocalIncludes;
             for (auto &&IEL : IC->IncludeEntriesLocs)
             {
@@ -523,16 +544,11 @@ namespace cpp2c
                 Valid = Res.first;
                 IncludeName = Res.second.empty() ? "None" : Res.second.str();
 
-                print("Include");
-                print(Valid);
-                print(IncludeName);
-
-                llvm::outs() << "\n";
+                print("Include", Valid, IncludeName, "\n");
             }
         }
 
         // Print macro expansion information
-
         for (auto Exp : MF->Expansions)
         {
             //// First get basic info about all macros
@@ -545,6 +561,9 @@ namespace cpp2c
                 .InMacroArg = Exp->InMacroArg,
                 .HasStringification = Exp->HasStringification,
                 .HasTokenPasting = Exp->HasTokenPasting,
+                .IsNameInspectedByPreprocessor =
+                    DC->InspectedMacroNames.find(Exp->Name.str()) !=
+                    DC->InspectedMacroNames.end()
 
             };
 
@@ -898,7 +917,7 @@ namespace cpp2c
             printFacts(Facts);
         }
 
-        // Free top level expansions since the deconstructor will free
+        // Only delete top level expansions since deconstructor deletes
         // nested expansions
         for (auto &&Exp : MF->Expansions)
             if (Exp->Depth == 0)
