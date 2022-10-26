@@ -3,11 +3,14 @@
 namespace cpp2c
 {
 
+    DefinitionInfoCollector::DefinitionInfoCollector(clang::ASTContext &Ctx)
+        : SM(Ctx.getSourceManager()), LO(Ctx.getLangOpts()) {}
+
     void DefinitionInfoCollector::MacroDefined(
         const clang::Token &MacroNameTok,
         const clang::MacroDirective *MD)
     {
-        std::string Name(MacroNameTok.getName());
+        std::string Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
         MacroNamesDefinitions.push_back({Name, MD});
     }
 
@@ -16,7 +19,8 @@ namespace cpp2c
         const clang::MacroDefinition &MD,
         const clang::MacroDirective *Undef)
     {
-        InspectedMacroNames.insert(MacroNameTok.getName());
+        auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
+        InspectedMacroNames.insert(Name);
     }
 
     void DefinitionInfoCollector::Defined(
@@ -24,7 +28,8 @@ namespace cpp2c
         const clang::MacroDefinition &MD,
         clang::SourceRange Range)
     {
-        InspectedMacroNames.insert(MacroNameTok.getName());
+        auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
+        InspectedMacroNames.insert(Name);
     }
 
     void DefinitionInfoCollector::Ifdef(
@@ -32,7 +37,8 @@ namespace cpp2c
         const clang::Token &MacroNameTok,
         const clang::MacroDefinition &MD)
     {
-        InspectedMacroNames.insert(MacroNameTok.getName());
+        auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
+        InspectedMacroNames.insert(Name);
     }
 
     void DefinitionInfoCollector::Ifndef(
@@ -40,7 +46,8 @@ namespace cpp2c
         const clang::Token &MacroNameTok,
         const clang::MacroDefinition &MD)
     {
-        InspectedMacroNames.insert(MacroNameTok.getName());
+        auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
+        InspectedMacroNames.insert(Name);
     }
 
 } // namespace cpp2c

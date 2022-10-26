@@ -3,8 +3,10 @@
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Basic/SourceManager.h"
 #include "clang/Lex/PPCallbacks.h"
+#include "clang/Lex/Lexer.h"
 #include "clang/Lex/Token.h"
 #include "clang/Lex/MacroInfo.h"
+#include "clang/AST/ASTContext.h"
 
 #include <vector>
 #include <set>
@@ -15,15 +17,16 @@ namespace cpp2c
     class DefinitionInfoCollector : public clang::PPCallbacks
     {
 
-        // Need to keep track of
-        // - All unique macro definitions
-        // - Names of all macros appearing in undefs, defined,
-        //   ifdef, and ifndef
+    private:
+        clang::SourceManager &SM;
+        const clang::LangOptions &LO;
 
     public:
         std::vector<std::pair<std::string, const clang::MacroDirective *>>
             MacroNamesDefinitions;
         std::set<std::string> InspectedMacroNames;
+
+        DefinitionInfoCollector(clang::ASTContext &Ctx);
 
         void MacroDefined(const clang::Token &MacroNameTok,
                           const clang::MacroDirective *MD) override;
