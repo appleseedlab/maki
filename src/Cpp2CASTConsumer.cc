@@ -25,17 +25,16 @@
 namespace cpp2c
 {
     static const constexpr char *delim = "\t";
-    static const constexpr char *argsDelim = "++++";
     inline std::string fmt(std::string s) { return s; }
     inline std::string fmt(const char *s) { return std::string(s); }
     inline std::string fmt(bool b) { return b ? "T" : "F"; }
     inline std::string fmt(unsigned int i) { return std::to_string(i); }
 
     template <typename T>
-    inline void print(T t) { llvm::outs() << fmt(t); }
+    inline void print(T t) { llvm::outs() << fmt(t) << "\n"; }
 
-    template <typename T, typename T2, typename... Ts>
-    inline void print(T t1, T2 t2, Ts... ts)
+    template <typename T1, typename T2, typename... Ts>
+    inline void print(T1 t1, T2 t2, Ts... ts)
     {
         llvm::outs() << fmt(t1) << delim;
         print(t2, ts...);
@@ -53,7 +52,8 @@ namespace cpp2c
 
         unsigned int
             Depth = 404,
-            NumASTRoots = 404;
+            NumASTRoots = 40,
+            NumArguments = 404;
 
         bool
             // All macros
@@ -95,7 +95,6 @@ namespace cpp2c
             ContainsTypedefDefinedAfterMacroWasDefined = false,
 
             // Macro arguments
-            HasArguments = false,
             HasAlignedArguments = false,
             HasUnexpandedArgument = false,
             HasNonExprArgument = false,
@@ -109,88 +108,57 @@ namespace cpp2c
 
     void printFacts(struct MacroFacts F)
     {
-        bool
-            NestedOrArg = F.Depth != 0 || F.InMacroArg,
-            HasArguments = F.HasArguments,
-            AlignedRoot = F.NumASTRoots == 0,
-            Stmt = F.ASTKind == "Stmt",
-            Expr = F.ASTKind == "Expr",
-            Decl = F.ASTKind == "Decl",
-            TypeLoc = F.ASTKind == "TypeLoc",
-            HasType = F.ExpansionHasType,
-            IsNullType = F.IsNullType;
-
-        // First print all the boolean fields we will need in order which
-        // of the following facts are valid
         print("Invocation",
-              NestedOrArg,
-              HasArguments,
-              AlignedRoot,
-              Stmt,
-              Expr,
-              Decl,
-              TypeLoc,
-              HasType,
-              IsNullType);
+              F.Name,
+              F.DefLocOrError,
+              F.InvokeLocOrError,
+              F.ASTKind,
 
-        delimit();
+              F.Depth,
+              F.NumASTRoots,
+              F.NumArguments,
 
-        // Print macro facts
-        print(
-            F.Name,
-            F.DefLocOrError,
-            F.InvokeLocOrError,
-            F.ASTKind,
+              F.IsObjectLike,
+              F.InMacroArg,
+              F.ValidDefLoc,
+              F.ValidInvokeLoc,
+              F.HasStringification,
+              F.HasTokenPasting,
+              F.InvokesLaterDefinedMacro,
+              F.IsNameInspectedByPreprocessor,
 
-            F.Depth,
-            F.NumASTRoots,
+              F.ContainsDeclRefExpr,
+              F.ContainsConditionalEvaluation,
+              F.ContainsSubExprFromBodyWithLocallyDefinedType,
+              F.ContainsDeclFromBodyDefinedAfterMacro,
+              F.ContainsSubExprFromBodyWithTypeDefinedAfterMacro,
+              F.ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro,
+              F.ExpansionHasType,
 
-            F.IsObjectLike,
-            F.InMacroArg,
-            F.ValidDefLoc,
-            F.ValidInvokeLoc,
-            F.HasStringification,
-            F.HasTokenPasting,
-            F.InvokesLaterDefinedMacro,
-            F.IsNameInspectedByPreprocessor,
+              F.IsHygienic,
+              F.IsParameterSideEffectFree,
+              F.IsLValueIndependent,
 
-            F.ContainsDeclRefExpr,
-            F.ContainsConditionalEvaluation,
-            F.ContainsSubExprFromBodyWithLocallyDefinedType,
-            F.ContainsDeclFromBodyDefinedAfterMacro,
-            F.ContainsSubExprFromBodyWithTypeDefinedAfterMacro,
-            F.ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro,
-            F.ExpansionHasType,
+              F.IsExpansionVoidType,
+              F.IsExpansionLocallyDefinedType,
+              F.IsExpansionAnonymousType,
+              F.ExpansionContainsTypeDefinedAfterMacroWasDefined,
+              F.ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined,
+              F.ExpandedWhereConstExprRequired,
 
-            F.IsHygienic,
-            F.IsParameterSideEffectFree,
-            F.IsLValueIndependent,
+              F.IsNullType,
 
-            F.IsExpansionVoidType,
-            F.IsExpansionLocallyDefinedType,
-            F.IsExpansionAnonymousType,
-            F.ExpansionContainsTypeDefinedAfterMacroWasDefined,
-            F.ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined,
-            F.ExpandedWhereConstExprRequired,
+              F.ContainsTypedefDefinedAfterMacroWasDefined,
 
-            F.IsNullType,
-
-            F.ContainsTypedefDefinedAfterMacroWasDefined);
-
-        // Print argument facts
-        print(argsDelim);
-        print(
-            F.HasArguments,
-            F.HasAlignedArguments,
-            F.HasUnexpandedArgument,
-            F.HasNonExprArgument,
-            F.HasUntypedArgument,
-            F.HasArgumentWithVoidType,
-            F.HasArgumentWithLocallyDefinedType,
-            F.HasArgumentWithAnonymousType,
-            F.HasArgumentWithTypeDefinedAfterMacro,
-            F.HasArgumentWithTypedefTypeDefinedAfterMacro,
-            "\n");
+              F.HasAlignedArguments,
+              F.HasUnexpandedArgument,
+              F.HasNonExprArgument,
+              F.HasUntypedArgument,
+              F.HasArgumentWithVoidType,
+              F.HasArgumentWithLocallyDefinedType,
+              F.HasArgumentWithAnonymousType,
+              F.HasArgumentWithTypeDefinedAfterMacro,
+              F.HasArgumentWithTypedefTypeDefinedAfterMacro);
     }
 
     template <typename T>
@@ -236,7 +204,7 @@ namespace cpp2c
                 if (FD->isBitField())
                     return true;
             if (auto VD = Cur.get<clang::VarDecl>())
-                if (auto T = VD->getType().getTypePtr())
+                if (auto T = VD->getType().getTypePtrOrNull())
                     if (T->isArrayType())
                         return true;
 
@@ -504,12 +472,12 @@ namespace cpp2c
             Valid &= Res.first;
             DefLocOrError = Res.second;
 
-            print("Definition", Name, Valid, DefLocOrError, "\n");
+            print("Definition", Name, Valid, DefLocOrError);
         }
 
         // Print names of macros inspected by the preprocessor
         for (auto &&Name : DC->InspectedMacroNames)
-            print("Inspected by CPP", Name, "\n");
+            print("InspectedByCPP", Name);
 
         // Print include-directive information
         {
@@ -542,7 +510,7 @@ namespace cpp2c
                 Valid = Res.first;
                 IncludeName = Res.second.empty() ? "None" : Res.second.str();
 
-                print("Include", Valid, IncludeName, "\n");
+                print("Include", Valid, IncludeName);
             }
         }
 
@@ -849,7 +817,7 @@ namespace cpp2c
                     Facts.ASTKind = "TypeLoc";
                     // Check that this type specifier list does not include
                     // a typedef that was defined after the macro was defined
-                    if (auto T = TL->getTypePtr())
+                    if (auto T = TL->getType().getTypePtrOrNull())
                         Facts.ContainsTypedefDefinedAfterMacroWasDefined =
                             containsTypedefDefinedAfter(T, SM, DefLoc);
                     else
@@ -859,7 +827,7 @@ namespace cpp2c
                     assert("Aligns with node that is not a Decl/Stmt/TypeLoc");
             }
 
-            Facts.HasArguments = !Exp->Arguments.empty();
+            Facts.NumArguments = Exp->Arguments.size();
 
             // Check that the number of AST nodes aligned with each argument
             // equals the number of times that argument was expanded
