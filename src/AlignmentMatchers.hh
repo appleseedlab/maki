@@ -41,7 +41,7 @@ namespace cpp2c
         //     // TODO: Determine why this must be commented out to be able to
         //     //       correctly match TypeLocs
         //     // llvm::errs() << "Inserting:\n";
-        //     // DSTL.TL->getTypePtr()->dump();
+        //     // DSTL.TL->getType().dump();
         //     MatchedTypeLocs.insert(DSTL.TL);
         // }
     }
@@ -101,12 +101,7 @@ namespace cpp2c
                 else if (DSTL.D)
                     DSTL.D->dumpColor();
                 else if (DSTL.TL)
-                {
-                    if (auto T = DSTL.TL->getTypePtr())
-                        T->dump();
-                    else
-                        llvm::errs() << "(TypeLoc with null type)\n";
-                }
+                    DSTL.TL->getType().dump();
                 llvm::errs() << "Expansion spelling range: ";
                 Expansion->SpellingRange.dump(SM);
                 llvm::errs() << "NodeSpB: ";
@@ -182,12 +177,7 @@ namespace cpp2c
                 else if (DSTL.D)
                     DSTL.D->dumpColor();
                 else if (DSTL.TL)
-                {
-                    if (auto T = DSTL.TL->getTypePtr())
-                        T->dump();
-                    else
-                        llvm::errs() << "(TypeLoc with null type)\n";
-                }
+                    DSTL.TL->getType().dump();
 
                 llvm::errs() << "Node begin loc: ";
                 Node.getBeginLoc().dump(SM);
@@ -238,12 +228,7 @@ namespace cpp2c
                 else if (DSTL.D)
                     DSTL.D->dumpColor();
                 else if (DSTL.TL)
-                {
-                    if (auto T = DSTL.TL->getTypePtr())
-                        T->dump();
-                    else
-                        llvm::errs() << "(TypeLoc with null type)\n";
-                }
+                    DSTL.TL->getType().dump();
 
                 llvm::errs() << "Node end loc: ";
                 Node.getEndLoc().dump(SM);
@@ -292,12 +277,7 @@ namespace cpp2c
                 else if (DSTL.D)
                     DSTL.D->dumpColor();
                 else if (DSTL.TL)
-                {
-                    if (auto T = DSTL.TL->getTypePtr())
-                        T->dump();
-                    else
-                        llvm::errs() << "(TypeLoc with null type)\n";
-                }
+                    DSTL.TL->getType().dump();
             }
             return false;
         }
