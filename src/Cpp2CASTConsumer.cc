@@ -67,6 +67,7 @@ namespace cpp2c
             IsNameInspectedByPreprocessor = false,
 
             // Stmt/Expr macros
+            IsIntConstExpr = false,
             ContainsDeclRefExpr = false,
             ContainsConditionalEvaluation = false,
             ContainsSubExprFromBodyWithLocallyDefinedType = false,
@@ -127,6 +128,7 @@ namespace cpp2c
               F.InvokesLaterDefinedMacro,
               F.IsNameInspectedByPreprocessor,
 
+              F.IsIntConstExpr,
               F.ContainsDeclRefExpr,
               F.ContainsConditionalEvaluation,
               F.ContainsSubExprFromBodyWithLocallyDefinedType,
@@ -808,6 +810,10 @@ namespace cpp2c
                         // expression is required
                         Facts.ExpandedWhereConstExprRequired =
                             descendantOfConstantExpression(Ctx, E);
+
+                        // Whether this expression is an integral
+                        // constant expression
+                        Facts.IsIntConstExpr = E->isIntegerConstantExpr(Ctx);
                     }
                 }
                 else if (D)
