@@ -247,7 +247,8 @@ namespace cpp2c
         const clang::Type *T,
         std::function<bool(const clang::Type *)> pred)
     {
-        assert(T);
+        if (!T)
+            return false;
         const clang::Type *Cur = T;
         while (Cur)
             if (pred(Cur))
