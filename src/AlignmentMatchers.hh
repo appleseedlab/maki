@@ -324,12 +324,7 @@ namespace cpp2c
             else if (DSTL.D)
                 DSTL.D->dumpColor();
             else if (DSTL.TL)
-            {
-                if (auto T = DSTL.TL->getTypePtr())
-                    T->dump();
-                else
-                    llvm::errs() << "(TypeLoc with null type)\n";
-            }
+                DSTL.TL->getType().dump();
         }
         return true;
     }
