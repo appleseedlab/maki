@@ -1,2 +1,3 @@
 .vscode
 build
+*.cpp2c
