@@ -25,6 +25,6 @@ namespace cpp2c
     inline std::function<bool(const clang::Stmt *)> stmtIsA()
     {
         return [](const clang::Stmt *ST)
-        { return clang::isa<T>(ST); };
+        { return llvm::isa_and_nonnull<T>(ST); };
     }
 } // namespace cpp2c
