@@ -22,8 +22,15 @@
 // NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
 //          paren exprs
 
+// TODO: Commit changes so far!
+// TODO: Review checks for parameter side-effects and l-value independence.
+//       Some of the results so far for Lua don't look right.
+//       For example, if the macro applies the arrow operator to its argument,
+//       this should not cause the macro to be labeled l-value dependent.
+
 namespace cpp2c
 {
+    static const constexpr bool Debug = false;
     static const constexpr char *delim = "\t";
     inline std::string fmt(std::string s) { return s; }
     inline std::string fmt(const char *s) { return std::string(s); }
@@ -42,13 +49,21 @@ namespace cpp2c
 
     inline void delimit() { print(delim); }
 
+    template <typename... Ts>
+    inline void debug(Ts... ts)
+    {
+        if (Debug)
+            print(ts...);
+    }
+
     struct MacroFacts
     {
         std::string
             Name = "N/A",
             DefLocOrError = "N/A",
             InvokeLocOrError = "N/A",
-            ASTKind = "N/A";
+            ASTKind = "N/A",
+            TypeSignature = "N/A";
 
         unsigned int
             Depth = 404,
@@ -70,10 +85,9 @@ namespace cpp2c
             IsIntConstExpr = false,
             ContainsDeclRefExpr = false,
             ContainsConditionalEvaluation = false,
-            ContainsSubExprFromBodyWithLocallyDefinedType = false,
+            ContainsSubExprFromBodyWithLocalOrAnonymousType = false,
             ContainsDeclFromBodyDefinedAfterMacro = false,
             ContainsSubExprFromBodyWithTypeDefinedAfterMacro = false,
-            ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro = false,
             ExpansionHasType = false,
 
             // Semantic properties for Stmt/Expr macros
@@ -83,17 +97,15 @@ namespace cpp2c
 
             // Expr macros whose type is not null
             IsExpansionVoidType = false,
-            IsExpansionLocallyDefinedType = false,
-            IsExpansionAnonymousType = false,
+            IsExpansionLocalOrAnonymousType = false,
             ExpansionContainsTypeDefinedAfterMacroWasDefined = false,
-            ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined = false,
             ExpandedWhereConstExprRequired = false,
 
             // TypeLoc macros
             IsNullType = false,
 
             // TypeLoc macros whose type is not null
-            ContainsTypedefDefinedAfterMacroWasDefined = false,
+            TypeLocContainsTypeDefinedAfterMacroWasDefined = false,
 
             // Macro arguments
             HasAlignedArguments = false,
@@ -101,10 +113,8 @@ namespace cpp2c
             HasNonExprArgument = false,
             HasUntypedArgument = false,
             HasArgumentWithVoidType = false,
-            HasArgumentWithLocallyDefinedType = false,
-            HasArgumentWithAnonymousType = false,
-            HasArgumentWithTypeDefinedAfterMacro = false,
-            HasArgumentWithTypedefTypeDefinedAfterMacro = false;
+            HasArgumentWithLocalOrAnonymousType = false,
+            HasArgumentWithTypeDefinedAfterMacro = false;
     };
 
     void printFacts(struct MacroFacts F)
@@ -114,6 +124,7 @@ namespace cpp2c
               F.DefLocOrError,
               F.InvokeLocOrError,
               F.ASTKind,
+              F.TypeSignature,
 
               F.Depth,
               F.NumASTRoots,
@@ -131,10 +142,9 @@ namespace cpp2c
               F.IsIntConstExpr,
               F.ContainsDeclRefExpr,
               F.ContainsConditionalEvaluation,
-              F.ContainsSubExprFromBodyWithLocallyDefinedType,
+              F.ContainsSubExprFromBodyWithLocalOrAnonymousType,
               F.ContainsDeclFromBodyDefinedAfterMacro,
               F.ContainsSubExprFromBodyWithTypeDefinedAfterMacro,
-              F.ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro,
               F.ExpansionHasType,
 
               F.IsHygienic,
@@ -142,25 +152,21 @@ namespace cpp2c
               F.IsLValueIndependent,
 
               F.IsExpansionVoidType,
-              F.IsExpansionLocallyDefinedType,
-              F.IsExpansionAnonymousType,
+              F.IsExpansionLocalOrAnonymousType,
               F.ExpansionContainsTypeDefinedAfterMacroWasDefined,
-              F.ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined,
               F.ExpandedWhereConstExprRequired,
 
               F.IsNullType,
 
-              F.ContainsTypedefDefinedAfterMacroWasDefined,
+              F.TypeLocContainsTypeDefinedAfterMacroWasDefined,
 
               F.HasAlignedArguments,
               F.HasUnexpandedArgument,
               F.HasNonExprArgument,
               F.HasUntypedArgument,
               F.HasArgumentWithVoidType,
-              F.HasArgumentWithLocallyDefinedType,
-              F.HasArgumentWithAnonymousType,
-              F.HasArgumentWithTypeDefinedAfterMacro,
-              F.HasArgumentWithTypedefTypeDefinedAfterMacro);
+              F.HasArgumentWithLocalOrAnonymousType,
+              F.HasArgumentWithTypeDefinedAfterMacro);
     }
 
     template <typename T>
@@ -192,6 +198,9 @@ namespace cpp2c
     bool descendantOfConstantExpression(clang::ASTContext &Ctx,
                                         const clang::Stmt *ST)
     {
+        if (!ST)
+            return false;
+
         std::queue<clang::DynTypedNode> Q;
         for (auto P : Ctx.getParents(*ST))
             Q.push(P);
@@ -199,16 +208,25 @@ namespace cpp2c
         {
             auto Cur = Q.front();
             Q.pop();
+
             if (Cur.get<clang::CaseStmt>() ||
                 Cur.get<clang::EnumDecl>())
                 return true;
+
             if (auto FD = Cur.get<clang::FieldDecl>())
                 if (FD->isBitField())
                     return true;
+
             if (auto VD = Cur.get<clang::VarDecl>())
-                if (auto T = VD->getType().getTypePtrOrNull())
-                    if (T->isArrayType())
-                        return true;
+            {
+                auto QT = VD->getType();
+                if (!QT.isNull())
+                {
+                    if (auto T = QT.getTypePtrOrNull())
+                        if (T->isArrayType())
+                            return true;
+                }
+            }
 
             for (auto P : Ctx.getParents(Cur))
                 Q.push(P);
@@ -220,106 +238,95 @@ namespace cpp2c
     std::set<const clang::Stmt *>
     collectStmtsFromArguments(MacroExpansionNode *Expansion)
     {
+        assert(Expansion);
+
         std::set<const clang::Stmt *> Result;
         for (auto &&Arg : Expansion->Arguments)
+        {
             for (auto &&R : Arg.AlignedRoots)
             {
                 if (R.ST)
                 {
                     std::queue<const clang::Stmt *> Q;
                     Q.push(R.ST);
-                    while (!Q.empty())
+                    while (!(Q.empty()))
                     {
                         auto Cur = Q.front();
                         Q.pop();
+
+                        if (!Cur)
+                            continue;
+
                         Result.insert(Cur);
-                        for (auto &&Child : Cur->children())
-                            Q.push(Child);
+                        for (auto &&child : Cur->children())
+                            Q.push(child);
                     }
                 }
             }
+        }
         return Result;
     }
 
     // Returns true if the given predicate returns true for any type
     // contained in the given type
-    inline bool isInType(
-        const clang::Type *T,
+    bool isInType(
+        const clang::QualType QT,
         std::function<bool(const clang::Type *)> pred)
     {
-        if (!T)
+        debug("Calling isInType");
+
+        if (QT.isNull())
             return false;
-        const clang::Type *Cur = T;
-        while (Cur)
-            if (pred(Cur))
-                return true;
-            else if (Cur->isAnyPointerType() || Cur->isArrayType())
-                Cur = Cur->getPointeeOrArrayElementType();
-            else
-                Cur = nullptr;
-        return false;
-    }
 
-    // Returns true if the given type contains an anonymous type
-    inline bool containsAnonymousType(const clang::Type *T)
-    {
-        return isInType(
-            T,
-            [](const clang::Type *T)
-            { return T->getAsTagDecl() &&
-                     T->getAsTagDecl()->getName().empty(); });
-    }
+        auto T = QT.getTypePtrOrNull();
 
-    // Returns true if the given type contains a locally-defined type
-    inline bool containsLocalType(const clang::Type *T)
-    {
-        return isInType(
-            T,
-            [](const clang::Type *T)
-            {
-                return T->getAsTagDecl() &&
-                       ((!T->getAsTagDecl()->getDeclContext()) ||
-                        !(T->getAsTagDecl()
-                              ->getDeclContext()
-                              ->isTranslationUnit()));
-            });
+        while (T != nullptr &&
+               // NOTE: I'm not sure why we need this check, but if I remove
+               // it then Clang may crash on certain inputs.
+               // See tests/declare_bitmap.c
+               (!T->getCanonicalTypeInternal().isNull()) &&
+               (T->isAnyPointerType() || T->isArrayType()))
+            T = T->getPointeeOrArrayElementType();
+
+        debug("(isInType) calling pred");
+        return pred(T);
     }
 
     // Returns true if any type in T was defined after L
     inline bool containsTypeDefinedAfter(
-        const clang::Type *T,
+        const clang::QualType QT,
         clang::SourceManager &SM,
         clang::SourceLocation L)
     {
         return isInType(
-            T,
-            [&SM, &L](const clang::Type *T)
+            QT,
+            [&SM, L](const clang::Type *Ty)
             {
-                return T->getAsTagDecl() &&
-                       SM.isBeforeInTranslationUnit(
-                           L,
-                           SM.getFileLoc(T->getAsTagDecl()->getLocation()));
-            });
-    }
+                debug("(isInType) Checking Ty");
+                if (!Ty)
+                    return false;
 
-    // Returns true if any typedef in T was defined after L
-    inline bool containsTypedefDefinedAfter(
-        const clang::Type *T,
-        clang::SourceManager &SM,
-        clang::SourceLocation L)
-    {
-        return isInType(
-            T,
-            [&SM, &L](const clang::Type *T)
-            {
-                return clang::isa<clang::TypedefType>(T) &&
-                       clang::dyn_cast<clang::TypedefType>(T)->getDecl() &&
-                       SM.isBeforeInTranslationUnit(
-                           L,
-                           SM.getFileLoc(
-                               clang::dyn_cast<clang::TypedefType>(T)
-                                   ->getDecl()
-                                   ->getLocation()));
+                debug("(isInType) Checking internal qualified type");
+                if (Ty->getCanonicalTypeInternal().isNull())
+                    return false;
+
+                debug("(isInType) Getting TD");
+                auto TD = Ty->getAsTagDecl();
+                debug("(isInType) Checking TD");
+                if (!TD)
+                    return false;
+
+                debug("(isInType) Checking TDLoc");
+                auto TDLoc = TD->getLocation();
+                if (TDLoc.isInvalid())
+                    return false;
+
+                debug("(isInType) Checking DeclFLoc");
+                auto DeclFLoc = SM.getFileLoc(TDLoc);
+                if (DeclFLoc.isInvalid())
+                    return false;
+
+                return SM.isBeforeInTranslationUnit(L, DeclFLoc);
             });
     }
 
@@ -333,7 +340,10 @@ namespace cpp2c
         if (nullptr == Expansion)
             return;
 
-        DefLocs.push_back(SM.getFileLoc(Expansion->MI->getDefinitionLoc()));
+        assert(Expansion->MI);
+
+        auto L = SM.getFileLoc(Expansion->MI->getDefinitionLoc());
+        DefLocs.push_back(L);
 
         for (auto &&Child : Expansion->Children)
             collectExpansionDefLocs(SM, DefLocs, Child);
@@ -347,29 +357,33 @@ namespace cpp2c
         clang::SourceManager &SM,
         clang::SourceLocation L)
     {
-        auto FID = SM.getFileID(L);
-        if (FID.isValid())
+        if (L.isValid())
         {
-            if (auto FE = SM.getFileEntryForID(FID))
+            auto FID = SM.getFileID(L);
+            if (FID.isValid())
             {
-                auto Name = FE->tryGetRealPathName();
-                if (!Name.empty())
+                if (auto FE = SM.getFileEntryForID(FID))
                 {
-                    auto FLoc = SM.getFileLoc(L);
-                    if (FLoc.isValid())
+                    auto Name = FE->tryGetRealPathName();
+                    if (!Name.empty())
                     {
-                        auto s = FLoc.printToString(SM);
-                        // Find second-to-last colon
-                        auto i = s.rfind(':', s.rfind(':') - 1);
-                        return {true, Name.str() + ":" + s.substr(i + 1)};
+                        auto FLoc = SM.getFileLoc(L);
+                        if (FLoc.isValid())
+                        {
+                            auto s = FLoc.printToString(SM);
+                            // Find second-to-last colon
+                            auto i = s.rfind(':', s.rfind(':') - 1);
+                            return {true, Name.str() + ":" + s.substr(i + 1)};
+                        }
+                        return {false, "Invalid File SLoc"};
                     }
-                    return {false, "Invalid SLoc"};
+                    return {false, "Nameless file"};
                 }
-                return {false, "Nameless file"};
+                return {false, "File without FileEntry"};
             }
-            return {false, "File without FileEntry"};
+            return {false, "Invalid file ID"};
         }
-        return {false, "Invalid file ID"};
+        return {false, "Invalid SLoc"};
     }
 
     // Checks if the included file is a globally included file.
@@ -386,9 +400,17 @@ namespace cpp2c
         auto FE = IEL.first;
         auto HashLoc = IEL.second;
 
+        // Check that the included file is not null
+        if (!FE)
+            return {false, "<null>"};
+
         // Check that the included file actually has a name
         auto IncludedFileRealpath = FE->tryGetRealPathName();
         if (IncludedFileRealpath.empty())
+            return {false, IncludedFileRealpath};
+
+        // Check that the hash location is valid
+        if (HashLoc.isInvalid())
             return {false, IncludedFileRealpath};
 
         // Check that the file the file is included in is valid
@@ -408,20 +430,26 @@ namespace cpp2c
 
         // Check that the file the file is included in is not in turn included
         // in a file included in a non-global scope
-        if (LocalIncludes.find(IncludedInRealpath) !=
-            LocalIncludes.end())
+        if (LocalIncludes.find(IncludedInRealpath) != LocalIncludes.end())
+            return {false, IncludedFileRealpath};
+
+        auto HashFLoc = SM.getFileLoc(HashLoc);
+        // Check that the file location is valid
+        if (HashFLoc.isInvalid())
             return {false, IncludedFileRealpath};
 
         // Check that the include does not appear within the range of any
         // declaration in the file
-        auto L = SM.getFileLoc(IEL.second);
         if (std::any_of(
                 Decls.begin(),
                 Decls.end(),
-                [&SM, &LO, &L](const clang::Decl *D)
+                [&SM, &LO, &HashFLoc](const clang::Decl *D)
                 {
                     auto B = SM.getFileLoc(D->getBeginLoc());
                     auto E = SM.getFileLoc(D->getEndLoc());
+
+                    if (B.isInvalid() || E.isInvalid())
+                        return false;
 
                     // Include the location just after the declaration
                     // to account for semicolons.
@@ -432,7 +460,10 @@ namespace cpp2c
                         if (Tok.hasValue())
                             E = SM.getFileLoc(Tok.getValue().getEndLoc());
 
-                    return clang::SourceRange(B, E).fullyContains(L);
+                    if (E.isInvalid())
+                        return false;
+
+                    return clang::SourceRange(B, E).fullyContains(HashFLoc);
                 }))
             return {false, IncludedFileRealpath};
 
@@ -467,7 +498,8 @@ namespace cpp2c
             bool Valid;
 
             auto MD = Entry.second;
-            auto DefLoc = SM.getFileLoc(MD->getDefinition().getLocation());
+            auto DefLoc = MD ? SM.getFileLoc(MD->getDefinition().getLocation())
+                             : clang::SourceLocation();
             Valid = DefLoc.isValid();
 
             // Try to get the full path to the DefLoc
@@ -502,16 +534,16 @@ namespace cpp2c
             for (auto &&IEL : IC->IncludeEntriesLocs)
             {
                 // Facts for includes
-                bool Valid;
-                std::string IncludeName;
+                bool Valid = false;
+                std::string IncludeName = "";
 
                 // Check if included at global scope or not
                 auto Res = isGlobalInclude(SM, LO, IEL, LocalIncludes, Decls);
-                if (!Res.first && !Res.second.empty())
+                if (!Res.first)
                     LocalIncludes.insert(Res.second);
 
                 Valid = Res.first;
-                IncludeName = Res.second.empty() ? "None" : Res.second.str();
+                IncludeName = Res.second.empty() ? "" : Res.second.str();
 
                 print("Include", Valid, IncludeName);
             }
@@ -520,6 +552,11 @@ namespace cpp2c
         // Print macro expansion information
         for (auto Exp : MF->Expansions)
         {
+            assert(Exp);
+            assert(Exp->MI);
+
+            debug("Checking", Exp->Name.str());
+
             //// First get basic info about all macros
             struct MacroFacts Facts = (struct MacroFacts){
                 .Name = Exp->Name.str(),
@@ -556,7 +593,7 @@ namespace cpp2c
                 std::any_of(
                     DescendantMacroDefLocs.begin(),
                     DescendantMacroDefLocs.end(),
-                    [&SM, &DefLoc](clang::SourceLocation L)
+                    [&SM, DefLoc](clang::SourceLocation L)
                     {
                         return SM.isBeforeInTranslationUnit(DefLoc, L);
                     });
@@ -572,8 +609,10 @@ namespace cpp2c
             // Next get AST information for top level invocations
 
             using namespace clang::ast_matchers;
+
+            debug("Matching stmts");
             // Match stmts
-            if (!(Exp)->DefinitionTokens.empty())
+            if (!Exp->DefinitionTokens.empty())
             {
                 MatchFinder Finder;
                 ExpansionMatchHandler Handler;
@@ -583,12 +622,14 @@ namespace cpp2c
                                    .bind("root");
                 Finder.addMatcher(Matcher, &Handler);
                 Finder.matchAST(Ctx);
-                for (auto M : Handler.Matches)
+                for (auto &&M : Handler.Matches)
                     Exp->ASTRoots.push_back(M);
             }
+            debug("Finished matching stmts");
 
+            debug("Matching decls");
             // Match decls
-            if (!(Exp->DefinitionTokens.empty()))
+            if (!Exp->DefinitionTokens.empty())
             {
                 MatchFinder Finder;
                 ExpansionMatchHandler Handler;
@@ -596,12 +637,14 @@ namespace cpp2c
                                    .bind("root");
                 Finder.addMatcher(Matcher, &Handler);
                 Finder.matchAST(Ctx);
-                for (auto M : Handler.Matches)
+                for (auto &&M : Handler.Matches)
                     Exp->ASTRoots.push_back(M);
             }
+            debug("Finished matching decls");
 
+            debug("Matching type locs");
             // Match type locs
-            if (!((Exp)->DefinitionTokens.empty()))
+            if (!Exp->DefinitionTokens.empty())
             {
                 MatchFinder Finder;
                 ExpansionMatchHandler Handler;
@@ -609,9 +652,10 @@ namespace cpp2c
                                    .bind("root");
                 Finder.addMatcher(Matcher, &Handler);
                 Finder.matchAST(Ctx);
-                for (auto M : Handler.Matches)
+                for (auto &&M : Handler.Matches)
                     Exp->ASTRoots.push_back(M);
             }
+            debug("Finished matching type locs");
 
             // If the expansion only aligns with one node, then set this
             // as its aligned root
@@ -623,8 +667,9 @@ namespace cpp2c
 
             for (auto &&Arg : Exp->Arguments)
             {
+                debug("Matching arg stmts");
                 // Match stmts
-                if (!Arg.Tokens.empty())
+                if (!(Arg.Tokens.empty()))
                 {
                     MatchFinder Finder;
                     ExpansionMatchHandler Handler;
@@ -634,10 +679,12 @@ namespace cpp2c
                                        .bind("root");
                     Finder.addMatcher(Matcher, &Handler);
                     Finder.matchAST(Ctx);
-                    for (auto M : Handler.Matches)
+                    for (auto &&M : Handler.Matches)
                         Arg.AlignedRoots.push_back(M);
                 }
+                debug("Finished matching arg stmts");
 
+                debug("Matching arg decls");
                 // Match decls
                 if (!(Arg.Tokens.empty()))
                 {
@@ -647,10 +694,12 @@ namespace cpp2c
                                        .bind("root");
                     Finder.addMatcher(Matcher, &Handler);
                     Finder.matchAST(Ctx);
-                    for (auto M : Handler.Matches)
+                    for (auto &&M : Handler.Matches)
                         Arg.AlignedRoots.push_back(M);
                 }
+                debug("Finished matching arg decls");
 
+                debug("Matching arg type locs");
                 // Match type locs
                 if (!(Arg.Tokens.empty()))
                 {
@@ -661,9 +710,10 @@ namespace cpp2c
                             .bind("root");
                     Finder.addMatcher(Matcher, &Handler);
                     Finder.matchAST(Ctx);
-                    for (auto M : Handler.Matches)
+                    for (auto &&M : Handler.Matches)
                         Arg.AlignedRoots.push_back(M);
                 }
+                debug("Finished matching arg type locs");
             }
 
             //// Print macro info
@@ -676,7 +726,8 @@ namespace cpp2c
             // Number of AST roots
             Facts.NumASTRoots = Exp->ASTRoots.size();
 
-            if (Exp->ASTRoots.size() == 1)
+            debug("Checking if expansion has aligned root");
+            if (Exp->AlignedRoot)
             {
                 auto D = Exp->AlignedRoot->D;
                 auto ST = Exp->AlignedRoot->ST;
@@ -684,6 +735,7 @@ namespace cpp2c
 
                 if (ST)
                 {
+                    debug("Aligns with a stmt");
                     Facts.ASTKind = "Stmt";
 
                     // TODO: Add this to facts?
@@ -718,18 +770,30 @@ namespace cpp2c
                     // Check if any subtree of the entire expansion
                     // that was not parsed from an argument is an expression
                     // whose type is a locally-defined type
-                    Facts.ContainsSubExprFromBodyWithLocallyDefinedType =
+                    Facts.ContainsSubExprFromBodyWithLocalOrAnonymousType =
                         isInTree(
                             ST,
-                            [&ArgStmts](const clang::Stmt *ST)
+                            [&ArgStmts](const clang::Stmt *St)
                             {
-                                if (ArgStmts.find(ST) == ArgStmts.end())
-                                    if (auto E =
-                                            clang::dyn_cast<clang::Expr>(ST))
-                                        if (auto T = E->getType()
-                                                         .getTypePtrOrNull())
-                                            return containsLocalType(T);
-                                return false;
+                                if (!St)
+                                    return false;
+
+                                if (ArgStmts.find(St) != ArgStmts.end())
+                                    return false;
+
+                                auto E = clang::dyn_cast<clang::Expr>(St);
+                                if (!E)
+                                    return false;
+
+                                auto QT = E->getType();
+                                if (QT.isNull())
+                                    return false;
+
+                                auto T = QT.getTypePtrOrNull();
+                                if (!T)
+                                    return false;
+
+                                return T->hasUnnamedOrLocalType();
                             });
 
                     // Check if any variable or function this macro references
@@ -738,17 +802,31 @@ namespace cpp2c
                     Facts.ContainsDeclFromBodyDefinedAfterMacro =
                         isInTree(
                             ST,
-                            [&SM, &ArgStmts, DefLoc](const clang::Stmt *ST)
+                            [&SM, &ArgStmts, DefLoc](const clang::Stmt *St)
                             {
-                                if (ArgStmts.find(ST) == ArgStmts.end())
-                                    if (auto DRE =
-                                            clang::dyn_cast<
-                                                clang::DeclRefExpr>(ST))
-                                        if (auto D = DRE->getDecl())
-                                            return SM.isBeforeInTranslationUnit(
-                                                DefLoc,
-                                                SM.getFileLoc(D->getLocation()));
-                                return false;
+                                if (!St)
+                                    return false;
+
+                                if (ArgStmts.find(St) != ArgStmts.end())
+                                    return false;
+
+                                auto DRE = clang::dyn_cast<clang::DeclRefExpr>(St);
+                                if (!DRE)
+                                    return false;
+
+                                auto D = DRE->getDecl();
+                                if (!D)
+                                    return false;
+
+                                auto L = D->getLocation();
+                                if (L.isInvalid())
+                                    return false;
+
+                                L = SM.getFileLoc(L);
+                                if (L.isInvalid())
+                                    return false;
+
+                                return SM.isBeforeInTranslationUnit(DefLoc, L);
                             });
 
                     // Check if any subtree of the entire expansion
@@ -758,54 +836,42 @@ namespace cpp2c
                     Facts.ContainsSubExprFromBodyWithTypeDefinedAfterMacro =
                         isInTree(
                             ST,
-                            [&SM, &ArgStmts, &DefLoc](const clang::Stmt *ST)
+                            [&SM, &ArgStmts, DefLoc](const clang::Stmt *St)
                             {
-                                if (ArgStmts.find(ST) == ArgStmts.end())
-                                    if (auto E =
-                                            clang::dyn_cast<clang::Expr>(ST))
-                                        if (auto T =
-                                                E->getType().getTypePtrOrNull())
-                                            return containsTypeDefinedAfter(
-                                                T, SM, DefLoc);
-                                return false;
+                                if (!St)
+                                    return false;
+
+                                if (ArgStmts.find(St) != ArgStmts.end())
+                                    return false;
+
+                                auto E = clang::dyn_cast<clang::Expr>(St);
+                                if (!E)
+                                    return false;
+
+                                auto QT = E->getType();
+
+                                return containsTypeDefinedAfter(QT, SM, DefLoc);
                             });
 
-                    // Check if any subtree of the entire expansion
-                    // that was not parsed from an argument is an expression
-                    // whose type is a typedef type that was defined after the
-                    // macro was defined
-                    Facts.ContainsSubExprFromBodyWithTypedefTypeDefinedAfterMacro =
-                        isInTree(
-                            ST,
-                            [&SM, &ArgStmts, &DefLoc](const clang::Stmt *ST)
-                            {
-                                if (ArgStmts.find(ST) == ArgStmts.end())
-                                    if (auto E =
-                                            clang::dyn_cast<clang::Expr>(ST))
-                                        if (auto T =
-                                                E->getType().getTypePtrOrNull())
-                                            return containsTypedefDefinedAfter(
-                                                T, SM, DefLoc);
-                                return false;
-                            });
-
+                    Facts.TypeSignature = "void";
                     if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
                         Facts.ASTKind = "Expr";
-                        auto T = E->getType().getTypePtrOrNull();
-                        Facts.ExpansionHasType = T != nullptr;
+
                         // Type information about the entire expansion
+                        auto QT = E->getType();
+                        auto T = QT.getTypePtrOrNull();
+                        Facts.ExpansionHasType = !(QT.isNull() || T == nullptr);
+
                         if (T)
                         {
-                            Facts.ExpansionHasType = true;
                             Facts.IsExpansionVoidType = T->isVoidType();
-                            Facts.IsExpansionLocallyDefinedType = containsLocalType(T);
-                            Facts.IsExpansionAnonymousType = containsAnonymousType(T);
-                            Facts.ExpansionContainsTypeDefinedAfterMacroWasDefined =
-                                containsTypeDefinedAfter(T, SM, DefLoc);
-                            Facts.ExpansionContainsTypedefTypeDefinedAfterMacroWasDefined =
-                                containsTypedefDefinedAfter(T, SM, DefLoc);
+                            Facts.IsExpansionLocalOrAnonymousType = T->hasUnnamedOrLocalType();
+                            auto CT = QT.getDesugaredType(Ctx).getUnqualifiedType().getCanonicalType();
+                            Facts.TypeSignature = CT.getAsString();
                         }
+                        Facts.ExpansionContainsTypeDefinedAfterMacroWasDefined =
+                            containsTypeDefinedAfter(QT, SM, DefLoc);
 
                         // Whether the expression was expanded where a constant
                         // expression is required
@@ -821,14 +887,16 @@ namespace cpp2c
                     Facts.ASTKind = "Decl";
                 else if (TL)
                 {
+                    debug("Aligns with a type loc");
                     Facts.ASTKind = "TypeLoc";
                     // Check that this type specifier list does not include
                     // a typedef that was defined after the macro was defined
-                    if (auto T = TL->getType().getTypePtrOrNull())
-                        Facts.ContainsTypedefDefinedAfterMacroWasDefined =
-                            containsTypedefDefinedAfter(T, SM, DefLoc);
-                    else
-                        Facts.IsNullType = true;
+                    auto QT = TL->getType();
+                    Facts.IsNullType = QT.isNull();
+                    debug("Checking TypeLocContainsTypeDefinedAfterMacroWasDefined");
+                    Facts.TypeLocContainsTypeDefinedAfterMacroWasDefined =
+                        containsTypeDefinedAfter(QT, SM, DefLoc);
+                    debug("Finished checking TypeLocContainsTypeDefinedAfterMacroWasDefined");
                 }
                 else
                     assert("Aligns with node that is not a Decl/Stmt/TypeLoc");
@@ -838,14 +906,24 @@ namespace cpp2c
 
             // Check that the number of AST nodes aligned with each argument
             // equals the number of times that argument was expanded
+            debug("Checking for aligned arguments");
             Facts.HasAlignedArguments = std::all_of(
                 Exp->Arguments.begin(),
                 Exp->Arguments.end(),
                 [](MacroExpansionArgument Arg)
                 { return Arg.AlignedRoots.size() == Arg.NumExpansions; });
 
+            if (Exp->MI->isFunctionLike() &&
+                (Facts.ASTKind == "Stmt" || Facts.ASTKind == "Expr"))
+                Facts.TypeSignature += "(";
+            debug("Iterating arguments");
+            int ArgNum = 0;
             for (auto &&Arg : Exp->Arguments)
             {
+                if (ArgNum != 0)
+                    Facts.TypeSignature += ", ";
+                ArgNum += 1;
+
                 Facts.HasUnexpandedArgument = Arg.AlignedRoots.empty();
 
                 if (Arg.AlignedRoots.empty())
@@ -859,39 +937,50 @@ namespace cpp2c
                 if (!E)
                     continue;
 
-                auto T = E->getType().getTypePtrOrNull();
-
-                Facts.HasUntypedArgument = T == nullptr;
-
-                if (!T)
-                    continue;
+                std::string ArgTypeStr = "<Null>";
 
                 // Type information about arguments
-                Facts.HasArgumentWithVoidType = T->isVoidType();
-                Facts.HasArgumentWithLocallyDefinedType = containsLocalType(T);
-                Facts.HasArgumentWithAnonymousType = containsAnonymousType(T);
+                auto QT = E->getType();
+                auto T = QT.getTypePtrOrNull();
+                Facts.HasUntypedArgument = QT.isNull() || T == nullptr;
+
+                if (T)
+                {
+                    Facts.HasArgumentWithVoidType = T->isVoidType();
+                    Facts.HasArgumentWithLocalOrAnonymousType = T->hasUnnamedOrLocalType();
+                    auto CT = QT.getDesugaredType(Ctx).getUnqualifiedType().getCanonicalType();
+                    ArgTypeStr = CT.getAsString();
+                }
                 Facts.HasArgumentWithTypeDefinedAfterMacro =
-                    containsTypeDefinedAfter(T, SM, DefLoc);
-                Facts.HasArgumentWithTypedefTypeDefinedAfterMacro =
-                    containsTypedefDefinedAfter(T, SM, DefLoc);
+                    containsTypeDefinedAfter(QT, SM, DefLoc);
+
+                Facts.TypeSignature += ArgTypeStr;
             }
+            debug("Finished iterating arguments");
+            if (Exp->MI->isFunctionLike() &&
+                (Facts.ASTKind == "Stmt" || Facts.ASTKind == "Expr"))
+                Facts.TypeSignature += ")";
 
             // Check for semantic properties of interface-equivalence
             // TODO: Check for these properties in decls as well?
             //       Can decls ever be hygienic?
+            debug("Checking if there is an aligned Stmt root");
             if (Exp->AlignedRoot && Exp->AlignedRoot->ST)
             {
+                debug("Checking for semantic properties");
                 Facts.IsHygienic = isHygienic(Ctx, Exp);
                 Facts.IsParameterSideEffectFree =
                     isParameterSideEffectFree(Ctx, Exp);
                 Facts.IsLValueIndependent = isLValueIndependent(Ctx, Exp);
             }
 
+            debug("Printing ", Exp->Name.str(), "facts");
             printFacts(Facts);
         }
 
         // Only delete top level expansions since deconstructor deletes
         // nested expansions
+        debug("Deleting expansion nodes");
         for (auto &&Exp : MF->Expansions)
             if (Exp->Depth == 0)
                 delete Exp;
