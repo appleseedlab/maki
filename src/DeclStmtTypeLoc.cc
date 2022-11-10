@@ -21,7 +21,13 @@ namespace cpp2c
         else if (ST)
             ST->dump();
         else if (TL)
-            TL->getType().dump();
+        {
+            auto QT = TL->getType();
+            if (!QT.isNull())
+                QT.dump();
+            else
+                llvm::errs() << "<Null type>\n";
+        }
         else
             assert(!"No node to dump");
     }
