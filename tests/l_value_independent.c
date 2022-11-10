@@ -1,3 +1,5 @@
+// All macro invocations should be L-value independent
+
 #define ADDR_OF_G (&(g))
 #define DEREF(x) (*(x))
 

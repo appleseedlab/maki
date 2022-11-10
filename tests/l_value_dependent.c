@@ -1,3 +1,5 @@
+// All macro invocations should be L-value dependent
+
 #define ADDR_OF(x) (&(x))
 
 #define INC_X_PRE(x) (++(x))
