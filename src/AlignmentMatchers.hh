@@ -23,11 +23,15 @@ namespace cpp2c
             {
                 auto Cur = Descendants.top();
                 Descendants.pop();
+                if (!Cur)
+                    continue;
+
                 // llvm::errs() << "Inserting:\n";
                 // Cur->dumpColor();
                 MatchedStmts.insert(Cur);
-                for (auto Child : Cur->children())
-                    Descendants.push(Child);
+                for (auto &&child : Cur->children())
+                    if (child)
+                        Descendants.push(child);
             }
         }
         else if (DSTL.D)
@@ -41,7 +45,13 @@ namespace cpp2c
         //     // TODO: Determine why this must be commented out to be able to
         //     //       correctly match TypeLocs
         //     // llvm::errs() << "Inserting:\n";
-        //     // DSTL.TL->getType().dump();
+        // {
+        //     auto QT = DSTL.TL->getType();
+        //     if (!QT.isNull())
+        //         QT.dump();
+        //     else
+        //         llvm::errs() << "<Null type>\n";
+        // }
         //     MatchedTypeLocs.insert(DSTL.TL);
         // }
     }
@@ -57,6 +67,19 @@ namespace cpp2c
         clang::ASTContext *, Ctx,
         cpp2c::MacroExpansionNode *, Expansion)
     {
+        // Can't match an expansion with no tokens
+        if (Expansion->DefinitionTokens.empty())
+            return false;
+
+        // Can't match an expansion with an invalid location
+        if (Node.getBeginLoc().isInvalid() || Node.getEndLoc().isInvalid())
+            return false;
+
+        auto DefB = Expansion->DefinitionTokens.front().getLocation();
+        auto DefE = Expansion->DefinitionTokens.back().getLocation();
+        if (DefB.isInvalid() || DefE.isInvalid())
+            return false;
+
         // These sets keep track of nodes we have already matched,
         // so that we do not match their subtrees as well
         static std::set<const clang::Stmt *> MatchedStmts;
@@ -67,8 +90,7 @@ namespace cpp2c
         // useful later
 
         auto &SM = Ctx->getSourceManager();
-        auto DefB = Expansion->DefinitionTokens.front().getLocation();
-        auto DefE = Expansion->DefinitionTokens.back().getLocation();
+
         auto NodeSpB = SM.getSpellingLoc(Node.getBeginLoc());
         auto NodeSpE = SM.getSpellingLoc(Node.getEndLoc());
         auto NodeExB = SM.getExpansionLoc(Node.getBeginLoc());
@@ -81,8 +103,6 @@ namespace cpp2c
             SM.getImmediateMacroCallerLoc(Node.getBeginLoc()));
         auto ImmMacroCallerLocExE = SM.getExpansionLoc(
             SM.getImmediateMacroCallerLoc(Node.getEndLoc()));
-        auto ImmSpellingLoc = SM.getImmediateSpellingLoc(Node.getBeginLoc());
-        auto ImmSpellingEndLoc = SM.getImmediateSpellingLoc(Node.getEndLoc());
         DeclStmtTypeLoc DSTL(&Node);
 
         static const constexpr bool debug = false;
@@ -101,7 +121,13 @@ namespace cpp2c
                 else if (DSTL.D)
                     DSTL.D->dumpColor();
                 else if (DSTL.TL)
-                    DSTL.TL->getType().dump();
+                {
+                    auto QT = DSTL.TL->getType();
+                    if (!QT.isNull())
+                        QT.dump();
+                    else
+                        llvm::errs() << "<Null type>\n";
+                }
                 llvm::errs() << "Expansion spelling range: ";
                 Expansion->SpellingRange.dump(SM);
                 llvm::errs() << "NodeSpB: ";
@@ -128,14 +154,38 @@ namespace cpp2c
         // 3. The node begins with a token that comes from an expansion of a
         //    nested macro invocation in the body of the macro's definition
 
+        // Set up case 2
+        clang::SourceLocation ArgB;
+        if (auto Arg = Expansion->ArgDefBeginsWith)
+        {
+            if (!Arg->Tokens.empty())
+            {
+                auto L = Arg->Tokens.front().getLocation();
+                if (L.isValid())
+                    ArgB = SM.getSpellingLoc(L);
+            }
+        }
+        clang::SourceLocation ArgE;
+        if (auto Arg = Expansion->ArgDefEndsWith)
+        {
+            if (!Arg->Tokens.empty())
+            {
+                auto L = Arg->Tokens.back().getLocation();
+                if (L.isValid())
+                    ArgE = SM.getSpellingLoc(L);
+            }
+        }
+
         // Set up case 3
         clang::SourceLocation B = Node.getBeginLoc();
-        while (SM.getImmediateMacroCallerLoc(B).isMacroID())
+        while (SM.getImmediateMacroCallerLoc(B).isMacroID() &&
+               SM.getImmediateMacroCallerLoc(B).isValid())
             B = SM.getImmediateMacroCallerLoc(B);
         B = SM.getSpellingLoc(B);
 
         clang::SourceLocation E = Node.getEndLoc();
-        while (SM.getImmediateMacroCallerLoc(E).isMacroID())
+        while (SM.getImmediateMacroCallerLoc(E).isMacroID() &&
+               SM.getImmediateMacroCallerLoc(E).isValid())
             E = SM.getImmediateMacroCallerLoc(E);
         E = SM.getSpellingLoc(E);
 
@@ -143,12 +193,7 @@ namespace cpp2c
             // Case 1
             (DefB == NodeSpB) ||
             // Case 2
-            ((Expansion->ArgDefBeginsWith) &&
-             (!(Expansion->ArgDefBeginsWith->Tokens.empty()) &&
-              (NodeSpB ==
-               SM.getSpellingLoc(Expansion->ArgDefBeginsWith
-                                     ->Tokens.front()
-                                     .getLocation())))) ||
+            (ArgB.isValid() && ArgB == NodeSpB) ||
             // Case 3
             (DefB == B);
 
@@ -156,12 +201,7 @@ namespace cpp2c
             // Case 1
             (NodeSpE == DefE) ||
             // Case 2
-            ((Expansion->ArgDefEndsWith) &&
-             (!(Expansion->ArgDefEndsWith->Tokens.empty()) &&
-              (NodeSpE ==
-               SM.getSpellingLoc(Expansion->ArgDefEndsWith
-                                     ->Tokens.back()
-                                     .getLocation())))) ||
+            (ArgE.isValid() && ArgE == NodeSpE) ||
             // Case 3
             (DefE == E);
 
@@ -177,7 +217,15 @@ namespace cpp2c
                 else if (DSTL.D)
                     DSTL.D->dumpColor();
                 else if (DSTL.TL)
-                    DSTL.TL->getType().dump();
+                {
+                    auto QT = DSTL.TL->getType();
+                    if (!QT.isNull())
+                        QT.dump();
+                    else
+                        llvm::errs() << "<Null type>\n";
+                }
+
+                auto ImmSpellingLoc = SM.getImmediateSpellingLoc(Node.getBeginLoc());
 
                 llvm::errs() << "Node begin loc: ";
                 Node.getBeginLoc().dump(SM);
@@ -228,7 +276,15 @@ namespace cpp2c
                 else if (DSTL.D)
                     DSTL.D->dumpColor();
                 else if (DSTL.TL)
-                    DSTL.TL->getType().dump();
+                {
+                    auto QT = DSTL.TL->getType();
+                    if (!QT.isNull())
+                        QT.dump();
+                    else
+                        llvm::errs() << "<Null type>\n";
+                }
+
+                auto ImmSpellingEndLoc = SM.getImmediateSpellingLoc(Node.getEndLoc());
 
                 llvm::errs() << "Node end loc: ";
                 Node.getEndLoc().dump(SM);
@@ -277,7 +333,13 @@ namespace cpp2c
                 else if (DSTL.D)
                     DSTL.D->dumpColor();
                 else if (DSTL.TL)
-                    DSTL.TL->getType().dump();
+                {
+                    auto QT = DSTL.TL->getType();
+                    if (!QT.isNull())
+                        QT.dump();
+                    else
+                        llvm::errs() << "<Null type>\n";
+                }
             }
             return false;
         }
@@ -324,7 +386,13 @@ namespace cpp2c
             else if (DSTL.D)
                 DSTL.D->dumpColor();
             else if (DSTL.TL)
-                DSTL.TL->getType().dump();
+            {
+                auto QT = DSTL.TL->getType();
+                if (!QT.isNull())
+                    QT.dump();
+                else
+                    llvm::errs() << "<Null type>\n";
+            }
         }
         return true;
     }
@@ -346,6 +414,25 @@ namespace cpp2c
         if (Tokens.empty())
             return false;
 
+        auto &SM = Ctx->getSourceManager();
+
+        auto NodeB = SM.getFileLoc(Node.getBeginLoc());
+        auto NodeE = SM.getFileLoc(Node.getEndLoc());
+        if (NodeB.isInvalid() || NodeE.isInvalid())
+            return false;
+
+        auto TokB = SM.getFileLoc(Tokens.front().getLocation());
+        // Note: We do NOT use getEndLoc for the last token!
+        auto TokE = SM.getFileLoc(Tokens.back().getLocation());
+        if (TokB.isInvalid() || TokE.isInvalid())
+            return false;
+
+        auto NodeImmMCB = SM.getImmediateMacroCallerLoc(Node.getBeginLoc());
+        auto NodeImmMCE = SM.getImmediateMacroCallerLoc(Node.getEndLoc());
+
+        if (NodeImmMCB.isInvalid() || NodeImmMCE.isInvalid())
+            return false;
+
         // These sets keep track of nodes we have already matched,
         // so that we do not match their subtrees as well
         static std::set<const clang::Stmt *> MatchedStmts;
@@ -354,20 +441,14 @@ namespace cpp2c
 
         static const constexpr bool debug = false;
 
-        auto &SM = Ctx->getSourceManager();
-        auto NodeB = SM.getFileLoc(Node.getBeginLoc());
-        auto NodeE = SM.getFileLoc(Node.getEndLoc());
-        auto TokB = SM.getFileLoc(Tokens.front().getLocation());
-        // Note: We do NOT use getEndLoc for the last token!
-        auto TokE = SM.getFileLoc(Tokens.back().getLocation());
         clang::SourceRange SpellingRange(NodeB, NodeE);
         clang::SourceRange TokFileRange(TokB, TokE);
         clang::SourceRange TokExpRange(
-            SM.getExpansionLoc(Tokens.front().getLocation()),
-            SM.getExpansionLoc(Tokens.back().getLocation()));
+            SM.getExpansionLoc(TokB),
+            SM.getExpansionLoc(TokE));
         clang::SourceRange ExpImmMacroCallerRange(
-            SM.getExpansionLoc(SM.getImmediateMacroCallerLoc(Node.getBeginLoc())),
-            SM.getExpansionLoc(SM.getImmediateMacroCallerLoc(Node.getEndLoc())));
+            SM.getExpansionLoc(NodeImmMCB),
+            SM.getExpansionLoc(NodeImmMCE));
 
         // Check that this node has not been matched before
         DeclStmtTypeLoc DSTL(&Node);
@@ -428,23 +509,49 @@ namespace cpp2c
         if (DSTL.ST)
         {
             std::vector<const clang::Stmt *> descendants;
-            for (auto child : DSTL.ST->children())
-                descendants.push_back(child);
+            for (auto &&child : DSTL.ST->children())
+                if (child)
+                    descendants.push_back(child);
             while (!descendants.empty())
             {
                 auto cur = descendants.back();
                 descendants.pop_back();
 
-                auto DescB = SM.getFileLoc(cur->getBeginLoc());
-                auto DescE = SM.getFileLoc(cur->getEndLoc());
-                clang::SourceRange FileRange(DescB, DescE);
+                // TODO: Might want to return false instead of continuing here
 
-                clang::SourceRange ExpImmMacroCallerRange(
-                    SM.getExpansionLoc(SM.getImmediateMacroCallerLoc(cur->getBeginLoc())),
-                    SM.getExpansionLoc(SM.getImmediateMacroCallerLoc(cur->getEndLoc())));
+                if (!cur)
+                    continue;
+
+                auto CurB = cur->getEndLoc();
+                auto CurE = cur->getEndLoc();
+
+                if (CurB.isInvalid() || CurE.isInvalid())
+                    continue;
+
+                auto CurFB = SM.getFileLoc(CurB);
+                auto CurFE = SM.getFileLoc(CurE);
+
+                if (CurFB.isInvalid() || CurFE.isInvalid())
+                    continue;
+
+                clang::SourceRange FileRange(CurFB, CurFE);
+
+                auto CurImmMCB = SM.getImmediateMacroCallerLoc(CurB);
+                auto CurImmMCE = SM.getImmediateMacroCallerLoc(CurE);
+
+                if (CurImmMCB.isInvalid() || CurImmMCE.isInvalid())
+                    continue;
+
+                auto CurImmMCExB = SM.getExpansionLoc(CurImmMCB);
+                auto CurImmMCExE = SM.getExpansionLoc(CurImmMCE);
+
+                if (CurImmMCExB.isInvalid() || CurImmMCExE.isInvalid())
+                    continue;
+
+                clang::SourceRange ExpImmMCRange(CurImmMCExB, CurImmMCExE);
 
                 if (!(TokFileRange.fullyContains(FileRange) ||
-                      TokExpRange == ExpImmMacroCallerRange))
+                      TokExpRange == ExpImmMCRange))
                 {
                     if (debug)
                     {
@@ -473,7 +580,8 @@ namespace cpp2c
                 }
 
                 for (auto &&child : cur->children())
-                    descendants.push_back(child);
+                    if (child)
+                        descendants.push_back(child);
             }
         }
 
