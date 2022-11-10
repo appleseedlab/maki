@@ -968,10 +968,10 @@ namespace cpp2c
             if (Exp->AlignedRoot && Exp->AlignedRoot->ST)
             {
                 debug("Checking for semantic properties");
-                Facts.IsHygienic = isHygienic(Ctx, Exp);
+                Facts.IsHygienic = isHygienic(Exp);
                 Facts.IsParameterSideEffectFree =
-                    isParameterSideEffectFree(Ctx, Exp);
-                Facts.IsLValueIndependent = isLValueIndependent(Ctx, Exp);
+                    isParameterSideEffectFree(Exp);
+                Facts.IsLValueIndependent = isLValueIndependent(Exp);
             }
 
             debug("Printing ", Exp->Name.str(), "facts");
