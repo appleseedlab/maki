@@ -6,7 +6,7 @@ namespace cpp2c
         const clang::ast_matchers::MatchFinder::MatchResult &Result)
     {
         if (auto ST = Result.Nodes.getNodeAs<clang::Stmt>("root"))
-            Stmts.push_back(ST);
+            Stmts.insert(ST);
         else
             assert(!"Matched a non-Stmt node");
     }

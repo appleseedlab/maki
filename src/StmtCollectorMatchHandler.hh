@@ -3,7 +3,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/AST/Stmt.h"
 
-#include <vector>
+#include <set>
 
 namespace cpp2c
 {
@@ -11,7 +11,7 @@ namespace cpp2c
         : public clang::ast_matchers::MatchFinder::MatchCallback
     {
     public:
-        std::vector<const clang::Stmt *> Stmts;
+        std::set<const clang::Stmt *> Stmts;
 
         virtual void run(
             const clang::ast_matchers::MatchFinder::MatchResult &Result)
