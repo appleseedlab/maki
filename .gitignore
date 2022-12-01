@@ -1,3 +1,6 @@
 .vscode
 build
 *.cpp2c
+evaluation/extracted_programs
+evaluation/*.tar.*
+evaluation/*.zip
