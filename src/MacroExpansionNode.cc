@@ -4,6 +4,8 @@
 
 #include "assert.h"
 
+#include <queue>
+
 namespace cpp2c
 {
 
@@ -66,4 +68,25 @@ namespace cpp2c
         else
             OS << "No arguments\n";
     }
+
+    std::set<MacroExpansionNode *> MacroExpansionNode::getDescendants()
+    {
+        std::set<MacroExpansionNode *> Desc;
+        // Collect descendants using BFS
+        std::queue<MacroExpansionNode *> Q;
+        for (auto &&Child : Children)
+            Q.push(Child);
+
+        while (!Q.empty())
+        {
+            auto Cur = Q.front();
+            Q.pop();
+            Desc.insert(Cur);
+            for (auto &&Child : Cur->Children)
+                Q.push(Child);
+        }
+
+        return Desc;
+    }
+
 } // namespace cpp2c

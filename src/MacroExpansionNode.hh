@@ -3,6 +3,7 @@
 #include "MacroExpansionArgument.hh"
 #include "DeclStmtTypeLoc.hh"
 
+#include "clang/AST/Stmt.h"
 #include "clang/Basic/SourceLocation.h"
 #include "clang/Lex/MacroInfo.h"
 
@@ -10,11 +11,13 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <vector>
+#include <set>
 
 namespace cpp2c
 {
     class MacroExpansionNode
     {
+
     public:
         // Info about the macro this is an expansion of
         clang::MacroInfo *MI;
@@ -74,6 +77,11 @@ namespace cpp2c
             llvm::raw_fd_ostream &OS,
             clang::SourceManager &SM,
             const clang::LangOptions &LO);
+
+        // Returns the set of all macros expanded under this invocation.
+        // Does not include macros passed to this macro's invocation as
+        // arguments.
+        std::set<MacroExpansionNode *> getDescendants();
     };
 
 } // namespace cpp2c
