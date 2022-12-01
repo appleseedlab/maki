@@ -47,7 +47,7 @@ int main(int argc, char const *argv[])
     // Does not invoke a later defined macro
     MULT(PI, TWO);
 
-    // Does not invokes a later defined macro
+    // Does not invoke a later defined macro
     E;
 
     return 0;
