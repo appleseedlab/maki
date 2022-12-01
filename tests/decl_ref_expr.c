@@ -5,8 +5,11 @@
 int main(int argc, char const *argv[])
 {
     int x, y;
+    // DeclRefExpr from body
     X;
+    // DeclRefExpr from argument
     REF(x);
+    // DeclRefExpr from argument
     ADDR_OF(y);
     return 0;
 }
