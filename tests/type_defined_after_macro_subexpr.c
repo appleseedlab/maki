@@ -15,9 +15,6 @@ int main(int argc, char const *argv[])
     // Type defined after macro subexpr
     M;
 
-    // Type defined after macro subexpr
-    F(a);
-
 #undef M
 #undef F
 #define M 1 + ((struct A){.x = 1}.x)
