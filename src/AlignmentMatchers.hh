@@ -1,8 +1,11 @@
 #pragma once
 
-#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "DeclStmtTypeLoc.hh"
+#include "MacroExpansionNode.hh"
 
+#include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Lex/Lexer.h"
+#include "clang/AST/ASTContext.h"
 
 #include <algorithm>
 
@@ -13,48 +16,7 @@ namespace cpp2c
     void storeChildren(cpp2c::DeclStmtTypeLoc DSTL,
                        std::set<const clang::Stmt *> &MatchedStmts,
                        std::set<const clang::Decl *> &MatchedDecls,
-                       std::set<const clang::TypeLoc *> &MatchedTypeLocs)
-    {
-        if (DSTL.ST)
-        {
-            std::stack<const clang::Stmt *> Descendants;
-            Descendants.push(DSTL.ST);
-            while (!Descendants.empty())
-            {
-                auto Cur = Descendants.top();
-                Descendants.pop();
-                if (!Cur)
-                    continue;
-
-                // llvm::errs() << "Inserting:\n";
-                // Cur->dumpColor();
-                MatchedStmts.insert(Cur);
-                for (auto &&child : Cur->children())
-                    if (child)
-                        Descendants.push(child);
-            }
-        }
-        else if (DSTL.D)
-        {
-            // llvm::errs() << "Inserting:\n";
-            // DSTL.D->dump();
-            MatchedDecls.insert(DSTL.D);
-        }
-        // else if (DSTL.TL)
-        // {
-        //     // TODO: Determine why this must be commented out to be able to
-        //     //       correctly match TypeLocs
-        //     // llvm::errs() << "Inserting:\n";
-        // {
-        //     auto QT = DSTL.TL->getType();
-        //     if (!QT.isNull())
-        //         QT.dump();
-        //     else
-        //         llvm::errs() << "<Null type>\n";
-        // }
-        //     MatchedTypeLocs.insert(DSTL.TL);
-        // }
-    }
+                       std::set<const clang::TypeLoc *> &MatchedTypeLocs);
 
     // Matches all AST nodes that align perfectly with the body of the given
     // macro expansion.
@@ -591,4 +553,8 @@ namespace cpp2c
 
         return true;
     }
+
+    void findAlignedASTNodesForExpansion(
+        cpp2c::MacroExpansionNode *Exp,
+        clang::ASTContext &Ctx);
 }
