@@ -36,9 +36,9 @@ int main(int argc, char const *argv[])
 {
     Person p;
     p.age = 30;
-    // Anonymous types
+    // Named argument types
     PARENT_GET_AGE(p);
-    // Anonymous types
+    // Named argument types
     PARENT_PTR_GET_AGE(&p);
 
     struct color_t c;

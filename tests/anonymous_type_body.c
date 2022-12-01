@@ -35,9 +35,9 @@ struct color_t
 int main(int argc, char const *argv[])
 {
     Person p;
-    // Anonymous types
+    // Named expansion type
     ID(p);
-    // Anonymous types
+    // Named expansion type
     PTR(p);
 
     struct color_t c;
