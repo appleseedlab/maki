@@ -1103,17 +1103,20 @@ namespace cpp2c
                     {"IsAnyArgumentNotAnExpression", IsAnyArgumentNotAnExpression},
                 };
 
-            llvm::outs() << "Top level invocation\t{\n";
+            // Only pretty print JSON if debug is on
+            const char sep = Debug ? '\n' : ' ';
+
+            llvm::outs() << "Top level invocation\t{" << sep;
             for (auto &&e : stringEntries)
-                llvm::outs() << entryString(e.first, e.second) << ",\n";
+                llvm::outs() << entryString(e.first, e.second) << "," << sep;
             for (auto &&e : intEntries)
-                llvm::outs() << entryInt(e.first, e.second) << ",\n";
+                llvm::outs() << entryInt(e.first, e.second) << "," << sep;
             for (int i = 0; i < boolEntries.size(); i++)
             {
                 auto e = boolEntries[i];
                 llvm::outs() << entryBool(e.first, e.second)
                              << (i == (boolEntries.size() - 1) ? "" : ",")
-                             << "\n";
+                             << sep;
             }
             llvm::outs() << " }\n";
         }
