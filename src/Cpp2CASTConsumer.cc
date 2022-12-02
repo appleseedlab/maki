@@ -664,39 +664,36 @@ namespace cpp2c
                 DC->InspectedMacroNames.find(Exp->Name.str()) !=
                 DC->InspectedMacroNames.end();
 
-            // Only gather remaining facts for top level invocations
+            // Definition location
+            auto Res = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionLoc());
+            IsDefinitionLocationValid = Res.first;
+            if (IsDefinitionLocationValid)
+                DefinitionLocation = Res.second;
+
+            // Invocation location
+            Res = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
+            IsInvocationLocationValid = Res.first;
+            if (IsInvocationLocationValid)
+                InvocationLocation = Res.second;
+
+            auto DefLoc = SM.getFileLoc(Exp->MI->getDefinitionLoc());
+
+            // Check if any macro this macro invokes were defined after
+            // this macro was
+            auto Descendants = Exp->getDescendants();
+
+            DoesBodyReferenceMacroDefinedAfterMacro = std::any_of(
+                Descendants.begin(),
+                Descendants.end(),
+                [&SM, &Exp](MacroExpansionNode *Desc)
+                { return SM.isBeforeInTranslationUnit(
+                      SM.getFileLoc(Exp->MI->getDefinitionLoc()),
+                      SM.getFileLoc(Desc->MI->getDefinitionLoc())); });
+
+            // Next get AST information for top level invocations
             if (Exp->Depth == 0 && !Exp->InMacroArg)
             {
                 debug("Top level invocation: ", Exp->Name.str());
-
-                // Definition location
-                auto Res = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionLoc());
-                IsDefinitionLocationValid = Res.first;
-                if (IsDefinitionLocationValid)
-                    DefinitionLocation = Res.second;
-
-                // Invocation location
-                Res = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
-                IsInvocationLocationValid = Res.first;
-                if (IsInvocationLocationValid)
-                    InvocationLocation = Res.second;
-
-                auto DefLoc = SM.getFileLoc(Exp->MI->getDefinitionLoc());
-
-                // Check if any macro this macro invokes were defined after
-                // this macro was
-                auto Descendants = Exp->getDescendants();
-
-                DoesBodyReferenceMacroDefinedAfterMacro = std::any_of(
-                    Descendants.begin(),
-                    Descendants.end(),
-                    [&SM, &Exp](MacroExpansionNode *Desc)
-                    { return SM.isBeforeInTranslationUnit(
-                          SM.getFileLoc(Exp->MI->getDefinitionLoc()),
-                          SM.getFileLoc(Desc->MI->getDefinitionLoc())); });
-
-                // Next get AST information for top level invocations
-
                 cpp2c::findAlignedASTNodesForExpansion(Exp, Ctx);
 
                 //// Print macro info
