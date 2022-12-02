@@ -590,19 +590,9 @@ namespace cpp2c
             assert(Exp);
             assert(Exp->MI);
 
-            // Stop here for nested macro invocations and macro arguments
-            if (Exp->Depth != 0 || Exp->InMacroArg)
-            {
-                print(Exp->Depth != 0
-                          ? "Nested Invocation"
-                          : "Invoked In Macro Argument",
-                      Exp->Name.str());
-                continue;
-            }
-
             // String properties
             std::string
-                Name = Exp->Name.str(),
+                Name,
                 DefinitionLocation,
                 InvocationLocation,
                 ASTKind,
@@ -610,14 +600,14 @@ namespace cpp2c
 
             // Integer properties
             int
-                InvocationDepth = Exp->Depth,
+                InvocationDepth,
                 NumASTRoots,
-                NumArguments = Exp->Arguments.size();
+                NumArguments;
 
             // Boolean properties
             bool
-                HasStringification = Exp->HasStringification,
-                HasTokenPasting = Exp->HasTokenPasting,
+                HasStringification,
+                HasTokenPasting,
                 HasAlignedArguments,
                 // TODO: Check this
                 HasSameNameAsOtherDeclaration,
@@ -636,11 +626,9 @@ namespace cpp2c
                 IsHygienic,
                 IsDefinitionLocationValid,
                 IsInvocationLocationValid,
-                IsObjectLike = Exp->MI->isObjectLike(),
-                IsInvokedInMacroArgument = Exp->InMacroArg,
-                IsNamePresentInCPPConditional =
-                    DC->InspectedMacroNames.find(Exp->Name.str()) !=
-                    DC->InspectedMacroNames.end(),
+                IsObjectLike,
+                IsInvokedInMacroArgument,
+                IsNamePresentInCPPConditional,
                 IsExpansionICE,
 
                 IsExpansionTypeNull,
@@ -665,363 +653,378 @@ namespace cpp2c
                 IsAnyArgumentNeverExpanded,
                 IsAnyArgumentNotAnExpression;
 
-            debug("Checking", Exp->Name.str());
+            Name = Exp->Name.str();
+            InvocationDepth = Exp->Depth;
+            NumArguments = Exp->Arguments.size();
+            HasStringification = Exp->HasStringification;
+            HasTokenPasting = Exp->HasTokenPasting;
+            IsObjectLike = Exp->MI->isObjectLike();
+            IsInvokedInMacroArgument = Exp->InMacroArg;
+            IsNamePresentInCPPConditional =
+                DC->InspectedMacroNames.find(Exp->Name.str()) !=
+                DC->InspectedMacroNames.end();
 
-            // Definition location
-            auto Res = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionLoc());
-            IsDefinitionLocationValid = Res.first;
-            if (IsDefinitionLocationValid)
-                DefinitionLocation = Res.second;
-
-            // Invocation location
-            Res = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
-            IsInvocationLocationValid = Res.first;
-            if (IsInvocationLocationValid)
-                InvocationLocation = Res.second;
-
-            auto DefLoc = SM.getFileLoc(Exp->MI->getDefinitionLoc());
-
-            // Check if any macro this macro invokes were defined after
-            // this macro was
-            auto Descendants = Exp->getDescendants();
-
-            DoesBodyReferenceMacroDefinedAfterMacro = std::any_of(
-                Descendants.begin(),
-                Descendants.end(),
-                [&SM, &Exp](MacroExpansionNode *Desc)
-                { return SM.isBeforeInTranslationUnit(
-                      SM.getFileLoc(Exp->MI->getDefinitionLoc()),
-                      SM.getFileLoc(Desc->MI->getDefinitionLoc())); });
-
-            // Next get AST information for top level invocations
-
-            cpp2c::findAlignedASTNodesForExpansion(Exp, Ctx);
-
-            //// Print macro info
-
-            // Exp->dumpMacroInfo(llvm::outs());
-
-            // Exp->dumpASTInfo(llvm::outs(),
-            //                  Ctx.getSourceManager(), Ctx.getLangOpts());
-
-            // Number of AST roots
-            NumASTRoots = Exp->ASTRoots.size();
-
-            // Determine the AST kind of the expansion
-            debug("Checking if expansion has aligned root");
-            if (Exp->AlignedRoot)
+            // Only gather remaining facts for top level invocations
+            if (Exp->Depth == 0 && !Exp->InMacroArg)
             {
-                auto D = Exp->AlignedRoot->D;
-                auto ST = Exp->AlignedRoot->ST;
-                auto TL = Exp->AlignedRoot->TL;
+                debug("Top level invocation: ", Exp->Name.str());
 
-                if (ST)
-                {
-                    debug("Aligns with a stmt");
-                    ASTKind = "Stmt";
-                }
-                else if (D)
-                {
-                    debug("Aligns with a decl");
-                    ASTKind = "Decl";
-                }
-                else if (TL)
-                {
-                    debug("Aligns with a type loc");
-                    ASTKind = "TypeLoc";
-                    // Check that this type specifier list does not include
-                    // a typedef that was defined after the macro was defined
-                    auto QT = TL->getType();
-                    IsExpansionTypeNull = QT.isNull();
-                    debug("Checking hasTypeDefinedAfter");
-                    IsExpansionTypeDefinedAfterMacro =
-                        hasTypeDefinedAfter(QT, SM, DefLoc);
-                    debug("Finished checking hasTypeDefinedAfter");
-                }
-                else
-                    assert("Aligns with node that is not a Decl/Stmt/TypeLoc");
-            }
+                // Definition location
+                auto Res = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionLoc());
+                IsDefinitionLocationValid = Res.first;
+                if (IsDefinitionLocationValid)
+                    DefinitionLocation = Res.second;
 
-            // Check that the number of AST nodes aligned with each argument
-            // equals the number of times that argument was expanded
-            debug("Checking if arguments are all aligned");
-            HasAlignedArguments = std::all_of(
-                Exp->Arguments.begin(),
-                Exp->Arguments.end(),
-                [](MacroExpansionArgument Arg)
-                { return Arg.AlignedRoots.size() == Arg.NumExpansions; });
-            debug("Done checking if arguments are all aligned");
+                // Invocation location
+                Res = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
+                IsInvocationLocationValid = Res.first;
+                if (IsInvocationLocationValid)
+                    InvocationLocation = Res.second;
 
-            std::set<const clang::Stmt *> StmtsExpandedFromArguments;
-            // Semantic properties of the macro's arguments
-            if (HasAlignedArguments)
-            {
-                debug("Collecting argument subtrees");
-                for (auto &&Arg : Exp->Arguments)
+                auto DefLoc = SM.getFileLoc(Exp->MI->getDefinitionLoc());
+
+                // Check if any macro this macro invokes were defined after
+                // this macro was
+                auto Descendants = Exp->getDescendants();
+
+                DoesBodyReferenceMacroDefinedAfterMacro = std::any_of(
+                    Descendants.begin(),
+                    Descendants.end(),
+                    [&SM, &Exp](MacroExpansionNode *Desc)
+                    { return SM.isBeforeInTranslationUnit(
+                          SM.getFileLoc(Exp->MI->getDefinitionLoc()),
+                          SM.getFileLoc(Desc->MI->getDefinitionLoc())); });
+
+                // Next get AST information for top level invocations
+
+                cpp2c::findAlignedASTNodesForExpansion(Exp, Ctx);
+
+                //// Print macro info
+
+                // Exp->dumpMacroInfo(llvm::outs());
+
+                // Exp->dumpASTInfo(llvm::outs(),
+                //                  Ctx.getSourceManager(), Ctx.getLangOpts());
+
+                // Number of AST roots
+                NumASTRoots = Exp->ASTRoots.size();
+
+                // Determine the AST kind of the expansion
+                debug("Checking if expansion has aligned root");
+                if (Exp->AlignedRoot)
                 {
-                    for (auto &&Root : Arg.AlignedRoots)
+                    auto D = Exp->AlignedRoot->D;
+                    auto ST = Exp->AlignedRoot->ST;
+                    auto TL = Exp->AlignedRoot->TL;
+
+                    if (ST)
                     {
-                        auto STs = subtrees(Root.ST);
-                        StmtsExpandedFromArguments.insert(STs.begin(), STs.end());
+                        debug("Aligns with a stmt");
+                        ASTKind = "Stmt";
                     }
+                    else if (D)
+                    {
+                        debug("Aligns with a decl");
+                        ASTKind = "Decl";
+                    }
+                    else if (TL)
+                    {
+                        debug("Aligns with a type loc");
+                        ASTKind = "TypeLoc";
+                        // Check that this type specifier list does not include
+                        // a typedef that was defined after the macro was defined
+                        auto QT = TL->getType();
+                        IsExpansionTypeNull = QT.isNull();
+                        debug("Checking hasTypeDefinedAfter");
+                        IsExpansionTypeDefinedAfterMacro =
+                            hasTypeDefinedAfter(QT, SM, DefLoc);
+                        debug("Finished checking hasTypeDefinedAfter");
+                    }
+                    else
+                        assert("Aligns with node that is not a Decl/Stmt/TypeLoc");
                 }
-                debug("Done collecting argument subtrees");
 
-                auto ExpandedFromArgument =
-                    [&StmtsExpandedFromArguments](const clang::Stmt *St)
-                { return StmtsExpandedFromArguments.find(St) !=
-                         StmtsExpandedFromArguments.end(); };
+                // Check that the number of AST nodes aligned with each argument
+                // equals the number of times that argument was expanded
+                debug("Checking if arguments are all aligned");
+                HasAlignedArguments = std::all_of(
+                    Exp->Arguments.begin(),
+                    Exp->Arguments.end(),
+                    [](MacroExpansionArgument Arg)
+                    { return Arg.AlignedRoots.size() == Arg.NumExpansions; });
+                debug("Done checking if arguments are all aligned");
 
-                DoesAnyArgumentHaveSideEffects = std::any_of(
-                    SideEffectExprs.begin(),
-                    SideEffectExprs.end(),
-                    ExpandedFromArgument);
-
-                DoesAnyArgumentContainDeclRefExpr = std::any_of(
-                    AllDeclRefExprs.begin(),
-                    AllDeclRefExprs.end(),
-                    ExpandedFromArgument);
-
-                IsAnyArgumentExpandedWhereModifiableValueRequired = std::any_of(
-                    SideEffectExprs.begin(),
-                    SideEffectExprs.end(),
-                    [&ExpandedFromArgument](const clang::Expr *E)
+                std::set<const clang::Stmt *> StmtsExpandedFromArguments;
+                // Semantic properties of the macro's arguments
+                if (HasAlignedArguments)
+                {
+                    debug("Collecting argument subtrees");
+                    for (auto &&Arg : Exp->Arguments)
                     {
-                        // Only consider side-effect expressions which were
-                        // not expanded from an argument of the same macro
-                        if (!ExpandedFromArgument(E))
+                        for (auto &&Root : Arg.AlignedRoots)
                         {
-                            clang::Expr *LHS = nullptr;
-                            auto B = clang::dyn_cast<clang::BinaryOperator>(E);
-                            auto U = clang::dyn_cast<clang::UnaryOperator>(E);
-                            if (B)
-                                LHS = B->getLHS();
-                            else if (U)
-                                LHS = U->getSubExpr();
-                            LHS = skipImplicitAndParens(LHS);
-                            return ExpandedFromArgument(LHS);
+                            auto STs = subtrees(Root.ST);
+                            StmtsExpandedFromArguments.insert(STs.begin(), STs.end());
                         }
-                        return false;
-                    });
+                    }
+                    debug("Done collecting argument subtrees");
 
-                IsAnyArgumentExpandedWhereAddressableValueRequired = std::any_of(
-                    AddressOfExprs.begin(),
-                    AddressOfExprs.end(),
-                    [&ExpandedFromArgument](const clang::UnaryOperator *U)
-                    {
-                        // Only consider address of expressions which were
-                        // not expanded from an argument of the same macro
-                        if (!ExpandedFromArgument(U))
+                    auto ExpandedFromArgument =
+                        [&StmtsExpandedFromArguments](const clang::Stmt *St)
+                    { return StmtsExpandedFromArguments.find(St) !=
+                             StmtsExpandedFromArguments.end(); };
+
+                    DoesAnyArgumentHaveSideEffects = std::any_of(
+                        SideEffectExprs.begin(),
+                        SideEffectExprs.end(),
+                        ExpandedFromArgument);
+
+                    DoesAnyArgumentContainDeclRefExpr = std::any_of(
+                        AllDeclRefExprs.begin(),
+                        AllDeclRefExprs.end(),
+                        ExpandedFromArgument);
+
+                    IsAnyArgumentExpandedWhereModifiableValueRequired = std::any_of(
+                        SideEffectExprs.begin(),
+                        SideEffectExprs.end(),
+                        [&ExpandedFromArgument](const clang::Expr *E)
                         {
-                            auto Operand = U->getSubExpr();
-                            Operand = skipImplicitAndParens(Operand);
-                            return ExpandedFromArgument(Operand);
-                        }
-                        return false;
-                    });
-
-                debug("Checking if any argument is conditionally evaluated");
-                IsAnyArgumentConditionallyEvaluated = std::any_of(
-                    StmtsExpandedFromArguments.begin(),
-                    StmtsExpandedFromArguments.end(),
-                    [&ConditionalExprOperands](const clang::Stmt *ArgStmt)
-                    {
-                        return std::any_of(
-                            ConditionalExprOperands.begin(),
-                            ConditionalExprOperands.end(),
-                            [&ArgStmt](const clang::Expr *Operand)
-                            { return inTree(ArgStmt, Operand); });
-                    });
-                debug("Done checking if any argument is conditionally evaluated");
-            }
-
-            std::set<const clang::Stmt *> StmtsExpandedFromBody;
-            // Semantic properties of the macro body
-            if (Exp->AlignedRoot && Exp->AlignedRoot->ST && HasAlignedArguments)
-            {
-                auto ST = Exp->AlignedRoot->ST;
-
-                debug("Collecting body subtrees");
-                StmtsExpandedFromBody = subtrees(ST);
-                // Remove all Stmts which were actually expanded from arguments
-                for (auto &&St : StmtsExpandedFromArguments)
-                    StmtsExpandedFromBody.erase(St);
-
-                auto ExpandedFromBody =
-                    [&StmtsExpandedFromBody](const clang::Stmt *St)
-                { return StmtsExpandedFromBody.find(St) !=
-                         StmtsExpandedFromBody.end(); };
-
-                // NOTE: This may not be correct if the definition of
-                // of the decl is separate from its declaration.
-                DoesBodyReferenceDeclDeclaredAfterMacro = std::any_of(
-                    AllDeclRefExprs.begin(),
-                    AllDeclRefExprs.end(),
-                    [&SM,
-                     &DefLoc,
-                     &ExpandedFromBody](const clang::DeclRefExpr *DRE)
-                    {
-                        if (ExpandedFromBody(DRE))
-                        {
-                            auto D = DRE->getDecl();
-                            auto DeclLoc = SM.getFileLoc(D->getLocation());
-
-                            return SM.isBeforeInTranslationUnit(DefLoc,
-                                                                DeclLoc);
-                        }
-                        return false;
-                    });
-
-                DoesBodyContainDeclRefExpr = std::any_of(
-                    AllDeclRefExprs.begin(),
-                    AllDeclRefExprs.end(),
-                    ExpandedFromBody);
-
-                DoesSubexpressionExpandedFromBodyHaveLocalType = std::any_of(
-                    ExprsWithLocallyDefinedTypes.begin(),
-                    ExprsWithLocallyDefinedTypes.end(),
-                    ExpandedFromBody);
-
-                DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro =
-                    std::any_of(
-                        StmtsExpandedFromBody.begin(),
-                        StmtsExpandedFromBody.end(),
-                        [&SM, &DefLoc](const clang::Stmt *St)
-                        {
-                            if (auto E = clang::dyn_cast<clang::Expr>(St))
+                            // Only consider side-effect expressions which were
+                            // not expanded from an argument of the same macro
+                            if (!ExpandedFromArgument(E))
                             {
-                                auto QT = E->getType();
-                                return hasTypeDefinedAfter(QT, SM, DefLoc);
+                                clang::Expr *LHS = nullptr;
+                                auto B = clang::dyn_cast<clang::BinaryOperator>(E);
+                                auto U = clang::dyn_cast<clang::UnaryOperator>(E);
+                                if (B)
+                                    LHS = B->getLHS();
+                                else if (U)
+                                    LHS = U->getSubExpr();
+                                LHS = skipImplicitAndParens(LHS);
+                                return ExpandedFromArgument(LHS);
                             }
                             return false;
                         });
 
-                IsHygienic = std::none_of(
-                    DeclRefExprsOfLocallyDefinedDecls.begin(),
-                    DeclRefExprsOfLocallyDefinedDecls.end(),
-                    ExpandedFromBody);
+                    IsAnyArgumentExpandedWhereAddressableValueRequired = std::any_of(
+                        AddressOfExprs.begin(),
+                        AddressOfExprs.end(),
+                        [&ExpandedFromArgument](const clang::UnaryOperator *U)
+                        {
+                            // Only consider address of expressions which were
+                            // not expanded from an argument of the same macro
+                            if (!ExpandedFromArgument(U))
+                            {
+                                auto Operand = U->getSubExpr();
+                                Operand = skipImplicitAndParens(Operand);
+                                return ExpandedFromArgument(Operand);
+                            }
+                            return false;
+                        });
 
-                IsInvokedWhereModifiableValueRequired = std::any_of(
-                    SideEffectExprsLHSs.begin(),
-                    SideEffectExprsLHSs.end(),
-                    [&ST](clang::Expr *E)
-                    { return skipImplicitAndParens(E) == ST; });
-
-                IsInvokedWhereAddressableValueRequired = std::any_of(
-                    AddressOfExprs.begin(),
-                    AddressOfExprs.end(),
-                    [&ST](const clang::UnaryOperator *U)
-                    { return skipImplicitAndParens(U->getSubExpr()) == ST; });
-
-                IsInvokedWhereICERequired =
-                    isDescendantOfStmtRequiringICE(Ctx, ST);
-
-                //// Generate type signature
-
-                // Body type information
-                TypeSignature = "void";
-                if (auto E = clang::dyn_cast<clang::Expr>(ST))
-                {
-                    ASTKind = "Expr";
-
-                    // Type information about the entire expansion
-                    auto QT = E->getType();
-                    auto T = QT.getTypePtrOrNull();
-                    IsExpansionTypeNull = !(QT.isNull() || T == nullptr);
-
-                    if (T)
-                    {
-                        IsExpansionTypeVoid = T->isVoidType();
-                        IsExpansionTypeAnonymous = hasAnonymousType(QT);
-                        IsExpansionTypeLocalType = hasLocalType(QT);
-                        auto CT = QT.getDesugaredType(Ctx)
-                                      .getUnqualifiedType()
-                                      .getCanonicalType();
-                        TypeSignature = CT.getAsString();
-                    }
-                    IsExpansionTypeDefinedAfterMacro =
-                        hasTypeDefinedAfter(QT, SM, DefLoc);
-
-                    // Whether this expression is an integral
-                    // constant expression
-                    IsExpansionICE = E->isIntegerConstantExpr(Ctx);
+                    debug("Checking if any argument is conditionally evaluated");
+                    IsAnyArgumentConditionallyEvaluated = std::any_of(
+                        StmtsExpandedFromArguments.begin(),
+                        StmtsExpandedFromArguments.end(),
+                        [&ConditionalExprOperands](const clang::Stmt *ArgStmt)
+                        {
+                            return std::any_of(
+                                ConditionalExprOperands.begin(),
+                                ConditionalExprOperands.end(),
+                                [&ArgStmt](const clang::Expr *Operand)
+                                { return inTree(ArgStmt, Operand); });
+                        });
+                    debug("Done checking if any argument is conditionally evaluated");
                 }
 
-                // Argument type information
-                IsAnyArgumentNotAnExpression = false;
-                IsAnyArgumentTypeNull = false;
-                IsAnyArgumentTypeDefinedAfterMacro = false;
-
-                if (Exp->MI->isFunctionLike() &&
-                    (ASTKind == "Stmt" || ASTKind == "Expr"))
-                    TypeSignature += "(";
-                debug("Iterating arguments");
-                int ArgNum = 0;
-                for (auto &&Arg : Exp->Arguments)
+                std::set<const clang::Stmt *> StmtsExpandedFromBody;
+                // Semantic properties of the macro body
+                if (Exp->AlignedRoot && Exp->AlignedRoot->ST && HasAlignedArguments)
                 {
-                    if (ArgNum != 0)
-                        TypeSignature += ", ";
-                    ArgNum += 1;
+                    auto ST = Exp->AlignedRoot->ST;
 
-                    IsAnyArgumentNeverExpanded = Arg.AlignedRoots.empty();
+                    debug("Collecting body subtrees");
+                    StmtsExpandedFromBody = subtrees(ST);
+                    // Remove all Stmts which were actually expanded from arguments
+                    for (auto &&St : StmtsExpandedFromArguments)
+                        StmtsExpandedFromBody.erase(St);
 
-                    if (Arg.AlignedRoots.empty())
-                        continue;
+                    auto ExpandedFromBody =
+                        [&StmtsExpandedFromBody](const clang::Stmt *St)
+                    { return StmtsExpandedFromBody.find(St) !=
+                             StmtsExpandedFromBody.end(); };
 
-                    auto Arg1stExpST = Arg.AlignedRoots.front().ST;
-                    auto E = clang::dyn_cast_or_null<clang::Expr>(Arg1stExpST);
+                    // NOTE: This may not be correct if the definition of
+                    // of the decl is separate from its declaration.
+                    DoesBodyReferenceDeclDeclaredAfterMacro = std::any_of(
+                        AllDeclRefExprs.begin(),
+                        AllDeclRefExprs.end(),
+                        [&SM,
+                         &DefLoc,
+                         &ExpandedFromBody](const clang::DeclRefExpr *DRE)
+                        {
+                            if (ExpandedFromBody(DRE))
+                            {
+                                auto D = DRE->getDecl();
+                                auto DeclLoc = SM.getFileLoc(D->getLocation());
 
-                    IsAnyArgumentNotAnExpression |= (E == nullptr);
+                                return SM.isBeforeInTranslationUnit(DefLoc,
+                                                                    DeclLoc);
+                            }
+                            return false;
+                        });
 
-                    debug("Checking if argument is an expression");
+                    DoesBodyContainDeclRefExpr = std::any_of(
+                        AllDeclRefExprs.begin(),
+                        AllDeclRefExprs.end(),
+                        ExpandedFromBody);
 
-                    if (!E)
-                        continue;
+                    DoesSubexpressionExpandedFromBodyHaveLocalType = std::any_of(
+                        ExprsWithLocallyDefinedTypes.begin(),
+                        ExprsWithLocallyDefinedTypes.end(),
+                        ExpandedFromBody);
 
-                    std::string ArgTypeStr = "<Null>";
+                    DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro =
+                        std::any_of(
+                            StmtsExpandedFromBody.begin(),
+                            StmtsExpandedFromBody.end(),
+                            [&SM, &DefLoc](const clang::Stmt *St)
+                            {
+                                if (auto E = clang::dyn_cast<clang::Expr>(St))
+                                {
+                                    auto QT = E->getType();
+                                    return hasTypeDefinedAfter(QT, SM, DefLoc);
+                                }
+                                return false;
+                            });
 
-                    // Type information about arguments
-                    auto QT = E->getType();
-                    auto T = QT.getTypePtrOrNull();
-                    IsAnyArgumentTypeNull |= QT.isNull() || T == nullptr;
+                    IsHygienic = std::none_of(
+                        DeclRefExprsOfLocallyDefinedDecls.begin(),
+                        DeclRefExprsOfLocallyDefinedDecls.end(),
+                        ExpandedFromBody);
 
-                    if (T)
+                    IsInvokedWhereModifiableValueRequired = std::any_of(
+                        SideEffectExprsLHSs.begin(),
+                        SideEffectExprsLHSs.end(),
+                        [&ST](clang::Expr *E)
+                        { return skipImplicitAndParens(E) == ST; });
+
+                    IsInvokedWhereAddressableValueRequired = std::any_of(
+                        AddressOfExprs.begin(),
+                        AddressOfExprs.end(),
+                        [&ST](const clang::UnaryOperator *U)
+                        { return skipImplicitAndParens(U->getSubExpr()) == ST; });
+
+                    IsInvokedWhereICERequired =
+                        isDescendantOfStmtRequiringICE(Ctx, ST);
+
+                    //// Generate type signature
+
+                    // Body type information
+                    TypeSignature = "void";
+                    if (auto E = clang::dyn_cast<clang::Expr>(ST))
                     {
-                        IsAnyArgumentTypeVoid = T->isVoidType();
-                        IsAnyArgumentTypeAnonymous = hasAnonymousType(QT);
-                        IsAnyArgumentTypeLocalType = hasLocalType(QT);
-                        auto CT = QT.getDesugaredType(Ctx)
-                                      .getUnqualifiedType()
-                                      .getCanonicalType();
-                        ArgTypeStr = CT.getAsString();
-                    }
-                    IsAnyArgumentTypeDefinedAfterMacro |=
-                        hasTypeDefinedAfter(QT, SM, DefLoc);
+                        ASTKind = "Expr";
 
-                    TypeSignature += ArgTypeStr;
+                        // Type information about the entire expansion
+                        auto QT = E->getType();
+                        auto T = QT.getTypePtrOrNull();
+                        IsExpansionTypeNull = !(QT.isNull() || T == nullptr);
+
+                        if (T)
+                        {
+                            IsExpansionTypeVoid = T->isVoidType();
+                            IsExpansionTypeAnonymous = hasAnonymousType(QT);
+                            IsExpansionTypeLocalType = hasLocalType(QT);
+                            auto CT = QT.getDesugaredType(Ctx)
+                                          .getUnqualifiedType()
+                                          .getCanonicalType();
+                            TypeSignature = CT.getAsString();
+                        }
+                        IsExpansionTypeDefinedAfterMacro =
+                            hasTypeDefinedAfter(QT, SM, DefLoc);
+
+                        // Whether this expression is an integral
+                        // constant expression
+                        IsExpansionICE = E->isIntegerConstantExpr(Ctx);
+                    }
+
+                    // Argument type information
+                    IsAnyArgumentNotAnExpression = false;
+                    IsAnyArgumentTypeNull = false;
+                    IsAnyArgumentTypeDefinedAfterMacro = false;
+
+                    if (Exp->MI->isFunctionLike() &&
+                        (ASTKind == "Stmt" || ASTKind == "Expr"))
+                        TypeSignature += "(";
+                    debug("Iterating arguments");
+                    int ArgNum = 0;
+                    for (auto &&Arg : Exp->Arguments)
+                    {
+                        if (ArgNum != 0)
+                            TypeSignature += ", ";
+                        ArgNum += 1;
+
+                        IsAnyArgumentNeverExpanded = Arg.AlignedRoots.empty();
+
+                        if (Arg.AlignedRoots.empty())
+                            continue;
+
+                        auto Arg1stExpST = Arg.AlignedRoots.front().ST;
+                        auto E = clang::dyn_cast_or_null<clang::Expr>(Arg1stExpST);
+
+                        IsAnyArgumentNotAnExpression |= (E == nullptr);
+
+                        debug("Checking if argument is an expression");
+
+                        if (!E)
+                            continue;
+
+                        std::string ArgTypeStr = "<Null>";
+
+                        // Type information about arguments
+                        auto QT = E->getType();
+                        auto T = QT.getTypePtrOrNull();
+                        IsAnyArgumentTypeNull |= QT.isNull() || T == nullptr;
+
+                        if (T)
+                        {
+                            IsAnyArgumentTypeVoid = T->isVoidType();
+                            IsAnyArgumentTypeAnonymous = hasAnonymousType(QT);
+                            IsAnyArgumentTypeLocalType = hasLocalType(QT);
+                            auto CT = QT.getDesugaredType(Ctx)
+                                          .getUnqualifiedType()
+                                          .getCanonicalType();
+                            ArgTypeStr = CT.getAsString();
+                        }
+                        IsAnyArgumentTypeDefinedAfterMacro |=
+                            hasTypeDefinedAfter(QT, SM, DefLoc);
+
+                        TypeSignature += ArgTypeStr;
+                    }
+                    debug("Finished iterating arguments");
+                    if (Exp->MI->isFunctionLike() &&
+                        (ASTKind == "Stmt" || ASTKind == "Expr"))
+                        TypeSignature += ")";
                 }
-                debug("Finished iterating arguments");
-                if (Exp->MI->isFunctionLike() &&
-                    (ASTKind == "Stmt" || ASTKind == "Expr"))
-                    TypeSignature += ")";
+
+                // Set of all Stmts expanded from macro
+                std::set<const clang::Stmt *> AllStmtsExpandedFromMacro =
+                    StmtsExpandedFromBody;
+                AllStmtsExpandedFromMacro.insert(StmtsExpandedFromArguments.begin(),
+                                                 StmtsExpandedFromArguments.end());
+
+                DoesExpansionHaveControlFlowStmt = std::any_of(
+                    AllStmtsExpandedFromMacro.begin(),
+                    AllStmtsExpandedFromMacro.end(),
+                    [](const clang::Stmt *St)
+                    {
+                        return clang::isa<clang::ReturnStmt>(St) ||
+                               clang::isa<clang::ContinueStmt>(St) ||
+                               clang::isa<clang::BreakStmt>(St) ||
+                               clang::isa<clang::GotoStmt>(St);
+                    });
             }
-
-            // Set of all Stmts expanded from macro
-            std::set<const clang::Stmt *> AllStmtsExpandedFromMacro =
-                StmtsExpandedFromBody;
-            AllStmtsExpandedFromMacro.insert(StmtsExpandedFromArguments.begin(),
-                                             StmtsExpandedFromArguments.end());
-
-            DoesExpansionHaveControlFlowStmt = std::any_of(
-                AllStmtsExpandedFromMacro.begin(),
-                AllStmtsExpandedFromMacro.end(),
-                [](const clang::Stmt *St)
-                {
-                    return clang::isa<clang::ReturnStmt>(St) ||
-                           clang::isa<clang::ContinueStmt>(St) ||
-                           clang::isa<clang::BreakStmt>(St) ||
-                           clang::isa<clang::GotoStmt>(St);
-                });
 
             auto entryString = [](std::string k, std::string v) -> std::string
             {
@@ -1106,7 +1109,7 @@ namespace cpp2c
             // Only pretty print JSON if debug is on
             const char sep = Debug ? '\n' : ' ';
 
-            llvm::outs() << "Top level invocation\t{" << sep;
+            llvm::outs() << "Invocation" << delim << '{' << sep;
             for (auto &&e : stringEntries)
                 llvm::outs() << entryString(e.first, e.second) << "," << sep;
             for (auto &&e : intEntries)
