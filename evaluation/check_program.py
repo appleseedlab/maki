@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
-from dataclasses import dataclass
 import json
 import os
 import subprocess
 import sys
+from dataclasses import dataclass
 from itertools import repeat
 from multiprocessing.pool import ThreadPool
+from typing import List
 
 
 @dataclass
@@ -28,11 +29,19 @@ USAGE_STRING = './check_program.py ' + ' '.join(ARGS)
 DELIM = "\t"
 
 
+def removeprefix(s: str, t: str):
+    '''Custom removeprefix function for Python 3.8.10 support'''
+    i = s.find(t)
+    if i == -1:
+        return s
+    return s[i+len(t):]
+
+
 def cpp2c(cpp2c_so_path: str,
           cc: CompileCommand,
           src_dir: str,
           dst_path: str,
-          i: list[int], n: int) -> None:
+          i: List[int], n: int) -> None:
     '''
     Runs Cpp2C on the program that the given compile_commands.json file
     comprises in the given src_dir, and prints the results to the outdir
@@ -119,7 +128,10 @@ def main():
     fp.close()
 
     # only analyze src files
-    ccs = [cc for cc in ccs if cc.directory.startswith(src_dir)]
+    ccs = [
+        cc for cc in ccs
+        if os.path.join(cc.directory, cc.file).startswith(src_dir)
+    ]
 
     # check if a file path contains the delimiter or '"' since this would
     # break the analysis
@@ -143,7 +155,7 @@ def main():
     dst_dirs = [
         os.path.dirname(
             os.path.join(dst_dir,
-                         fp.removeprefix(src_dir).removeprefix('/')))
+                         removeprefix(removeprefix(fp, src_dir), ('/'))))
         for fp in fullpaths
     ]
     dst_paths = [
@@ -151,6 +163,7 @@ def main():
                      os.path.splitext(os.path.basename(fp))[0] + '.cpp2c')
         for d, fp in zip(dst_dirs, fullpaths)
     ]
+    os.makedirs(dst_dir, exist_ok=True)
     for d in dst_dirs:
         os.makedirs(d, exist_ok=True)
 
