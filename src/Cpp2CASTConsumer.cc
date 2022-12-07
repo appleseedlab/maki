@@ -39,9 +39,12 @@ namespace cpp2c
         {
             auto Cur = Q.front();
             Q.pop();
-            Subtrees.insert(Cur);
-            for (auto &&Child : Cur->children())
-                Q.push(Child);
+            if (Cur)
+            {
+                Subtrees.insert(Cur);
+                for (auto &&Child : Cur->children())
+                    Q.push(Child);
+            }
         }
         return Subtrees;
     }
@@ -67,8 +70,9 @@ namespace cpp2c
             Q.pop();
             if (LHS == Cur)
                 return true;
-            for (auto &&Child : Cur->children())
-                Q.push(Child);
+            if (Cur)
+                for (auto &&Child : Cur->children())
+                    Q.push(Child);
         }
         return false;
     }
@@ -895,6 +899,8 @@ namespace cpp2c
                                 return false;
                             });
 
+                    // TODO: Count macros which reference local declarations
+                    // declared INSIDE the macro expansion as hygienic
                     IsHygienic = std::none_of(
                         DeclRefExprsOfLocallyDefinedDecls.begin(),
                         DeclRefExprsOfLocallyDefinedDecls.end(),
