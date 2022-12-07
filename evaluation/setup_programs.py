@@ -30,10 +30,10 @@ class Program:
         self.extracted_archive_path = os.path.join(
             EXTRACTED_PROGRAMS_DIR, self.name)
 
-    def configure(self) -> CompletedProcess[bytes]:
+    def configure(self) -> CompletedProcess:
         return run(self.configure_script, shell=True)
 
-    def build(self) -> CompletedProcess[bytes]:
+    def build(self) -> CompletedProcess:
         return run(self.build_script, shell=True)
 
 
