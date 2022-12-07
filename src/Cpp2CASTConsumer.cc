@@ -899,12 +899,33 @@ namespace cpp2c
                                 return false;
                             });
 
-                    // TODO: Count macros which reference local declarations
-                    // declared INSIDE the macro expansion as hygienic
+                    // We only allow references to declarations declared
+                    // within the macro expansion itself
                     IsHygienic = std::none_of(
                         DeclRefExprsOfLocallyDefinedDecls.begin(),
                         DeclRefExprsOfLocallyDefinedDecls.end(),
-                        ExpandedFromBody);
+                        [&ST, &SM, &ExpandedFromBody](const clang::DeclRefExpr *DRE)
+                        {
+                            // References that don't come from the macro's body
+                            // are fine
+                            if (!ExpandedFromBody(DRE))
+                                return false;
+
+                            auto B = SM.getFileLoc(ST->getBeginLoc());
+                            auto E = SM.getFileLoc(ST->getEndLoc());
+                            auto D = DRE->getDecl();
+                            if (!D)
+                                return false;
+
+                            auto L = SM.getFileLoc(D->getLocation());
+                            // NOTE: It would be nice if we could instead walk
+                            // the AST and check if this decl is under the AST
+                            // aligned with this macro.
+                            // This should work for now though.
+                            // TODO: Test that this will treat declarations
+                            // coming from the macro as hygienic
+                            return !clang::SourceRange(B, E).fullyContains(L);
+                        });
 
                     IsInvokedWhereModifiableValueRequired = std::any_of(
                         SideEffectExprsLHSs.begin(),
