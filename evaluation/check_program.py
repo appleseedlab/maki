@@ -64,6 +64,7 @@ def cpp2c(cpp2c_so_path: str,
         '-flto=auto',
 
         # warning causing
+        '-ffat-lto-objects',
         '-Wno-format-truncation',
         '-Wno-format-overflow',
         '-Wno-unused-but-set-variable',
@@ -80,8 +81,12 @@ def cpp2c(cpp2c_so_path: str,
         '-Wno-aggressive-loop-optimizations',
     }
 
-    args: list[str] = [arg for arg in cc.arguments
-                       if not any([arg.startswith(ua) for ua in clang_unknown_args])]
+    args: list[str] = [
+        # ensure that escaped double quotes are passed correctly
+        arg.replace('"', r'\"')
+        for arg in cc.arguments
+        if not any([arg.startswith(ua) for ua in clang_unknown_args])
+    ]
     # use clang-11
     args[0] = 'clang-11'
     # pass cpp2c plugin shared library file
@@ -98,6 +103,7 @@ def cpp2c(cpp2c_so_path: str,
         ofp.flush()
         # change to the directory, then run cpp2c
         cmd = f"cd {cc.directory} && {' '.join(args)}"
+        print(cmd)
         p = subprocess.run(cmd, shell=True, text=True, stdout=ofp)
         if p.stderr:
             print(p.stderr)
