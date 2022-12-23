@@ -401,25 +401,25 @@ namespace cpp2c
             print("Definition", Name, Valid, DefLocOrError);
         }
 
+        // Collect declaration ranges
+        std::vector<const clang::Decl *> TopLevelDecls =
+            ({
+                MatchFinder Finder;
+                DeclCollectorMatchHandler Handler;
+                auto Matcher = decl(unless(anyOf(
+                                        isImplicit(),
+                                        translationUnitDecl())))
+                                   .bind("root");
+                Finder.addMatcher(Matcher, &Handler);
+                Finder.matchAST(Ctx);
+                Handler.Decls;
+            });
+
         // Print names of macros inspected by the preprocessor
         for (auto &&Name : DC->InspectedMacroNames)
             print("InspectedByCPP", Name);
         // Print include-directive information
         {
-            // Collect declaration ranges
-            std::vector<const clang::Decl *> Decls =
-                ({
-                    MatchFinder Finder;
-                    DeclCollectorMatchHandler Handler;
-                    auto Matcher = decl(unless(anyOf(
-                                            isImplicit(),
-                                            translationUnitDecl())))
-                                       .bind("root");
-                    Finder.addMatcher(Matcher, &Handler);
-                    Finder.matchAST(Ctx);
-                    Handler.Decls;
-                });
-
             std::set<llvm::StringRef> LocalIncludes;
             for (auto &&IEL : IC->IncludeEntriesLocs)
             {
@@ -428,7 +428,8 @@ namespace cpp2c
                 std::string IncludeName = "";
 
                 // Check if included at global scope or not
-                auto Res = isGlobalInclude(SM, LO, IEL, LocalIncludes, Decls);
+                auto Res = isGlobalInclude(SM, LO, IEL, LocalIncludes,
+                                           TopLevelDecls);
                 if (!Res.first)
                     LocalIncludes.insert(Res.second);
 
@@ -613,7 +614,6 @@ namespace cpp2c
                 HasStringification,
                 HasTokenPasting,
                 HasAlignedArguments,
-                // TODO: Check this
                 HasSameNameAsOtherDeclaration,
 
                 DoesExpansionHaveControlFlowStmt,
@@ -662,6 +662,49 @@ namespace cpp2c
             NumArguments = Exp->Arguments.size();
             HasStringification = Exp->HasStringification;
             HasTokenPasting = Exp->HasTokenPasting;
+
+            // TODO: Test this!
+            HasSameNameAsOtherDeclaration =
+                // First check if any macro defined before this macro has the
+                // same name as any of this macro's parameters
+                std::any_of(
+                    DC->MacroNamesDefinitions.begin(),
+                    DC->MacroNamesDefinitions.end(),
+                    [&SM, &Exp](std::pair<std::string,
+                                          const clang::MacroDirective *>
+                                    Entry)
+                    {
+                        return SM.isBeforeInTranslationUnit(
+                                   SM.getFileLoc(Entry.second
+                                                     ->getDefinition()
+                                                     .getLocation()),
+                                   SM.getFileLoc(Exp->MI
+                                                     ->getDefinitionLoc())) &&
+                               std::any_of(
+                                   Exp->Arguments.begin(),
+                                   Exp->Arguments.end(),
+                                   [&Entry](MacroExpansionArgument Arg)
+                                   {
+                                       return Arg.Name.str() == Entry.first;
+                                   });
+                    }) ||
+                // Also check if any global declarations defined before this macro
+                // have the same name as this macro
+                std::any_of(
+                    TopLevelDecls.begin(),
+                    TopLevelDecls.end(),
+                    [&SM, &Exp](const clang::Decl *D)
+                    {
+                        auto ND = clang::dyn_cast_or_null<clang::NamedDecl>(D);
+                        if (!ND)
+                            return false;
+                        if (ND->getName().empty())
+                            return false;
+                        return ND->getName().str() == Exp->Name.str() &&
+                               SM.isBeforeInTranslationUnit(
+                                   SM.getFileLoc(D->getBeginLoc()),
+                                   SM.getFileLoc(Exp->MI->getDefinitionLoc()));
+                    });
             IsObjectLike = Exp->MI->isObjectLike();
             IsInvokedInMacroArgument = Exp->InMacroArg;
             IsNamePresentInCPPConditional =
@@ -922,8 +965,6 @@ namespace cpp2c
                             // the AST and check if this decl is under the AST
                             // aligned with this macro.
                             // This should work for now though.
-                            // TODO: Test that this will treat declarations
-                            // coming from the macro as hygienic
                             return !clang::SourceRange(B, E).fullyContains(L);
                         });
 
@@ -1138,7 +1179,7 @@ namespace cpp2c
                 llvm::outs() << entryString(e.first, e.second) << "," << sep;
             for (auto &&e : intEntries)
                 llvm::outs() << entryInt(e.first, e.second) << "," << sep;
-            for (int i = 0; i < boolEntries.size(); i++)
+            for (size_t i = 0; i < boolEntries.size(); i++)
             {
                 auto e = boolEntries[i];
                 llvm::outs() << entryBool(e.first, e.second)
