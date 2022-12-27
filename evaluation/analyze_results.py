@@ -4,6 +4,7 @@ import json
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
+from typing import Dict, Set
 
 USAGE_STRING = r'./analyze_results.py RESULTS_FILE'
 
@@ -76,7 +77,7 @@ class Invocation:
     IsAnyArgumentNotAnExpression: bool
 
 
-MacroMap = dict[Macro, set[Invocation]]
+MacroMap = Dict[Macro, Set[Invocation]]
 
 
 def main():
