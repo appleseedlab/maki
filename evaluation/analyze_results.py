@@ -32,7 +32,6 @@ class Invocation:
     HasStringification: bool
     HasTokenPasting: bool
     HasAlignedArguments: bool
-    # TODO: Check this
     HasSameNameAsOtherDeclaration: bool
 
     DoesExpansionHaveControlFlowStmt: bool
