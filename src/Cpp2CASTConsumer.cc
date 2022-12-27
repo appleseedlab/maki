@@ -653,6 +653,7 @@ namespace cpp2c
 
                 IsAnyArgumentExpandedWhereModifiableValueRequired,
                 IsAnyArgumentExpandedWhereAddressableValueRequired,
+                // TODO: Test
                 IsAnyArgumentConditionallyEvaluated,
                 IsAnyArgumentNeverExpanded,
                 IsAnyArgumentNotAnExpression;
@@ -663,7 +664,6 @@ namespace cpp2c
             HasStringification = Exp->HasStringification;
             HasTokenPasting = Exp->HasTokenPasting;
 
-            // TODO: Test this!
             HasSameNameAsOtherDeclaration =
                 // First check if any macro defined before this macro has the
                 // same name as any of this macro's parameters
@@ -969,16 +969,41 @@ namespace cpp2c
                         });
 
                     IsInvokedWhereModifiableValueRequired = std::any_of(
-                        SideEffectExprsLHSs.begin(),
-                        SideEffectExprsLHSs.end(),
-                        [&ST](clang::Expr *E)
-                        { return skipImplicitAndParens(E) == ST; });
+                        SideEffectExprs.begin(),
+                        SideEffectExprs.end(),
+                        [&ST, &ExpandedFromBody](const clang::Expr *E)
+                        {
+                            // Only consider side-effect expressions which were
+                            // not expanded from the body of the same macro
+                            if (!ExpandedFromBody(E))
+                            {
+                                clang::Expr *LHS = nullptr;
+                                auto B = clang::dyn_cast<clang::BinaryOperator>(E);
+                                auto U = clang::dyn_cast<clang::UnaryOperator>(E);
+                                if (B)
+                                    LHS = B->getLHS();
+                                else if (U)
+                                    LHS = U->getSubExpr();
+                                return inTree(ST, LHS);
+                            }
+                            return false;
+                        });
 
                     IsInvokedWhereAddressableValueRequired = std::any_of(
                         AddressOfExprs.begin(),
                         AddressOfExprs.end(),
-                        [&ST](const clang::UnaryOperator *U)
-                        { return skipImplicitAndParens(U->getSubExpr()) == ST; });
+                        [&ST, &ExpandedFromBody](const clang::UnaryOperator *U)
+                        {
+                            // Only consider address of expressions which were
+                            // not expanded from the body of the same macro
+                            if (!ExpandedFromBody(U))
+                            {
+                                auto Operand = U->getSubExpr();
+                                Operand = skipImplicitAndParens(Operand);
+                                return inTree(ST, Operand);
+                            }
+                            return false;
+                        });
 
                     IsInvokedWhereICERequired =
                         isDescendantOfStmtRequiringICE(Ctx, ST);
