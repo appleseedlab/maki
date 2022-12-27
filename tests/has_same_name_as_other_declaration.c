@@ -19,6 +19,23 @@ int buzz()
 
 #define buzz() 5
 
+enum fizz
+{
+    fizz1,
+};
+
+#define fizz() 6
+
+union fuzz
+{
+};
+
+#define fuzz() 7
+
+typedef int faz;
+
+#define faz int
+
 int main(int argc, char const *argv[])
 {
     // A parameter has the same name as another declaration
@@ -33,8 +50,16 @@ int main(int argc, char const *argv[])
     // Has the same name as another declaration (function declaration)
     buzz();
 
-    // TODO: Test enums, unions, and typedefs
-    // TODO: Test the opposite case as well
+    // Has the same name as another declaration (enum declaration)
+    fizz();
+
+    // Has the same name as another declaration (union declaration)
+    fuzz();
+
+    // Has the same name as another declaration (typedef declaration)
+    faz x;
+
+    // TODO: Test the opposite case as well (doesn't have same name as other declaration)
 
     return 0;
 }
