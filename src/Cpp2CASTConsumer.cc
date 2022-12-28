@@ -653,7 +653,6 @@ namespace cpp2c
 
                 IsAnyArgumentExpandedWhereModifiableValueRequired,
                 IsAnyArgumentExpandedWhereAddressableValueRequired,
-                // TODO: Test
                 IsAnyArgumentConditionallyEvaluated,
                 IsAnyArgumentNeverExpanded,
                 IsAnyArgumentNotAnExpression;
