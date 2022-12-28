@@ -35,7 +35,7 @@ class Invocation:
     HasAlignedArguments: bool
     HasSameNameAsOtherDeclaration: bool
 
-    DoesExpansionHaveControlFlowStmt: bool
+    IsExpansionControlFlowStmt: bool
 
     DoesBodyReferenceMacroDefinedAfterMacro: bool
     DoesBodyReferenceDeclDeclaredAfterMacro: bool

@@ -616,7 +616,7 @@ namespace cpp2c
                 HasAlignedArguments,
                 HasSameNameAsOtherDeclaration,
 
-                DoesExpansionHaveControlFlowStmt,
+                IsExpansionControlFlowStmt,
 
                 DoesBodyReferenceMacroDefinedAfterMacro,
                 DoesBodyReferenceDeclDeclaredAfterMacro,
@@ -1103,7 +1103,7 @@ namespace cpp2c
                 AllStmtsExpandedFromMacro.insert(StmtsExpandedFromArguments.begin(),
                                                  StmtsExpandedFromArguments.end());
 
-                DoesExpansionHaveControlFlowStmt = std::any_of(
+                IsExpansionControlFlowStmt = std::any_of(
                     AllStmtsExpandedFromMacro.begin(),
                     AllStmtsExpandedFromMacro.end(),
                     [](const clang::Stmt *St)
@@ -1153,7 +1153,7 @@ namespace cpp2c
                     {"HasAlignedArguments", HasAlignedArguments},
                     {"HasSameNameAsOtherDeclaration", HasSameNameAsOtherDeclaration},
 
-                    {"DoesExpansionHaveControlFlowStmt", DoesExpansionHaveControlFlowStmt},
+                    {"IsExpansionControlFlowStmt", IsExpansionControlFlowStmt},
 
                     {"DoesBodyReferenceMacroDefinedAfterMacro", DoesBodyReferenceMacroDefinedAfterMacro},
                     {"DoesBodyReferenceDeclDeclaredAfterMacro", DoesBodyReferenceDeclDeclaredAfterMacro},
