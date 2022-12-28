@@ -31,6 +31,12 @@ def main():
 
         src_dir = p.extracted_archive_path + '/' + p.src_dir
         dst_dir = f"./results/{p.name}"
+
+        # TODO: add an option to run programs even if results already exist
+        if os.path.exists(dst_dir):
+            print(f"info: skipping {p.name}, already evaluated")
+            continue
+
         cmd = ' '.join(["./check_program.py ",
                        cpp2c_so_path,
                        p.extracted_archive_path,
