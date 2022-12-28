@@ -154,14 +154,21 @@ def main():
           sum([len([i for i in is_ if i.IsInvokedInMacroArgument])
                for is_ in src_mis.values()]))
 
+    print('aligned src invocations',
+          sum([len([i for i in is_
+                    if all([i.NumASTRoots == 1,
+                           i.HasAlignedArguments])])
+               for is_ in src_mis.values()]))
+
     # TODO: double check that these are actually the minimum requirements for
     # transformation
+
     print('transformable src invocations',
           sum([len([i for i in is_
                     if all([i.NumASTRoots == 1,
                            i.HasAlignedArguments,
-                           not (not i.IsObjectLike
-                                and i.IsAnyArgumentNotAnExpression)])])
+                           not i.IsAnyArgumentNotAnExpression,
+                           not i.IsExpansionControlFlowStmt])])
                for is_ in src_mis.values()]))
 
 
