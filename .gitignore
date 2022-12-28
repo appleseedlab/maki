@@ -4,3 +4,4 @@ build
 evaluation/extracted_programs
 evaluation/*.tar.*
 evaluation/*.zip
+__pycache__
