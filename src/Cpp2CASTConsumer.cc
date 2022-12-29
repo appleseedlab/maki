@@ -172,7 +172,7 @@ namespace cpp2c
                 if (!ND)
                     return false;
 
-                return ND->getName().empty();
+                return ND->getIdentifier() == nullptr || ND->getName().empty();
             });
     }
 
@@ -439,6 +439,8 @@ namespace cpp2c
                 print("Include", Valid, IncludeName);
             }
         }
+        debug("Finished checking includes");
+
 
         // Collect certain sets of AST nodes that will be used for checking
         // whether properties are satisfied
@@ -697,9 +699,10 @@ namespace cpp2c
                         auto ND = clang::dyn_cast_or_null<clang::NamedDecl>(D);
                         if (!ND)
                             return false;
-                        if (ND->getName().empty())
+                        auto II = ND->getIdentifier();
+                        if (!II)
                             return false;
-                        return ND->getName().str() == Exp->Name.str() &&
+                        return II->getName().str() == Exp->Name.str() &&
                                SM.isBeforeInTranslationUnit(
                                    SM.getFileLoc(D->getBeginLoc()),
                                    SM.getFileLoc(Exp->MI->getDefinitionLoc()));
