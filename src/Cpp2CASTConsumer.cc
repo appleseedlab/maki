@@ -90,16 +90,36 @@ namespace cpp2c
 
         auto T = QT.getTypePtrOrNull();
 
-        while (T != nullptr &&
-               // NOTE: I'm not sure why we need this check, but if I remove
-               // it then Clang may crash on certain inputs.
-               // See tests/declare_bitmap.c
-               (!T->getCanonicalTypeInternal().isNull()) &&
-               (T->isAnyPointerType() || T->isArrayType()))
-            T = T->getPointeeOrArrayElementType();
+            while (true)
+            {
+                debug("checking if T is nullptr");
+                if (T == nullptr)
+                    break;
 
-        debug("(isInType) calling pred");
-        return pred(T);
+                // NOTE: I'm not sure why we need this check, but if I remove
+                // it then Clang may crash on certain inputs.
+                // See tests/declare_bitmap.c
+                // FIXME: This still crashes, see tests/wide-int.cc
+                try {
+                    debug("getting T's canon type internal CTI");
+                    const auto CTI = T->getCanonicalTypeInternal();
+                    debug("checking if CTI is null");
+                    if (CTI.isNull())
+                        break;
+                }
+                catch (...)
+                {
+                    debug("error traversing type pointers");
+                    return false;
+                }
+
+                if (T->isAnyPointerType() || T->isArrayType())
+                    T = T->getPointeeOrArrayElementType();
+                else
+                    break;
+            }
+            debug("calling isInType pred");
+            return pred(T);
     }
 
     clang::Decl *getTypeDeclOrNull(const clang::Type *T)
