@@ -123,7 +123,7 @@ PROGRAMS = [
     Program(
         r'gcc-12.1.0',
         r'https://bigsearcher.com/mirrors/gcc/releases/gcc-12.1.0/gcc-12.1.0.tar.gz',
-        r'gcc',
+        r'.',
         r'./configure --disable-multilib',
         r'intercept-build make -j8'
     ),
