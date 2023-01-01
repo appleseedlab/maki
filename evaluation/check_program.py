@@ -87,8 +87,8 @@ def cpp2c(cpp2c_so_path: str,
         for arg in cc.arguments
         if not any([arg.startswith(ua) for ua in clang_unknown_args])
     ]
-    # use clang-11
-    args[0] = 'clang-11'
+    # use clang-14
+    args[0] = 'clang-14'
     # pass cpp2c plugin shared library file
     args.insert(1, f'-fplugin={cpp2c_so_path}')
     # at the very end, specify that we are only doing syntactic analysis so as to
