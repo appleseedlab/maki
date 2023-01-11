@@ -100,8 +100,11 @@ namespace cpp2c
                 // it then Clang may crash on certain inputs.
                 // See tests/declare_bitmap.c
                 // FIXME: This still crashes, see tests/wide-int.cc
+                // The try catch doesn't seem to help
                 try {
                     debug("getting T's canon type internal CTI");
+                    // Specifically, the following line of code is causing
+                    // clang to crash
                     const auto CTI = T->getCanonicalTypeInternal();
                     debug("checking if CTI is null");
                     if (CTI.isNull())
