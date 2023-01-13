@@ -51,8 +51,8 @@ namespace cpp2c
 
     clang::Expr *skipImplicitAndParens(clang::Expr *E)
     {
-        while (E && (clang::isa<clang::ParenExpr>(E) ||
-                     clang::isa<clang::ImplicitCastExpr>(E)))
+        while (E && (llvm::isa_and_nonnull<clang::ParenExpr>(E) ||
+                     llvm::isa_and_nonnull<clang::ImplicitCastExpr>(E)))
             if (auto P = clang::dyn_cast<clang::ParenExpr>(E))
                 E = P->getSubExpr();
             else if (auto I = clang::dyn_cast<clang::ImplicitCastExpr>(E))
@@ -558,7 +558,7 @@ namespace cpp2c
 
         // Any expr that is the operand of an expression with short-circuiting.
         // ConditionalOperator, LogicalAnd, LogicalOr
-        std::set<const clang::Expr *> ConditionalExprOperands;
+        std::set<const clang::Expr *> ConditionalExprs;
         {
             MatchFinder Finder;
             auto Matcher = expr(
@@ -578,18 +578,8 @@ namespace cpp2c
             Finder.addMatcher(Matcher, &Handler);
             Finder.matchAST(Ctx);
             for (auto &&ST : Handler.Stmts)
-            {
-                if (auto E = clang::dyn_cast<clang::ConditionalOperator>(ST))
-                {
-                    ConditionalExprOperands.insert(E->getTrueExpr());
-                    ConditionalExprOperands.insert(E->getFalseExpr());
-                }
-                else if (auto E = clang::dyn_cast<clang::BinaryOperator>(ST))
-                {
-                    ConditionalExprOperands.insert(E->getLHS());
-                    ConditionalExprOperands.insert(E->getRHS());
-                }
-            }
+                if (auto E = clang::dyn_cast<clang::Expr>(ST))
+                    ConditionalExprs.insert(E);
         }
 
         // Any expr with a type defined at a local scope
@@ -890,20 +880,6 @@ namespace cpp2c
                             }
                             return false;
                         });
-
-                    debug("Checking if any argument is conditionally evaluated");
-                    IsAnyArgumentConditionallyEvaluated = std::any_of(
-                        StmtsExpandedFromArguments.begin(),
-                        StmtsExpandedFromArguments.end(),
-                        [&ConditionalExprOperands](const clang::Stmt *ArgStmt)
-                        {
-                            return std::any_of(
-                                ConditionalExprOperands.begin(),
-                                ConditionalExprOperands.end(),
-                                [&ArgStmt](const clang::Expr *Operand)
-                                { return inTree(ArgStmt, Operand); });
-                        });
-                    debug("Done checking if any argument is conditionally evaluated");
                 }
 
                 std::set<const clang::Stmt *> StmtsExpandedFromBody;
@@ -922,6 +898,23 @@ namespace cpp2c
                         [&StmtsExpandedFromBody](const clang::Stmt *St)
                     { return StmtsExpandedFromBody.find(St) !=
                              StmtsExpandedFromBody.end(); };
+
+                    debug("Checking if any argument is conditionally "
+                            "evaluated in the body of the expansion");
+                    IsAnyArgumentConditionallyEvaluated = std::any_of(
+                        ConditionalExprs.begin(),
+                        ConditionalExprs.end(),
+                        [&ExpandedFromBody,
+                         &StmtsExpandedFromArguments](const clang::Expr *CE)
+                        {
+                            return ExpandedFromBody(CE) && std::any_of(
+                                StmtsExpandedFromArguments.begin(),
+                                StmtsExpandedFromArguments.end(),
+                                [&CE](const clang::Stmt *ArgStmt)
+                                { return inTree(ArgStmt, CE); });
+                        });
+                    debug("Done checking if any argument is conditionally "
+                            "evaluated in the body of the expansion");
 
                     // NOTE: This may not be correct if the definition of
                     // of the decl is separate from its declaration.
@@ -1134,10 +1127,10 @@ namespace cpp2c
                     AllStmtsExpandedFromMacro.end(),
                     [](const clang::Stmt *St)
                     {
-                        return clang::isa<clang::ReturnStmt>(St) ||
-                               clang::isa<clang::ContinueStmt>(St) ||
-                               clang::isa<clang::BreakStmt>(St) ||
-                               clang::isa<clang::GotoStmt>(St);
+                        return llvm::isa_and_nonnull<clang::ReturnStmt>(St) ||
+                               llvm::isa_and_nonnull<clang::ContinueStmt>(St) ||
+                               llvm::isa_and_nonnull<clang::BreakStmt>(St) ||
+                               llvm::isa_and_nonnull<clang::GotoStmt>(St);
                     });
             }
 
