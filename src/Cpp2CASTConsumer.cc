@@ -1044,7 +1044,7 @@ namespace cpp2c
                         // Type information about the entire expansion
                         auto QT = E->getType();
                         auto T = QT.getTypePtrOrNull();
-                        IsExpansionTypeNull = !(QT.isNull() || T == nullptr);
+                        IsExpansionTypeNull = QT.isNull() || T == nullptr;
 
                         if (T)
                         {
