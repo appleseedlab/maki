@@ -3,7 +3,7 @@
 #define ONE_AND_A(A) ((1) && (A))
 #define A_AND_ONE(A) ((A) && (1))
 
-#define ZERO(A) (1 ? (0) : (p))
+#define ZERO(A) (1 ? (0) : (A))
 
 int main(int argc, char const *argv[])
 {
