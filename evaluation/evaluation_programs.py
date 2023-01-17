@@ -120,32 +120,32 @@ PROGRAMS = [
     ),
 
     # contains c++ code.
-    Program(
-        r'gcc-12.1.0',
-        r'https://bigsearcher.com/mirrors/gcc/releases/gcc-12.1.0/gcc-12.1.0.tar.gz',
-        r'.',
-        r'./configure --disable-multilib',
-        r'intercept-build make -j8'
-    ),
+    # Program(
+    #     r'gcc-12.1.0',
+    #     r'https://bigsearcher.com/mirrors/gcc/releases/gcc-12.1.0/gcc-12.1.0.tar.gz',
+    #     r'.',
+    #     r'./configure --disable-multilib',
+    #     r'intercept-build make -j8'
+    # ),
 
     # contains c++ code.
-    Program(
-        r'ghostscript-9.56.1',
-        r'https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs9561/ghostscript-9.56.1.tar.gz',
-        r'',
-        r'bash configure',
-        r'intercept-build make -j8'
-    ),
+    # Program(
+    #     r'ghostscript-9.56.1',
+    #     r'https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs9561/ghostscript-9.56.1.tar.gz',
+    #     r'',
+    #     r'bash configure',
+    #     r'intercept-build make -j8'
+    # ),
 
     # requires help2man
     # GNU chess is written in a mix of c and c++ code.
-    Program(
-        r'gnuchess-6.2.9',
-        r'https://gnu.mirror.constant.com/chess/gnuchess-6.2.9.tar.gz',
-        r'src',
-        r'./configure',
-        r'intercept-build make -j8'
-    ),
+    # Program(
+    #     r'gnuchess-6.2.9',
+    #     r'https://gnu.mirror.constant.com/chess/gnuchess-6.2.9.tar.gz',
+    #     r'src',
+    #     r'./configure',
+    #     r'intercept-build make -j8'
+    # ),
 
     Program(
         r'gnuplot-5.4.4',
@@ -178,6 +178,14 @@ PROGRAMS = [
         r'.',
         r'./configure',
         r'intercept-build make -j8',
+    ),
+
+    Program(
+        r'linux-6.2-rc2',
+        r'https://github.com/torvalds/linux/archive/refs/tags/v6.2-rc2.tar.gz',
+        r'.',
+        r'make CC=clang-14 defconfig',
+        r'intercept-build make -j8'
     ),
 
     Program(
@@ -271,7 +279,6 @@ PROGRAMS = [
     # where fgets should be used instead.
     # i fixed this problem changing lib/stdio.in.h
     # https://www.fatalerrors.org/a/gets-undeclared-here-not-in-a-function.html
-    # this was not an error due to cpp2c.
     Program(
         r'rcs-5.10.0',
         r'https://mirror2.sandyriver.net/pub/software/gnu/rcs/rcs-5.10.0.tar.xz',
