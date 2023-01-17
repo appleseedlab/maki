@@ -14,7 +14,7 @@ def main():
 
     # check that the user passed the path to the cpp2c shared object file
     if len(sys.argv) != 2:
-        print(USAGE_STRING)
+        print(USAGE_STRING, file=sys.stderr)
         exit(1)
 
     # extract the cpp2c so path from the command line arguments
@@ -44,7 +44,10 @@ def main():
                        dst_dir])
         print(cmd)
         t0 = datetime.now()
-        run(cmd, shell=True, capture_output=True).check_returncode()
+        proc = run(cmd, shell=True, capture_output=True)
+        if proc.returncode != 0:
+            print(proc.stderr.decode('utf-8'))
+            exit(1)
         t1 = datetime.now()
         evaluation_time = t1 - t0
         print(f'evaluation time: {evaluation_time}')
