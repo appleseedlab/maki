@@ -21,7 +21,7 @@ def main():
     # of programs
     if any([len(sys.argv) < 2,
             len(sys.argv) > 2 and sys.argv[1] == 'all']):
-        print(USAGE_STRING)
+        print(USAGE_STRING, file=sys.stderr)
         exit(1)
     else:
         if sys.argv == 2 and sys.argv[1] == 'all':
