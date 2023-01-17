@@ -80,49 +80,18 @@ namespace cpp2c
     // Returns true if the given predicate returns true for any type
     // contained in the given type
     bool isInType(
-        const clang::QualType QT,
+        const clang::Type *T,
+        clang::ASTContext &Ctx,
         std::function<bool(const clang::Type *)> pred)
     {
-        debug("Calling isInType");
+        debug("Checking if T is a pointer type");
+        while (T && (T->isAnyPointerType() || T->isArrayType()))
+            if (T->isAnyPointerType())
+                T = T->getPointeeType().getTypePtrOrNull();
+            else if (T->isArrayType())
+                T = T->getBaseElementTypeUnsafe();
 
-        if (QT.isNull())
-            return false;
-
-        auto T = QT.getTypePtrOrNull();
-
-            while (true)
-            {
-                debug("checking if T is nullptr");
-                if (T == nullptr)
-                    break;
-
-                // NOTE: I'm not sure why we need this check, but if I remove
-                // it then Clang may crash on certain inputs.
-                // See tests/declare_bitmap.c
-                // FIXME: This still crashes, see tests/wide-int.cc
-                // The try catch doesn't seem to help
-                try {
-                    debug("getting T's canon type internal CTI");
-                    // Specifically, the following line of code is causing
-                    // clang to crash
-                    const auto CTI = T->getCanonicalTypeInternal();
-                    debug("checking if CTI is null");
-                    if (CTI.isNull())
-                        break;
-                }
-                catch (...)
-                {
-                    debug("error traversing type pointers");
-                    return false;
-                }
-
-                if (T->isAnyPointerType() || T->isArrayType())
-                    T = T->getPointeeOrArrayElementType();
-                else
-                    break;
-            }
-            debug("calling isInType pred");
-            return pred(T);
+        return pred(T);
     }
 
     clang::Decl *getTypeDeclOrNull(const clang::Type *T)
@@ -142,19 +111,17 @@ namespace cpp2c
 
     // Returns true if any type in T was defined after L
     bool hasTypeDefinedAfter(
-        const clang::QualType QT,
-        clang::SourceManager &SM,
+        const clang::Type *T,
+        clang::ASTContext &Ctx,
         clang::SourceLocation L)
     {
+        auto &SM = Ctx.getSourceManager();
         return isInType(
-            QT,
+            T,
+            Ctx,
             [&SM, L](const clang::Type *T)
             {
                 if (!T)
-                    return false;
-
-                debug("Checking internal qualified type");
-                if (T->getCanonicalTypeInternal().isNull())
                     return false;
 
                 auto *D = getTypeDeclOrNull(T);
@@ -175,16 +142,14 @@ namespace cpp2c
     }
 
     // Returns true if any type in T is an anonymous type
-    bool hasAnonymousType(const clang::QualType QT)
+    bool hasAnonymousType(const clang::Type *T, clang::ASTContext &Ctx)
     {
         return isInType(
-            QT,
+            T,
+            Ctx,
             [](const clang::Type *T)
             {
                 if (!T)
-                    return false;
-
-                if (T->getCanonicalTypeInternal().isNull())
                     return false;
 
                 auto D = getTypeDeclOrNull(T);
@@ -200,16 +165,14 @@ namespace cpp2c
     }
 
     // Returns true if any type in T is a local type
-    bool hasLocalType(const clang::QualType QT)
+    bool hasLocalType(const clang::Type *T, clang::ASTContext &Ctx)
     {
         return isInType(
-            QT,
+            T,
+            Ctx,
             [](const clang::Type *T)
             {
                 if (!T)
-                    return false;
-
-                if (T->getCanonicalTypeInternal().isNull())
                     return false;
 
                 auto D = getTypeDeclOrNull(T);
@@ -599,7 +562,7 @@ namespace cpp2c
             {
                 auto E = clang::dyn_cast<clang::Expr>(ST);
                 auto QT = E->getType();
-                if (hasLocalType(QT))
+                if (hasLocalType(QT.getTypePtrOrNull(), Ctx))
                     ExprsWithLocallyDefinedTypes.insert(E);
             }
         }
@@ -794,9 +757,16 @@ namespace cpp2c
                         // a typedef that was defined after the macro was defined
                         auto QT = TL->getType();
                         IsExpansionTypeNull = QT.isNull();
-                        debug("Checking hasTypeDefinedAfter");
-                        IsExpansionTypeDefinedAfterMacro =
-                            hasTypeDefinedAfter(QT, SM, DefLoc);
+                        debug("Getting unqualified type loc");
+                        auto UTL = TL->getUnqualifiedLoc();
+                        if (auto T = UTL.getTypePtr())
+                        {
+                            debug("Checking hasTypeDefinedAfter");
+                            IsExpansionTypeDefinedAfterMacro =
+                                hasTypeDefinedAfter(T, Ctx, DefLoc);
+                        }
+                        else
+                            IsExpansionTypeDefinedAfterMacro = false;
                         debug("Finished checking hasTypeDefinedAfter");
                     }
                     else
@@ -950,12 +920,12 @@ namespace cpp2c
                         std::any_of(
                             StmtsExpandedFromBody.begin(),
                             StmtsExpandedFromBody.end(),
-                            [&SM, &DefLoc](const clang::Stmt *St)
+                            [&Ctx, &DefLoc](const clang::Stmt *St)
                             {
                                 if (auto E = clang::dyn_cast<clang::Expr>(St))
                                 {
                                     auto QT = E->getType();
-                                    return hasTypeDefinedAfter(QT, SM, DefLoc);
+                                    return hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
                                 }
                                 return false;
                             });
@@ -1042,15 +1012,15 @@ namespace cpp2c
                         if (T)
                         {
                             IsExpansionTypeVoid = T->isVoidType();
-                            IsExpansionTypeAnonymous = hasAnonymousType(QT);
-                            IsExpansionTypeLocalType = hasLocalType(QT);
+                            IsExpansionTypeAnonymous = hasAnonymousType(T, Ctx);
+                            IsExpansionTypeLocalType = hasLocalType(T, Ctx);
                             auto CT = QT.getDesugaredType(Ctx)
                                           .getUnqualifiedType()
                                           .getCanonicalType();
                             TypeSignature = CT.getAsString();
                         }
                         IsExpansionTypeDefinedAfterMacro =
-                            hasTypeDefinedAfter(QT, SM, DefLoc);
+                            hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
 
                         // Whether this expression is an integral
                         // constant expression
@@ -1098,15 +1068,15 @@ namespace cpp2c
                         if (T)
                         {
                             IsAnyArgumentTypeVoid = T->isVoidType();
-                            IsAnyArgumentTypeAnonymous = hasAnonymousType(QT);
-                            IsAnyArgumentTypeLocalType = hasLocalType(QT);
+                            IsAnyArgumentTypeAnonymous = hasAnonymousType(T, Ctx);
+                            IsAnyArgumentTypeLocalType = hasLocalType(T, Ctx);
                             auto CT = QT.getDesugaredType(Ctx)
                                           .getUnqualifiedType()
                                           .getCanonicalType();
                             ArgTypeStr = CT.getAsString();
                         }
                         IsAnyArgumentTypeDefinedAfterMacro |=
-                            hasTypeDefinedAfter(QT, SM, DefLoc);
+                            hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
 
                         TypeSignature += ArgTypeStr;
                     }
