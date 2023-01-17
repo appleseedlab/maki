@@ -62,6 +62,20 @@ def cpp2c(cpp2c_so_path: str,
         '-fconserve-stack',
         '-fno-allow-store-data-races',
         '-flto=auto',
+        '-mindirect-branch',
+        '-mfunction-return',
+        '-fno-ipa-cp-clone',
+        '-fno-partial-inlining',
+        '-fzero-call-used-regs',
+        '-falign-jumps',
+        '-fno-reorder-blocks',
+        '-fno-inline-functions-called-once',
+        '-mrecord-mcount',
+        '-mharden-sls',
+        '-Wno-tsan',
+        '-Wstrict-aliasing',
+        '-fno-gcse',
+        '-fno-code-hoisting',
 
         # warning causing
         '-ffat-lto-objects',
@@ -79,21 +93,44 @@ def cpp2c(cpp2c_so_path: str,
         '-Wno-packed-not-aligned',
         '-Wlogical-op',
         '-Wno-aggressive-loop-optimizations',
+        '-O6',
     }
 
     args: list[str] = [
-        # ensure that escaped double quotes are passed correctly
-        arg.replace('"', r'\"')
+        # ensure that escaped double quotes and parentheses are passed correctly
+        arg.replace('"', r'\"').replace("(", r"\(").replace(")", r"\)")
         for arg in cc.arguments
         if not any([arg.startswith(ua) for ua in clang_unknown_args])
     ]
+
+    # To compile Linux we need to remove "--param tsan-distinguish-volatile".
+    # This argument is composed of two arguments in the compile_commands.json,
+    # so I have to use a bit of a kludge to remove it...
+    for j in range(len(args)):
+        if (args[j] == '--param' and
+            j+1 < len(args) and
+                args[j+1].startswith('tsan-distinguish-volatile')):
+            del args[j]
+            del args[j]
+            break
+
     # use clang-14
     args[0] = 'clang-14'
     # pass cpp2c plugin shared library file
     args.insert(1, f'-fplugin={cpp2c_so_path}')
-    # at the very end, specify that we are only doing syntactic analysis so as to
-    # not waste time compiling
-    args.insert(-1, '-fsyntax-only')
+    # at the very end, specify that we are only doing syntactic analysis
+    # so as to not waste time compiling
+    args.append('-fsyntax-only')
+    # also add ignore these specific types of warning in order to be able to
+    # compile Linux with Clang
+    # FIXME: Perhaps it would be better to simply remove "-Werror"?
+    ignored_warnings = [
+        '-Wno-gnu-variable-sized-type-not-at-end',
+        '-Wno-tautological-constant-out-of-range-compare',
+        '-Wno-unused-but-set-variable',
+        '-Wno-initializer-overrides'
+    ]
+    args.extend(ignored_warnings)
 
     fullpath = os.path.realpath(os.path.join(cc.directory, cc.file))
     with open(dst_path, 'w') as ofp:
@@ -115,7 +152,7 @@ def cpp2c(cpp2c_so_path: str,
 
 def main():
     if len(sys.argv) != len(ARGS) + 1:
-        print(USAGE_STRING)
+        print(USAGE_STRING, file=sys.stderr)
         exit(1)
 
     cpp2c_so_path, program_dir, src_dir, dst_dir = [
