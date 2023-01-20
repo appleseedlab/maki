@@ -1,7 +1,4 @@
-import os
 from subprocess import CompletedProcess, run
-
-EXTRACTED_PROGRAMS_DIR = r'extracted_programs/'
 
 
 class Program:
@@ -20,9 +17,6 @@ class Program:
         self.build_script = build_script
 
         self.archive_file = archive_url.rsplit(r'/', 1)[1]
-        self.extract_dir = EXTRACTED_PROGRAMS_DIR
-        self.extracted_archive_path = os.path.join(
-            EXTRACTED_PROGRAMS_DIR, self.name)
 
     def configure(self) -> CompletedProcess:
         return run(self.configure_script, shell=True)
