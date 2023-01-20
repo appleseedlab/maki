@@ -384,7 +384,10 @@ namespace cpp2c
             Valid &= Res.first;
             DefLocOrError = Res.second;
 
-            print("Definition", Name, Valid, DefLocOrError);
+            auto MI = MD->getMacroInfo();
+            assert(MI);
+
+            print("Definition", Name, MI->isObjectLike(), Valid, DefLocOrError);
         }
 
         // Collect declaration ranges
@@ -755,19 +758,19 @@ namespace cpp2c
                         ASTKind = "TypeLoc";
                         // Check that this type specifier list does not include
                         // a typedef that was defined after the macro was defined
-                        auto QT = TL->getType();
-                        IsExpansionTypeNull = QT.isNull();
-                        debug("Getting unqualified type loc");
-                        auto UTL = TL->getUnqualifiedLoc();
-                        if (auto T = UTL.getTypePtr())
-                        {
-                            debug("Checking hasTypeDefinedAfter");
-                            IsExpansionTypeDefinedAfterMacro =
-                                hasTypeDefinedAfter(T, Ctx, DefLoc);
-                        }
-                        else
-                            IsExpansionTypeDefinedAfterMacro = false;
-                        debug("Finished checking hasTypeDefinedAfter");
+                        // debug("Checking if type loc type is null");
+                        IsExpansionTypeNull = TL->isNull();
+
+                        // FIXME: For some reason, this function call sometimes
+                        // triggers an error. I have tried to debug it the best
+                        // I can, but it seems to be due to a problem with
+                        // Clang.
+                        // Until this is fixed, we will not be able to gather
+                        // full data on TypeLocs.
+                        // debug("Checking hasTypeDefinedAfter");
+                        // IsExpansionTypeDefinedAfterMacro = (!TL->isNull()) &&
+                        //     hasTypeDefinedAfter(TL->getTypePtr(), Ctx, DefLoc);
+                        // debug("Finished checking hasTypeDefinedAfter");
                     }
                     else
                         assert("Aligns with node that is not a Decl/Stmt/TypeLoc");
