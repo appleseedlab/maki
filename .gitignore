@@ -2,6 +2,5 @@
 build
 *.cpp2c
 evaluation/extracted_programs
-evaluation/*.tar.*
-evaluation/*.zip
+evaluation/archived_programs
 __pycache__
