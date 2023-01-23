@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import argparse
 import os
 import sys
 from datetime import datetime
@@ -8,18 +9,12 @@ from subprocess import run
 from constants import EXTRACTED_PROGRAMS_DIR
 from evaluation_programs import PROGRAMS
 
-USAGE_STRING = r"./check_program.py CPP2C_SO_PATH"
-
 
 def main():
-
-    # check that the user passed the path to the cpp2c shared object file
-    if len(sys.argv) != 2:
-        print(USAGE_STRING, file=sys.stderr)
-        exit(1)
-
-    # extract the cpp2c so path from the command line arguments
-    _, cpp2c_so_path = sys.argv
+    ap = argparse.ArgumentParser()
+    ap.add_argument('cpp2c_so_path', type=str)
+    ap.add_argument('num_threads', type=int)
+    args = ap.parse_args()
 
     # create the results directory
     os.makedirs('./results/', exist_ok=True)
@@ -39,11 +34,12 @@ def main():
             print(f"info: skipping {p.name}, already evaluated")
             continue
 
-        cmd = ' '.join(["./check_program.py ",
-                       cpp2c_so_path,
+        cmd = ' '.join(["./evaluate_program.py ",
+                       args.cpp2c_so_path,
                        p_extracted_path,
                        src_dir,
-                       dst_dir])
+                       dst_dir,
+                       str(args.num_threads)])
         print(cmd)
         t0 = datetime.now()
         run(cmd, shell=True).check_returncode()
