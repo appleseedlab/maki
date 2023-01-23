@@ -1,22 +1,23 @@
 #!/usr/bin/python3
 
+import argparse
 import json
 import sys
 from dataclasses import asdict
+from itertools import chain
 from typing import Callable
 
 from analysis import Analysis, definition_stat, invocation_stat
 from macros import Invocation, Macro, PreprocessorData
 from predicates.argument_altering import aa_invocation
-from predicates.declaration_altering import da_invocation
 from predicates.call_site_context_altering import csca_invocation
+from predicates.declaration_altering import da_invocation
 from predicates.interface_equivalent import ie_def
 from predicates.metaprogramming import mp_invocation
 from predicates.thunkizing import thunkizing_invocation
 
 ANALYSES_DIR = r'ANALYSES'
 DELIM = '\t'
-USAGE_STRING = r'./analyze_results.py RESULTS_FILE'
 
 
 def only(i: Invocation,
@@ -54,13 +55,13 @@ def invocations_at_least_t(pd, t):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print(USAGE_STRING, file=sys.stderr)
-        exit(1)
-    f = sys.argv[1]
+    ap = argparse.ArgumentParser()
+    ap.add_argument('results_file', type=str)
+    ap.add_argument('-o', '--output_file')
+    args = ap.parse_args()
 
     lines: list[str] = []
-    with open(f) as fp:
+    with open(args.results_file) as fp:
         lines = fp.readlines()
 
     pd = PreprocessorData()
@@ -110,6 +111,15 @@ def main():
         pd.local_includes
     )
 
+    # ie_pd only records preprocessor data about interface-equivalent macros
+    ie_pd = PreprocessorData(
+        {m: is_ for m, is_ in src_pd.mm.items() if ie_def(m, src_pd)},
+        pd.inspected_macro_names,
+        pd.local_includes
+    )
+
+    ie_invocations = set(chain(*ie_pd.mm.values()))
+
     a = Analysis(
         defined_macros=definition_stat(pd, lambda _m, _pd: True),
         macros_defined_at_valid_src_locs=definition_stat(
@@ -147,10 +157,7 @@ def main():
         # be interface-equivalent, all its definition's corresponding
         # invocations must be interface-equivalent as well
         interface_equivalent_src_invocations=invocation_stat(
-            PreprocessorData({m: is_ for m, is_ in src_pd.mm.items()
-                              if ie_def(m, src_pd)},
-                             src_pd.inspected_macro_names,
-                             src_pd.local_includes),
+            ie_pd,
             lambda _m, _pd: True),
 
         src_definitions_with_only_argument_altering_invocations=mdefs_only_t(
@@ -198,9 +205,33 @@ def main():
         toplevel_non_argument_src_invocations_that_are_at_least_metaprogramming=invocations_at_least_t(
             src_pd, mp_invocation),
 
+        src_definitions_that_are_easy_to_transform=definition_stat(
+            src_pd, lambda m, pd: (ie_def(m, pd) or
+                                   all([(aa_invocation(i, pd) or
+                                         da_invocation(i, pd)) and
+                                        not any([
+                                            csca_invocation(i, pd),
+                                            thunkizing_invocation(i, pd),
+                                            mp_invocation(i, pd)
+                                        ])
+                                       for i in pd.mm[m]]))),
+        toplevel_non_argument_src_invocations_that_are_easy_to_transform=invocation_stat(
+            src_pd,
+            lambda i, pd: (i in ie_invocations or
+                           ((aa_invocation(i, pd) or da_invocation(i, pd) and
+                             not any([
+                                 csca_invocation(i, pd),
+                                 thunkizing_invocation(i, pd),
+                                 mp_invocation(i, pd)
+                             ]))))
+        )
     )
 
-    json.dump(asdict(a), sys.stdout, indent=4)
+    if args.output_file:
+        with open(args.output_file, 'w', encoding='utf-8') as ofp:
+            json.dump(asdict(a), ofp, indent=4)
+    else:
+        json.dump(asdict(a), sys.stdout, indent=4)
 
 
 if __name__ == '__main__':
