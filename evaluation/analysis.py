@@ -96,3 +96,6 @@ class Analysis:
     src_definitions_with_any_metaprogramming_invocations: MacroOFStat
     toplevel_non_argument_src_invocations_that_are_only_metaprogramming: MacroOFStat
     toplevel_non_argument_src_invocations_that_are_at_least_metaprogramming: MacroOFStat
+
+    src_definitions_that_are_easy_to_transform: MacroOFStat
+    toplevel_non_argument_src_invocations_that_are_easy_to_transform: MacroOFStat
