@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import argparse
 import json
 import os
 import subprocess
@@ -16,15 +17,6 @@ class CompileCommand:
     directory: str
     file: str
 
-
-ARGS = [
-    'CPP2C_SO_PATH',
-    'PROGRAM_DIR',
-    'SRC_DIR',
-    'DST_DIR'
-]
-
-USAGE_STRING = './check_program.py ' + ' '.join(ARGS)
 
 DELIM = "\t"
 
@@ -151,13 +143,18 @@ def cpp2c(cpp2c_so_path: str,
 
 
 def main():
-    if len(sys.argv) != len(ARGS) + 1:
-        print(USAGE_STRING, file=sys.stderr)
-        exit(1)
+    ap = argparse.ArgumentParser()
+    ap.add_argument('cpp2c_so_path', type=str)
+    ap.add_argument('program_dir', type=str)
+    ap.add_argument('src_dir', type=str)
+    ap.add_argument('dst_dir', type=str)
+    ap.add_argument('num_processes', type=int)
+    args = ap.parse_args()
 
-    cpp2c_so_path, program_dir, src_dir, dst_dir = [
-        os.path.abspath(a) for a in sys.argv[1:]
-    ]
+    cpp2c_so_path: str = os.path.abspath(args.cpp2c_so_path)
+    program_dir: str = os.path.abspath(args.program_dir)
+    src_dir: str = os.path.abspath(args.src_dir)
+    dst_dir: str = os.path.abspath(args.dst_dir)
 
     os.chdir(program_dir)
 
@@ -211,7 +208,7 @@ def main():
         os.makedirs(d, exist_ok=True)
 
     # run cpp2c on all files
-    with ThreadPool(8) as pool:
+    with ThreadPool(args.num_processes) as pool:
         pool.starmap(cpp2c, zip(repeat(cpp2c_so_path), ccs, repeat(src_dir),
                                 dst_paths, repeat(i), repeat(n)))
 
