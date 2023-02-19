@@ -126,7 +126,7 @@ def cpp2c(cpp2c_so_path: str,
 
     fullpath = os.path.realpath(os.path.join(cc.directory, cc.file))
     with open(dst_path, 'w') as ofp:
-        print(f'Analyzing {fullpath} ({os.path.getsize(fullpath)} bytes)')
+        print(f'Analyzing macros in {fullpath} ({os.path.getsize(fullpath)} bytes)')
         # print header information about the analysis file
         print(f'Src{DELIM}{src_dir}', file=ofp)
         ofp.flush()
