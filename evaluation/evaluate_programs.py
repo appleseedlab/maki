@@ -46,6 +46,7 @@ def main():
         t1 = datetime.now()
         evaluation_time = t1 - t0
         print(f'{p.name} evaluation time: {evaluation_time}')
+        sys.stdout.flush()
 
 
 if __name__ == '__main__':
