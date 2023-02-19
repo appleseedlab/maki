@@ -308,7 +308,7 @@ PROGRAMS = [
     Program(
         r'xfig-3.2.8b',
         r'https://cytranet.dl.sourceforge.net/project/mcj/xfig%2Bfig2dev-3.2.8b.tar.xz',
-        r'fig2dev',
+        r'src',
         r'./configure',
         r'intercept-build make -j8'
     ),
