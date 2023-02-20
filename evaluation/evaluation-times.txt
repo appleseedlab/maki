@@ -36,7 +36,7 @@ evaluation time: 13:43:16.844816
 evaluation time: 0:01:52.926085
 ./check_program.py  ../build/lib/libcpp2c.so extracted_programs/remind extracted_programs/remind/src ./results/remind
 evaluation time: 0:03:35.354290
-./check_program.py  ../build/lib/libcpp2c.so extracted_programs/xfig-3.2.8b extracted_programs/xfig-3.2.8b/fig2dev ./results/xfig-3.2.8b
-evaluation time: 0:00:00.075446
+./evaluate_program.py  ../build/lib/libcpp2c.so extracted_programs/xfig-3.2.8b extracted_programs/xfig-3.2.8b/src ./results/xfig-3.2.8b 8
+xfig-3.2.8b evaluation time: 0:31:51.024155
 ./check_program.py  ../build/lib/libcpp2c.so extracted_programs/zsh-5.9 extracted_programs/zsh-5.9/Src ./results/zsh-5.9
 evaluation time: 0:59:03.428856
