@@ -34,7 +34,7 @@ def main():
             print(f"info: skipping {p.name}, already evaluated")
             continue
 
-        cmd = ' '.join(["./evaluate_program.py ",
+        cmd = ' '.join(["./analyze_macros_in_program.py ",
                        args.cpp2c_so_path,
                        p_extracted_path,
                        src_dir,
@@ -45,7 +45,7 @@ def main():
         run(cmd, shell=True).check_returncode()
         t1 = datetime.now()
         evaluation_time = t1 - t0
-        print(f'{p.name} evaluation time: {evaluation_time}')
+        print(f'{p.name} macro analysis time: {evaluation_time}')
         sys.stdout.flush()
 
 
