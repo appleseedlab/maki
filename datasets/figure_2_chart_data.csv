@@ -1,0 +1,23 @@
+Program,Definition-adapting,Calling-convention-adapting,Scope-adapting,Multiple interface-equivalent adaptations,Call-site-context-altering,Thunkizing,Metaprogramming,Nested invocations,Multiple non-interface-equivalent adaptations
+xfig,909,52,17,13,39,0,0,232,47
+mosaic,269,0,20,6,20,0,0,51,33
+cvs,120,0,8,1,7,0,0,17,23
+remind,243,1,1,1,30,0,2,56,33
+bash,802,14,126,24,226,0,1,386,244
+fvwm,204,7,275,73,39,0,0,226,261
+enscript,24,0,0,1,13,0,0,9,9
+zsh,878,2,73,12,138,0,0,965,154
+m4,26,0,2,1,6,0,0,13,20
+linux,21297,94,2339,194,6886,3,13,22727,4343
+flex,97,3,50,2,48,4,0,140,57
+gv,182,5,12,86,89,0,0,249,152
+gnuplot,152,4,62,12,71,0,0,125,231
+rcs,43,4,11,17,45,0,3,90,55
+bc,15,1,20,0,26,0,0,21,58
+gawk,155,5,82,10,234,0,0,270,273
+gzip,77,2,30,5,138,0,0,166,87
+lua,144,1,51,8,120,0,2,488,140
+bison,54,2,27,6,96,0,0,139,101
+perl,1185,7,730,112,2650,1,0,4265,1597
+emacs,408,37,91,73,278,1,0,3849,359
+Total,27284,241,4027,657,11199,9,21,34484,8277

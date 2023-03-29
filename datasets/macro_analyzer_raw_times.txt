@@ -23,7 +23,7 @@ evaluation time: 0:15:01.913510
 ./check_program.py  ../build/lib/libcpp2c.so extracted_programs/gzip-1.12 extracted_programs/gzip-1.12/. ./results/gzip-1.12
 evaluation time: 0:03:48.673063
 ./evaluate_program.py  ../build/lib/libcpp2c.so extracted_programs/linux-6.2-rc2 extracted_programs/linux-6.2-rc2/. ./results/linux-6.2-rc2 32
-linux-6.2-rc2 evaluation time: 16 days, 23:30:20.447940
+evaluation time: 16 days, 23:30:20.447940
 ./check_program.py  ../build/lib/libcpp2c.so extracted_programs/lua-5.4.4 extracted_programs/lua-5.4.4/src ./results/lua-5.4.4
 evaluation time: 0:06:28.996382
 ./check_program.py  ../build/lib/libcpp2c.so extracted_programs/m4-1.4.19 extracted_programs/m4-1.4.19/src ./results/m4-1.4.19
@@ -37,6 +37,6 @@ evaluation time: 0:01:52.926085
 ./check_program.py  ../build/lib/libcpp2c.so extracted_programs/remind extracted_programs/remind/src ./results/remind
 evaluation time: 0:03:35.354290
 ./evaluate_program.py  ../build/lib/libcpp2c.so extracted_programs/xfig-3.2.8b extracted_programs/xfig-3.2.8b/src ./results/xfig-3.2.8b 8
-xfig-3.2.8b evaluation time: 0:31:51.024155
+evaluation time: 0:31:51.024155
 ./check_program.py  ../build/lib/libcpp2c.so extracted_programs/zsh-5.9 extracted_programs/zsh-5.9/Src ./results/zsh-5.9
 evaluation time: 0:59:03.428856

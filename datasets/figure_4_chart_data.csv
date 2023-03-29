@@ -1,0 +1,23 @@
+Program,Percentage of aligned definitions,Percentage of interface-equivalent definitions
+bash,70.33,52.99
+bc,68.8,25.53
+bison,33.65,20.94
+cvs,86.93,73.3
+emacs,20.63,11.96
+enscript,75.0,44.65
+flex,56.36,37.91
+fvwm,75.02,51.53
+gawk,50.73,24.49
+gnuplot,72.15,35.02
+gv,56.52,36.78
+gzip,37.62,22.58
+linux,47.73,41.32
+lua,36.37,21.38
+m4,77.94,42.65
+mosaic,84.46,73.93
+perl,32.98,19.29
+rcs,48.51,27.97
+remind,79.29,67.02
+xfig,80.37,75.7
+zsh,50.68,43.43
+Total,46.26,37.36
