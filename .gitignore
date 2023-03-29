@@ -1,7 +1,7 @@
 .vscode
 build
 *.cpp2c
-*.csv
+evaluation/*.csv
 evaluation/extracted_programs
 evaluation/archived_programs
 __pycache__
