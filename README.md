@@ -1,7 +1,7 @@
 # Macro Analysis Tool
 
 ## Preface about the Data
-All raw data is already available in the directories `evaluation/results` and `datasets`.
+All raw data is already available in the `datasets` directory.
 Program runtime data is present in the files `evaluation/macro_analyzer_raw_times.txt` and `evaluation/property_analyzer_raw_times.txt`.
 This artifact enables you to reproduce this data on your own machine.
 
