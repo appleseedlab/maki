@@ -9,7 +9,7 @@ This artifact enables you to reproduce this data on your own machine.
 
 ### Clang Plugin
 ```
-sudo apt install llvm-14 clang-14 libclang-14-dev build-essential cmake
+sudo apt install llvm-17 clang-17 libclang-17-dev build-essential cmake
 ```
 
 ### Python Script
