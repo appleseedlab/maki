@@ -580,6 +580,7 @@ namespace cpp2c
             std::string
                 Name,
                 DefinitionLocation,
+                EndDefinitionLocation,
                 InvocationLocation,
                 ASTKind,
                 TypeSignature;
@@ -697,6 +698,10 @@ namespace cpp2c
             IsDefinitionLocationValid = Res.first;
             if (IsDefinitionLocationValid)
                 DefinitionLocation = Res.second;
+            auto [IsEndDefinitonLocationValid, EndLoc] = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionEndLoc());
+            if(IsEndDefinitonLocationValid)
+                EndDefinitionLocation = EndLoc;
+                
 
             // Invocation location
             Res = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
@@ -1126,6 +1131,7 @@ namespace cpp2c
                 {
                     {"Name", Name},
                     {"DefinitionLocation", DefinitionLocation},
+                    {"EndDefinitionLocation", EndDefinitionLocation},
                     {"InvocationLocation", InvocationLocation},
                     {"ASTKind", ASTKind},
                     {"TypeSignature", TypeSignature},
