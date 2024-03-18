@@ -1034,6 +1034,8 @@ namespace cpp2c
                         // constant expression
                         IsExpansionICE = E->isIntegerConstantExpr(Ctx);
                     }
+                    // Macro identifier 
+                    TypeSignature += " " + Name;
 
                     // Argument type information
                     IsAnyArgumentNotAnExpression = false;
@@ -1087,6 +1089,7 @@ namespace cpp2c
                             hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
 
                         TypeSignature += ArgTypeStr;
+                        TypeSignature += " " + Arg.Name.str();
                     }
                     debug("Finished iterating arguments");
                     if (Exp->MI->isFunctionLike() &&
