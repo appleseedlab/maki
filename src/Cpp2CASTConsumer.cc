@@ -580,6 +580,7 @@ namespace cpp2c
             std::string
                 Name,
                 DefinitionLocation,
+                EndDefinitionLocation,
                 InvocationLocation,
                 ASTKind,
                 TypeSignature;
@@ -697,6 +698,10 @@ namespace cpp2c
             IsDefinitionLocationValid = Res.first;
             if (IsDefinitionLocationValid)
                 DefinitionLocation = Res.second;
+            auto [IsEndDefinitonLocationValid, EndLoc] = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionEndLoc());
+            if(IsEndDefinitonLocationValid)
+                EndDefinitionLocation = EndLoc;
+                
 
             // Invocation location
             Res = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
@@ -1029,6 +1034,8 @@ namespace cpp2c
                         // constant expression
                         IsExpansionICE = E->isIntegerConstantExpr(Ctx);
                     }
+                    // Macro identifier 
+                    TypeSignature += " " + Name;
 
                     // Argument type information
                     IsAnyArgumentNotAnExpression = false;
@@ -1082,6 +1089,7 @@ namespace cpp2c
                             hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
 
                         TypeSignature += ArgTypeStr;
+                        TypeSignature += " " + Arg.Name.str();
                     }
                     debug("Finished iterating arguments");
                     if (Exp->MI->isFunctionLike() &&
@@ -1126,6 +1134,7 @@ namespace cpp2c
                 {
                     {"Name", Name},
                     {"DefinitionLocation", DefinitionLocation},
+                    {"EndDefinitionLocation", EndDefinitionLocation},
                     {"InvocationLocation", InvocationLocation},
                     {"ASTKind", ASTKind},
                     {"TypeSignature", TypeSignature},
