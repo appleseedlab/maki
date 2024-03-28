@@ -7,3 +7,6 @@ int main(int argc, char const *argv[])
 #undef FOO
     return 0;
 }
+
+
+// No expected invocation properties
