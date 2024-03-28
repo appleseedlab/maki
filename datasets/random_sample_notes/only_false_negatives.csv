@@ -1,0 +1,33 @@
+name, definition location, definition-adapting, calling-convention-adapting, scope-adapting, call-site-context-adapting, thunkizing, metaprogramming, nested invocations, correct classification, notes
+RTC_CLASS_DEV_PM_OPS, extracted_programs/linux-6.2-rc2/drivers/rtc/class.c:199:9, False, False, False, True, False, False, False, false, should be calling-convention-adapting; on RHS of assignment; contains a nested invocation of NULL
+IPV6_2292RTHDR, extracted_programs/linux-6.2-rc2/include/uapi/linux/in6.h:160:9, False, False, False, False, False, False, False, false, not classified; definition-adapting; numeric constant; expanded in conditional expr; expanded in case label; expanded in function call argument; expanded on RHS of comparison
+SNDRV_PCM_HW_PARAMS_NO_PERIOD_WAKEUP, extracted_programs/linux-6.2-rc2/include/uapi/sound/asound.h:385:9, False, False, False, False, False, False, False, false, definition-adapting enum; RHS of assignment; conditional expr
+READ_DEFECT_DATA_TIMEOUT, extracted_programs/linux-6.2-rc2/include/scsi/scsi.h:138:9, False, False, False, False, False, False, False, false, definition-adapting; RHS of assignment
+UPF_FULL_PROBE, extracted_programs/linux-6.2-rc2/include/linux/serial_core.h:533:9, False, False, False, False, False, False, False, false, not classified; many nested invocations; token pasting; RHS of assignment; conditional expr
+SHMDT, extracted_programs/linux-6.2-rc2/include/uapi/linux/ipc.h:72:9, False, False, False, False, False, False, False, false, definition-adapting; case labels
+PORT_16450, extracted_programs/linux-6.2-rc2/include/uapi/linux/serial.h:52:9, False, False, False, False, False, False, False, false, not classified; definition-adapting; conditional expr; comparison; RHS of assignment; designated initializer
+SIG_KTHREAD, extracted_programs/linux-6.2-rc2/include/linux/signal.h:297:9, False, False, False, False, False, False, False, false, not classified; nested invocations; cast expression; passed to function call
+DEVCG_DEV_CHAR, extracted_programs/linux-6.2-rc2/include/linux/device_cgroup.h:10:9, False, False, False, False, False, False, False, false, not classified; definition-adapting; ICE; RHS of assignment; passed to function call; RHS of comparison; bitwise expression
+DASH_HZ, extracted_programs/linux-6.2-rc2/arch/x86/realmode/rm/wakemain.c:36:9, False, False, False, False, False, False, False, false, definition-adapting; numeric constant; passed to a function call
+
+lisp_h_FLOATP, extracted_programs/emacs-28.1/src/lisp.h:369:9, False, False, True, False, False, False, False, false, also has nested invocations; used as return value; many nested invocations; invoked as a nested invocation; expands to conditional expr
+PUREBEG, extracted_programs/emacs-28.1/src/alloc.c:343:9, False, False, False, False, False, False, False, false, calling-convention-adapting; object-like macro defined to a non-constant expression; RHS of assignment; defined to cast expression
+ISUNIBYTE, extracted_programs/emacs-28.1/src/regex-emacs.c:105:9, False, False, False, False, False, False, False, false, should be definition-adapting; expands to a function call; LHS of comparison
+
+PerlMemShared_malloc, extracted_programs/perl-5.36.0/iperlsys.h:901:11, False, False, False, False, False, False, False, false, not classified; alias for malloc; argument of one invocation is a conditional expr; RHS of assignment; operand of cast-expression; invoked in conditional expr
+YYFINAL, extracted_programs/perl-5.36.0/perly.tab:235:9, False, False, False, False, False, False, False, false, not classified because defined in a non-C file
+PerlLIO_read, extracted_programs/perl-5.36.0/iperlsys.h:795:11, False, False, False, False, False, False, False, false, calling-convention-adapting; scope-adapting; generic; function alias; RHS of assignment; in comparison; invoked by `read` macro
+C64, extracted_programs/perl-5.36.0/cpan/Digest-SHA/src/sha64bit.c:26:9, False, False, False, False, False, False, False, false, alias for a metaprogramming macro that expands to token-pasting
+FORM_NUM_BLANK, extracted_programs/perl-5.36.0/pp_ctl.c:480:9, False, False, False, False, False, False, False, false, not classified; invoked in conditional expression; RHS of assignment
+
+LUA_OPBOR, extracted_programs/lua-5.4.4/src/lua.h:213:9, False, False, False, False, False, False, False, false, definition-adapting; numeric constant; case label
+
+FDAY0, extracted_programs/gnuplot-5.4.4/src/national.h:174:9, False, False, False, False, False, False, False, false, also definition-adapting string constant; invoked in array initializer
+DEFAULT_BORDER_LP, extracted_programs/gnuplot-5.4.4/src/gadgets.c:155:10, False, False, False, False, False, False, False, false, calling-convention-adapting; scope-adapting; defined to struct literal but without wrapping cast expression so type is ambigious (could be an array initializer); RHS of assignment
+
+FPS_IGNORE_RAISE_CLICK_MOTION, extracted_programs/fvwm-2.6.9/fvwm/focus_policy.h:106:9, False, False, True, False, False, False, False, false, also calling-convention-adapting; assigns a field of the first argument to the !! of the second argument; passed a macro invocation as an argument
+TOGGLE_USER_STATES, extracted_programs/fvwm-2.6.9/fvwm/window_flags.h:68:9, False, False, False, False, False, False, False, false, calling-convention-adapting; ^= a field of the first argument with second argument
+
+YYDPRINTF, extracted_programs/gawk-5.1.1/command.c:1241:10, False, False, False, False, False, False, False, false, defined multiple times; does not expand argument so should be unaligned and thus calling-convention-adapting; expands to cast expression
+D_WATCH, extracted_programs/gawk-5.1.1/command.c:269:9, False, False, False, False, False, False, False, false, name is first used for an enum and then redefined as a macro; invoked in array initializer
+YYACCEPT, extracted_programs/gawk-5.1.1/command.c:1091:9, False, False, False, False, False, False, False, false, not classified; expands to a goto statement

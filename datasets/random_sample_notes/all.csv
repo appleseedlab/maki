@@ -1,0 +1,384 @@
+name, definition location, definition-adapting, calling-convention-adapting, scope-adapting, call-site-context-adapting, thunkizing, metaprogramming, nested invocations, correct classification, notes
+HIDIOCGUCODE, extracted_programs/linux-6.2-rc2/include/uapi/linux/hiddev.h:167:9, False, False, False, True, False, False, False, true, function-like macro used where an ICE is required
+PORT_RX_LANES, extracted_programs/linux-6.2-rc2/drivers/usb/host/xhci.h:438:9, True, False, False, False, False, False, False, true, function
+SMART_MOVE, extracted_programs/xfig-3.2.8b/src/mode.h:171:10, True, False, False, False, False, False, False, true, enum
+P9_STATS_CTIME, extracted_programs/linux-6.2-rc2/include/net/9p/9p.h:434:9, True, False, False, False, False, False, False, true, enum
+setskip, extracted_programs/xfig-3.2.8b/src/f_neuclrtab.c:77:9, True, False, False, False, False, False, False, true, function
+ACPI_DB_RESOURCES, extracted_programs/linux-6.2-rc2/include/acpi/acoutput.h:140:9, False, False, False, False, False, False, True, true, nested in arguments
+RTC_CLASS_DEV_PM_OPS, extracted_programs/linux-6.2-rc2/drivers/rtc/class.c:199:9, False, False, False, True, False, False, False, false, should be calling-convention-adapting; on RHS of assignment; contains a nested invocation of NULL
+lisp_h_FLOATP, extracted_programs/emacs-28.1/src/lisp.h:369:9, False, False, True, False, False, False, False, false, also has nested invocations; used as return value; many nested invocations; invoked as a nested invocation; expands to conditional expr
+REMAP_MSG, extracted_programs/xfig-3.2.8b/src/f_util.c:235:9, True, False, False, False, False, False, False, true, string constant
+POSIX_FADV_NOREUSE, extracted_programs/linux-6.2-rc2/include/uapi/linux/fadvise.h:19:9, True, False, False, False, False, False, False, true, enum
+Qecho_keystrokes, extracted_programs/emacs-28.1/src/globals.h:7096:10, False, False, True, False, False, False, True, true, captures a function decl and has nested invocations in arguments
+SNDRV_PCM_DEVICES, extracted_programs/linux-6.2-rc2/include/sound/pcm.h:89:9, False, False, False, False, False, False, True, true, also definition-adapting
+REL_Y, extracted_programs/linux-6.2-rc2/include/uapi/linux/input-event-codes.h:816:9, False, False, False, False, False, False, True, true, also definition-adapting
+RTA_ALIGNTO, extracted_programs/linux-6.2-rc2/include/uapi/linux/rtnetlink.h:218:9, False, False, False, False, False, False, True, true, also definition-adapting
+KGIDT_INIT, extracted_programs/linux-6.2-rc2/include/linux/uidgid.h:31:9, False, False, True, False, False, False, True, true, captures a struct decl
+BXT_DRAM_TYPE_DDR4, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/intel_mchbar_regs.h:123:11, True, False, False, False, False, False, False, true, enum
+w_vihistorysearchforward, extracted_programs/zsh-5.9/Src/Zle/zle_widget.h:312:9, False, False, False, False, False, False, True, true, also call-site-context-adapting because defined to an address; invoked in a non-c file
+PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND, extracted_programs/perl-5.36.0/proto.h:6125:9, False, False, False, True, False, False, False, true, defined to two sequential assert statements
+GPCMD_CLOSE_TRACK, extracted_programs/linux-6.2-rc2/include/uapi/linux/cdrom.h:459:9, True, False, False, False, False, False, False, true, enum
+ANEG_STATE_DISABLE_LINK_OK, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.c:5092:9, True, False, False, False, False, False, False, true, enum
+SEMI_COLON_POSIX_WARNING, extracted_programs/perl-5.36.0/ext/re/re_comp.c:15991:9, False, False, False, False, False, False, True, true, also call-site-context adapting because expands to string literal that is concatenated during translation phase 6
+E1000_RCTL_RST, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/intel/e1000/e1000_hw.h:1810:9, False, False, False, False, False, False, True, true, also definition-adapting
+UPF_FULL_PROBE, extracted_programs/linux-6.2-rc2/include/linux/serial_core.h:533:9, False, False, False, False, False, False, False, false, not classified; many nested invocations; token pasting; RHS of assignment; conditional expr
+DRM_IOCTL_I915_GET_VBLANK_PIPE, extracted_programs/linux-6.2-rc2/include/uapi/drm/i915_drm.h:489:9, False, False, False, False, False, False, True, true, not invoked in a .c/.h file
+QCconversion, extracted_programs/emacs-28.1/src/globals.h:6681:10, False, False, True, False, False, False, True, true, captures a function decl
+mouse_fine_grained_tracking, extracted_programs/emacs-28.1/src/globals.h:1109:9, False, True, True, False, False, False, True, true, captures a declaration; appears on left-hand-side of an assignment; nested
+INTEL_FRONTBUFFER_OVERLAY, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/display/intel_frontbuffer.h:63:9, False, False, False, True, False, False, False, true, expands to a nested invocation
+case_145_SBOX32, extracted_programs/perl-5.36.0/sbox32_hash.h:670:9, False, False, False, True, False, False, False, true, expands to nested invocation that expands to a case label
+iQCwindow, extracted_programs/emacs-28.1/src/globals.h:1572:9, False, False, False, False, False, False, True, true, also metaprogramming; invocation was constructed from token-pasting
+_CHV_VIDEO_DIP_DATA_C, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:6122:9, False, False, False, False, False, False, True, true, also definition-adapting
+DRM_IOCTL_I915_SETPARAM, extracted_programs/linux-6.2-rc2/include/uapi/drm/i915_drm.h:482:9, False, False, False, False, False, False, True, true, not invoked in a .c/.h file
+SCSI_INLINE_PROT_SG_CNT, extracted_programs/linux-6.2-rc2/drivers/scsi/scsi_lib.c:52:10, True, False, False, False, False, False, False, true, enum
+E1000_ICH8_LAN_INIT_TIMEOUT, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/intel/e1000e/ich8lan.h:66:9, True, False, False, False, False, False, False, true, enum
+is_dir_sep, extracted_programs/linux-6.2-rc2/tools/lib/subcmd/exec-cmd.c:32:9, True, False, False, False, False, False, False, true, function
+EDP_PSR_LINK_STANDBY, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:2065:11, True, False, False, False, False, False, False, true, enum
+POLLOUT, extracted_programs/linux-6.2-rc2/include/uapi/asm-generic/poll.h:8:9, False, False, False, False, False, False, True, true, also definition-adapting
+ARGP_ZERO_OP, extracted_programs/linux-6.2-rc2/drivers/acpi/acpica/acopcode.h:161:9, False, False, False, False, False, False, True, true, also definition-adapting
+YYDPRINTF, extracted_programs/gawk-5.1.1/command.c:1241:10, False, False, False, False, False, False, False, false, defined multiple times; does not expand argument so should be unaligned and thus calling-convention-adapting; expands to cast expression
+CHANCTX_ASSIGN, extracted_programs/linux-6.2-rc2/net/mac80211/trace.h:82:9, False, False, False, False, False, False, True, true, also call-site-context-adapting
+Qpost_self_insert_hook, extracted_programs/emacs-28.1/src/globals.h:7616:10, False, False, True, False, False, False, True, true, captures a function decl
+MI_LRI_FORCE_POSTED, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_gpu_commands.h:157:11, True, False, False, False, False, False, False, true, enum
+iQdumped_with_pdumper, extracted_programs/emacs-28.1/src/globals.h:2136:9, False, False, False, False, False, False, True, true, also metaprogramming; invocation was constructed from token-pasting
+SWAP_MAP_SHMEM, extracted_programs/linux-6.2-rc2/include/linux/swap.h:220:9, False, False, True, False, False, False, False, false, definition-adapting; on RHS of ==; passed to a function call
+SHMDT, extracted_programs/linux-6.2-rc2/include/uapi/linux/ipc.h:72:9, False, False, False, False, False, False, False, false, definition-adapting; case labels
+IBS_FETCH_ENABLE, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/perf_event.h:448:9, True, False, False, False, False, False, False, true, enum
+IoTYPE_APPEND, extracted_programs/perl-5.36.0/sv.h:1530:9, False, False, False, False, False, False, True, true, also definition-adapting
+RCVLPC_STATSCTRL, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:1017:9, False, False, False, False, False, False, True, true, also definition-adapting
+ANYOFD, extracted_programs/perl-5.36.0/regnodes.h:220:9, False, False, False, False, False, False, True, true, also definition-adapting
+PCI_VENDOR_ID_USR, extracted_programs/linux-6.2-rc2/include/linux/pci_ids.h:2357:9, False, False, False, False, False, False, True, true, also definition-adapting
+LEVEL_DMT, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/drm_edid.c:103:9, True, False, False, False, False, False, False, true, enum
+HAVE_DECL_FGETS_UNLOCKED, extracted_programs/emacs-28.1/src/config.h:475:9, False, False, False, True, False, False, False, true, invoked in static conditional
+SvSetSV_and, extracted_programs/perl-5.36.0/sv.h:2283:9, False, False, False, False, False, False, True, true, none
+VIRTIO_SCSI_MEMPOOL_SZ, extracted_programs/linux-6.2-rc2/drivers/scsi/virtio_scsi.c:36:9, True, False, False, False, False, False, False, true, enum
+I915_PARAM_HAS_EXEC_SOFTPIN, extracted_programs/linux-6.2-rc2/include/uapi/drm/i915_drm.h:618:9, True, False, False, False, False, False, False, true, enum
+DEFAULT_TARGET_LOW, extracted_programs/linux-6.2-rc2/security/selinux/ss/policydb.h:69:9, True, False, False, False, False, False, False, true, enum
+ICL_DSC0_RC_RANGE_PARAMETERS_1, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:2293:9, False, False, False, True, False, False, False, false, calling-convention-adapting; scope-adapting; expression statement
+PERL_ARGS_ASSERT__INVLIST_DUMP, extracted_programs/perl-5.36.0/proto.h:6079:9, False, False, False, True, False, False, False, true, expands to a sequence of asserts
+IOMMU_PTE_PR, extracted_programs/linux-6.2-rc2/drivers/iommu/amd/amd_iommu_types.h:367:9, False, False, False, False, False, False, True, true, also definition-adapting
+NVRAM_CFG1_5752PAGE_SIZE_MASK, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:1985:10, True, False, False, False, False, False, False, true, enum
+HEK_BASESIZE, extracted_programs/perl-5.36.0/hv.h:422:9, False, False, False, False, False, False, True, true, also call-site-context-adapting; defined to a non-ICE
+node_online_map, extracted_programs/linux-6.2-rc2/include/linux/nodemask.h:528:9, False, False, False, False, False, False, True, true, also calling-convention-adapting
+PAN_LOG_FILENAME, extracted_programs/ncsa-mosaic-af1c9aaaa299da3540faa16dcab82eb681cf624e/src/pan.c:123:9, True, False, False, False, False, False, False, true, string constant
+SDE_GMBUS_CPT, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:5887:9, True, False, False, False, False, False, False, true, enum
+OHCI1394_HCControl_LPS, extracted_programs/linux-6.2-rc2/drivers/firewire/ohci.h:28:10, True, False, False, False, False, False, False, true, enum
+MAC_RCV_VALUE_11, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:578:9, False, False, False, False, False, False, True, true, also definition-adapting
+VIRTIO_PCI_COMMON_DFSELECT, extracted_programs/linux-6.2-rc2/include/uapi/linux/virtio_pci.h:186:9, False, False, False, False, False, False, True, true, also definition-adapting
+sub_crush_depth, extracted_programs/perl-5.36.0/embed.h:1498:9, False, False, True, False, False, False, False, true, function alias
+ENABLE_NLS, extracted_programs/gawk-5.1.1/config.h:9:9, False, False, False, True, False, False, False, true, invoked in a static conditional
+BTN_Y, extracted_programs/linux-6.2-rc2/include/uapi/linux/input-event-codes.h:389:9, True, False, False, False, False, False, False, true, enum
+MI_INVALIDATE_TLB, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_gpu_commands.h:165:11, True, False, False, False, False, False, False, true, enum
+PTY_TYPE_SLAVE, extracted_programs/linux-6.2-rc2/include/linux/tty_driver.h:564:9, True, False, False, False, False, False, False, true, enum
+SvRX, extracted_programs/perl-5.36.0/regexp.h:281:11, False, False, True, False, False, False, False, true, function alias
+SNDRV_SEQ_PORT_CAP_SUBS_WRITE, extracted_programs/linux-6.2-rc2/include/uapi/sound/asequencer.h:407:9, False, False, False, False, False, False, True, true, also definition-adapting
+ACPI_OSI_WINSRV_2008, extracted_programs/linux-6.2-rc2/include/acpi/actypes.h:1300:9, True, False, False, False, False, False, False, true, enum
+LUA_OPBOR, extracted_programs/lua-5.4.4/src/lua.h:213:9, False, False, False, False, False, False, False, false, definition-adapting; numeric constant; case label
+CLEARHPAGEFLAG, extracted_programs/linux-6.2-rc2/include/linux/hugetlb.h:598:9, False, False, False, False, False, False, True, true, also metaprogramming
+BTN_BASE2, extracted_programs/linux-6.2-rc2/include/uapi/linux/input-event-codes.h:373:9, True, False, False, False, False, False, False, true, enum
+CEC_OP_STATUS_REQ_OFF, extracted_programs/linux-6.2-rc2/include/uapi/linux/cec.h:805:9, True, False, False, False, False, False, False, true, enum
+POSIXL_SET, extracted_programs/perl-5.36.0/regcomp.h:677:9, False, True, False, False, False, False, True, true, none
+TASK_NORMAL, extracted_programs/linux-6.2-rc2/include/linux/sched.h:122:9, False, False, True, False, False, False, True, true, also definition-adapting
+QOPR_CLOCK_X2, extracted_programs/linux-6.2-rc2/drivers/tty/serial/8250/8250_pci.c:1273:9, True, False, False, False, False, False, False, true, enum
+t_vichangewholeline, extracted_programs/zsh-5.9/Src/Zle/zle_things.h:266:9, False, False, False, False, False, False, True, true, also call-site-context-adapting because defined to an address; invoked in a non-c file
+PerlLIO_read, extracted_programs/perl-5.36.0/iperlsys.h:795:11, False, False, False, False, False, False, False, false, calling-convention-adapting; scope-adapting; generic; function alias; RHS of assignment; in comparison; invoked by `read` macro
+AC_PAR_FUNCTION_TYPE, extracted_programs/linux-6.2-rc2/include/sound/hda_verbs.h:130:9, True, False, False, False, False, False, False, true, enum
+size_overflow_p, extracted_programs/gzip-1.12/lib/xsize.h:100:9, False, False, False, False, False, False, True, true, also generic
+RKL_PW_4_POWER_DOMAINS, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/display/intel_display_power_map.c:1009:9, False, False, False, False, False, False, True, true, also expands to an unguarded comma
+IOAM6_GENL_NAME, extracted_programs/linux-6.2-rc2/include/uapi/linux/ioam6_genl.h:12:9, True, False, False, False, False, False, False, true, string constant
+__BLIST_HIGH_UNUSED, extracted_programs/linux-6.2-rc2/include/scsi/scsi_devinfo.h:74:9, False, False, False, False, False, False, True, true, invoked within itself
+GMBUS_PIN_3_BXT, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/display/intel_gmbus.h:25:9, True, False, False, False, False, False, False, true, enum
+COL_DI, extracted_programs/zsh-5.9/Src/Zle/complist.c:169:9, True, False, False, False, False, False, False, true, enum
+regtail, extracted_programs/perl-5.36.0/embed.h:1119:9, False, False, False, False, False, False, True, true, also definition-adapting
+PORT_LINK_STROBE, extracted_programs/linux-6.2-rc2/drivers/usb/host/xhci.h:360:9, True, False, False, False, False, False, False, true, enum
+rcu_sleep_check, extracted_programs/linux-6.2-rc2/include/linux/rcupdate.h:410:9, False, False, True, False, False, False, False, true, expands to `do { } while (0)`
+do_print, extracted_programs/perl-5.36.0/embed.h:1335:9, False, False, True, False, False, False, False, true, function alias
+t_viundochange, extracted_programs/zsh-5.9/Src/Zle/zle_things.h:364:9, False, False, False, False, False, False, True, true, also calling-convention-adapting; defined to a memory address and invoked in a non-c file
+USB_DEVICE_ID_APPLE_GEYSER3_ANSI, extracted_programs/linux-6.2-rc2/drivers/hid/hid-ids.h:102:9, False, False, False, False, False, False, True, true, also definition-adapting
+TGL_UNCORE_PCI_IMC_MAP_SIZE, extracted_programs/linux-6.2-rc2/arch/x86/events/intel/uncore_snb.c:1321:9, True, False, False, False, False, False, False, true, enum
+pr_fmt, extracted_programs/linux-6.2-rc2/net/core/netprio_cgroup.c:8:9, False, False, False, False, False, False, True, true, string concatenates an argument
+TSO_MAX_SEGS, extracted_programs/linux-6.2-rc2/include/linux/netdevice.h:2323:9, False, False, False, True, False, False, False, true, also definition-adapting; expanded as RHS of an assignment statement
+PERL_ARGS_ASSERT_ISLB, extracted_programs/perl-5.36.0/proto.h:6360:9, False, False, False, True, False, True, False, true, expands to a series of asserts
+ETHTOOL_GGRO, extracted_programs/linux-6.2-rc2/include/uapi/linux/ethtool.h:1587:9, True, False, False, False, False, False, False, true, enum
+iQmaximized, extracted_programs/emacs-28.1/src/globals.h:2852:9, False, False, False, False, False, False, True, true, also metaprogramming; invocation was constructed from token-pasting
+IPV6_2292RTHDR, extracted_programs/linux-6.2-rc2/include/uapi/linux/in6.h:160:9, False, False, False, False, False, False, False, false, not classified; definition-adapting; numeric constant; expanded in conditional expr; expanded in case label; expanded in function call argument; expanded on RHS of comparison
+Qoverlay, extracted_programs/emacs-28.1/src/globals.h:7576:10, False, False, False, False, False, False, True, true, also scope-adapting; defined to a function call
+PF_WANPIPE, extracted_programs/linux-6.2-rc2/include/linux/socket.h:272:9, True, False, False, False, False, False, False, true, enum
+TX_WAKE_THRESHOLD, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/intel/e1000e/netdev.c:1269:9, True, False, False, False, False, False, False, true, multiple definitions; all enums
+PLATFORM_NAME, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/intel_device_info.c:38:9, False, False, False, True, False, True, False, true, token-pasting
+SECCLASS_NETLINK_ROUTE_SOCKET, extracted_programs/linux-6.2-rc2/security/selinux/flask.h:35:9, True, False, False, False, False, False, False, true, enum
+inhibit_menubar_update, extracted_programs/emacs-28.1/src/globals.h:1065:9, False, True, True, False, False, False, True, true, expands to global struct variable field
+FATTR4_WORD0_LINK_SUPPORT, extracted_programs/linux-6.2-rc2/include/linux/nfs4.h:399:9, False, False, False, False, False, False, True, true, calling-convetion-adapting; maybe scope-adapting; defined to a field of a global struct variable
+CVSADM_REP, extracted_programs/cvs-1.11.21/src/cvs.h:153:9, True, False, False, False, False, False, False, true, string constant
+GEN7_CXT_TOTAL_SIZE, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_gt_regs.h:237:11, False, False, False, False, False, False, True, true, also definition-adapting
+TCA_DUMP_FLAGS_TERSE, extracted_programs/linux-6.2-rc2/include/uapi/linux/rtnetlink.h:643:9, False, False, False, False, False, False, True, true, also definition-adapting
+PCI_CLASS_BRIDGE_CARDBUS, extracted_programs/linux-6.2-rc2/include/linux/pci_ids.h:67:9, False, False, False, False, False, False, True, true, also definition-adapting
+brace_whitespace, extracted_programs/bash-5.2-rc1/braces.c:58:9, False, False, False, True, False, False, False, true, expands an argument in a short-circuiting operation but actually definition-adapting
+USB_ENDPOINT_XFER_CONTROL, extracted_programs/linux-6.2-rc2/include/uapi/linux/usb/ch9.h:433:9, False, False, False, False, False, False, True, true, also definition-adapting
+any_width, extracted_programs/xfig-3.2.8b/src/w_icons.c:1934:9, True, False, False, False, False, False, False, true, enum
+AC_AMPCAP_MIN_MUTE, extracted_programs/linux-6.2-rc2/include/sound/hda_verbs.h:294:9, True, False, False, False, False, False, False, true, enum
+PAGE_MAPCOUNT_RESERVE, extracted_programs/linux-6.2-rc2/include/linux/page-flags.h:919:9, False, False, True, False, False, False, False, false, appears to be definition-adapting; on RHS of <
+DSPCLK_GATE_D, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:1572:9, False, False, False, True, False, False, False, false, should be definition-adapting; expression statement; passed to function call; nested invocations
+tolstream, extracted_programs/lua-5.4.4/src/liolib.c:158:9, True, False, False, False, False, False, False, true, function
+TAINT_MACHINE_CHECK, extracted_programs/linux-6.2-rc2/include/linux/panic.h:58:9, False, False, True, False, False, False, False, false, definition-adapting to enum; passed to a function call; used as a designated initializer
+Vprint_circle, extracted_programs/emacs-28.1/src/globals.h:515:9, False, True, True, False, False, False, True, true, defined to a field of a global struct variable
+EXT4_S_ERR_END, extracted_programs/linux-6.2-rc2/fs/ext4/ext4.h:1424:9, False, False, False, False, False, False, True, true, also scope-adapting
+FS_DQ_BIGTIME, extracted_programs/linux-6.2-rc2/include/uapi/linux/dqblk_xfs.h:132:9, False, False, True, False, False, False, False, false, definition-adapting; on RHS of &; on RHS of |=
+do_intl, extracted_programs/gawk-5.1.1/awk.h:1181:9, False, False, True, False, False, False, False, false, should also be calling-convention-adapting; invoked in &&
+iQoblique, extracted_programs/emacs-28.1/src/globals.h:3070:9, False, False, False, False, False, False, True, true, also metaprogramming; invocation was constructed from token-pasting
+TRACE_FLAGS_MAX_SIZE, extracted_programs/linux-6.2-rc2/kernel/trace/trace.h:191:9, False, False, False, False, False, False, True, true, also definition-adapting
+PERL_SYS_TERM_BODY, extracted_programs/perl-5.36.0/unixish.h:155:11, False, False, False, True, False, False, False, true, defined to a sequence of nested macro invocations
+XFRM_SKB_CB, extracted_programs/linux-6.2-rc2/include/net/xfrm.h:641:9, False, True, False, False, False, False, True, true, invoked on LHS/RHS of assignment statements
+PUSH_STATE_GOTO, extracted_programs/perl-5.36.0/regexec.c:6115:9, False, False, False, True, False, False, False, true, expands to a long series of statements
+RELAYFS_CHANNEL_VERSION, extracted_programs/linux-6.2-rc2/include/linux/relay.h:29:9, True, False, False, False, False, False, False, true, enum
+DP_DS_PORT_HPD, extracted_programs/linux-6.2-rc2/include/drm/display/drm_dp.h:396:10, True, False, False, False, False, False, False, true, enum
+INPUT_DEV_ID_ATTR, extracted_programs/linux-6.2-rc2/drivers/input/input.c:1499:9, False, False, False, True, False, True, False, true, token-pasting
+UNOP_AUX_item_sv, extracted_programs/perl-5.36.0/op.h:202:11, False, False, False, True, True, False, True, true, side-effects in arguments and nested invocations
+IPT_BASE_CTL, extracted_programs/linux-6.2-rc2/include/uapi/linux/netfilter_ipv4/ip_tables.h:134:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+MSG_IDLE_VCS6, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_gt_regs.h:912:9, False, False, False, True, False, False, False, false, definition-adapting; designated initializer; nested invocations
+LOCK_CONTENDED, extracted_programs/linux-6.2-rc2/include/linux/lockdep.h:480:9, False, False, True, True, False, False, False, true, function-alias with unexpanded arguments
+PCI_DEVICE_ID_INTEL_PORT_RIDGE, extracted_programs/linux-6.2-rc2/include/linux/pci_ids.h:2684:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+GT, extracted_programs/bash-5.2-rc1/expr.c:123:9, True, False, False, False, False, False, False, true, enum char constant
+PUT_SINFO_U64, extracted_programs/linux-6.2-rc2/net/wireless/nl80211.c:6356:9, False, False, False, True, False, True, False, true, token-pasting; undefined at one point
+COMP_LISTMATCH, extracted_programs/zsh-5.9/Src/Zle/compctl.c:58:9, True, False, False, False, False, False, False, true, enum
+ELF_ST_TYPE, extracted_programs/linux-6.2-rc2/scripts/sorttable.h:62:10, False, True, True, False, False, False, False, true, undefined at one point and defined as an alias for another macro
+MTL_RESET_PICA_HANDSHAKE_EN, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:5758:10, False, False, False, True, False, False, False, true, global constant defined to a non-ICE expression
+E1000_TORL, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/intel/e1000e/regs.h:163:9, False, False, False, False, False, False, True, true, also definition-adapting
+p4_config_pack_escr, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/perf_event_p4.h:81:9, False, False, False, False, False, False, True, true, also definition-adapting function
+iQdirectory_files, extracted_programs/emacs-28.1/src/globals.h:2074:9, False, False, False, False, False, False, True, true, also metaprogramming; invocation was constructed from token-pasting
+LUAI_THROW, extracted_programs/lua-5.4.4/src/ldo.c:66:9, False, False, True, False, False, False, False,  true, name appears in a static conditional
+FORM_NUM_BLANK, extracted_programs/perl-5.36.0/pp_ctl.c:480:9, False, False, False, False, False, False, False, false, not classified; invoked in conditional expression; RHS of assignment
+DASH_HZ, extracted_programs/linux-6.2-rc2/arch/x86/realmode/rm/wakemain.c:36:9, False, False, False, False, False, False, False, false, definition-adapting; numeric constant; passed to a function call
+RE_NO_BK_PARENS, extracted_programs/gawk-5.1.1/support/regex.h:148:10, False, False, False, False, False, False, True, true, also definition-adapting
+SIXAXIS_CONTROLLER_BT, extracted_programs/linux-6.2-rc2/drivers/hid/hid-sony.c:49:9, False, False, False, True, False, False, True, true, definition-adapting
+DDI_CLK_SEL_TBT_162, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:7039:10, False, False, False, True, False, False, False, true, expands to a nested function-like macro invocation inside of a case label
+PerlMemShared_malloc, extracted_programs/perl-5.36.0/iperlsys.h:901:11, False, False, False, False, False, False, False, false, not classified; alias for malloc; argument of one invocation is a conditional expr; RHS of assignment; operand of cast-expression; invoked in conditional expr
+DRM_MODE_FB_DIRTY_FLAGS, extracted_programs/linux-6.2-rc2/include/uapi/drm/drm_mode.h:737:9, True, False, False, False, False, False, False, true, enum
+FIRST_EXTERNAL_VECTOR, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/irq_vectors.h:36:9, False, False, False, False, False, False, True, true, also definition-adapting
+RXD_ERR_BAD_CRC, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:2620:9, False, False, False, False, False, False, True, true, also definition-adapting
+ISUNIBYTE, extracted_programs/emacs-28.1/src/regex-emacs.c:105:9, False, False, False, False, False, False, False, false, should be definition-adapting; expands to a function call; LHS of comparison
+CAP_GRP_HDR_CAPTURE_TYPE, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/uc/guc_capture_fwif.h:142:9, False, False, False, False, False, False, True, true, also definition-adapting
+t_Dvibeginningofline, extracted_programs/zsh-5.9/Src/Zle/zle_things.h:644:9, False, False, False, False, False, False, True, true, also calling-convention-adapting; defined to a memory address and invoked in a non-c file
+DMA_RWCTRL_READ_BNDRY_256, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:226:10, True, False, False, False, False, False, False, true, enum
+NOOP, extracted_programs/perl-5.36.0/perl.h:639:9, False, False, True, False, True, False, True, true, also definition-adapting
+FDI_FE_ERRC_ENABLE, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:6351:10, True, False, False, False, False, False, False, true, enum
+INTEL_CE_GBE_MDIC_OP_WRITE, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/intel/e1000/e1000_hw.h:1599:9, True, False, False, False, False, False, False, true, enum
+__UAPI_DEF_IF_IFNAMSIZ, extracted_programs/linux-6.2-rc2/include/uapi/linux/libc-compat.h:183:9, False, False, False, True, False, False, False, true, appears in a static conditional
+IDA_BITMAP_BITS, extracted_programs/linux-6.2-rc2/include/linux/idr.h:238:9, False, False, True, False, False, False, True, true, definition-adapting
+ATTR_KILL_SGID, extracted_programs/linux-6.2-rc2/include/linux/fs.h:202:9, False, False, True, False, False, False, False, false, definition-adapting; used as return value; on RHS of |; on RHS of &; in RHS of &=; on LHS of &&; on RHS of |=; 
+CONFIG_NODES_SHIFT, extracted_programs/linux-6.2-rc2/include/generated/autoconf.h:846:9, False, False, False, False, False, False, True, true, also scope-adapting
+FDAY0, extracted_programs/gnuplot-5.4.4/src/national.h:174:9, False, False, False, False, False, False, False, false, also definition-adapting string constant; invoked in array initializer
+pr_fmt, extracted_programs/linux-6.2-rc2/drivers/acpi/ioapic.c:21:9, False, False, False, False, False, False, True, true, also exploits TP6 string concatenation
+tw_refcnt, extracted_programs/linux-6.2-rc2/include/net/inet_timewait_sock.h:47:9, False, False, False, True, False, False, True, true, defined to a field access of a struct field name
+BUILD_BUG, extracted_programs/linux-6.2-rc2/tools/include/linux/build_bug.h:59:9, False, False, False, False, False, False, True, true, ultimately expands to macro compile_time_asssert which (if the __OPTIMIZE macro is not defined) uses token-pasting; so may also be metaprogramming
+XV_VERSION, extracted_programs/xfig-3.2.8b/src/w_rottext.h:27:9, True, False, False, False, False, False, False, true, floating point constant
+TYPE_WORM, extracted_programs/linux-6.2-rc2/include/scsi/scsi_proto.h:237:9, False, False, True, False, False, False, True, true, also definition-adapting
+topology_cluster_cpumask, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/topology.h:120:9, False, False, False, False, False, False, True, true, function alias
+_ICL_DSC1_RC_RANGE_PARAMETERS_2_UDW_PC, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:2317:9, False, False, False, False, False, False, True, true, also definition-adapting
+SIOCGIFNETMASK, extracted_programs/linux-6.2-rc2/include/uapi/linux/sockios.h:68:9, True, False, False, False, False, False, False, true, enum
+GEN8_RPCS_EU_MAX_SHIFT, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_engine_regs.h:97:11, False, False, False, False, False, False, True, true, also definition-adapting
+MS_SLAVE, extracted_programs/linux-6.2-rc2/include/uapi/linux/mount.h:33:9, False, False, False, False, False, False, True, true, also definition-adapting
+MII_TG3_AUXCTL_ACTL_EXTPKTLEN, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:2328:9, True, False, False, False, False, False, False, true, enum
+USB_CONFIG_ATT_SELFPOWER, extracted_programs/linux-6.2-rc2/include/uapi/linux/usb/ch9.h:365:9, True, False, False, False, False, False, False, true, enum
+S_ISNWK, extracted_programs/zsh-5.9/Src/zsh_system.h:673:10, False, False, True, False, False, False, False, true, appears in static conditional
+SOUTH_CHICKEN2, extracted_programs/linux-6.2-rc2/drivers/pci/quirks.c:3786:9, True, False, False, False, False, False, False, true, enum
+YYFINAL, extracted_programs/perl-5.36.0/perly.tab:235:9, False, False, False, False, False, False, False, false, not classified because defined in a non-C file
+STACK_SKIP, extracted_programs/linux-6.2-rc2/kernel/trace/trace_events_trigger.c:1533:10, True, False, False, False, False, False, False, true, enum
+STD_COM4_FLAGS, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/serial.h:17:10, False, False, False, False, False, False, True, true, also definition-adapting
+SF_ENERGY, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_hwmon.c:29:9, True, False, False, False, False, False, False, true, enum
+for_each_net, extracted_programs/linux-6.2-rc2/include/net/net_namespace.h:390:9, False, False, False, True, False, False, False, true, expands to the list_for_each_entry macro which is accepts a type; identifier; and value as arguments
+QDISC_STATE_NON_EMPTY, extracted_programs/linux-6.2-rc2/include/net/sch_generic.h:53:9, True, False, False, False, False, False, False, true, enum
+CB_CD1EVENT, extracted_programs/linux-6.2-rc2/drivers/pcmcia/yenta_socket.h:9:12, True, False, False, False, False, False, False, true, enum
+FTS_AGAIN, extracted_programs/gawk-5.1.1/extension/gawkfts.h:122:9, True, False, False, False, False, False, False, true, enum
+CRD_ROTATE, extracted_programs/gnuplot-5.4.4/src/gp_types.h:187:9, False, False, False, True, False, False, False, true, expands to the name of a struct field and invoked as if it were the name of the struct field on the LHS/RHS of assignment statements
+__UDP_INC_STATS, extracted_programs/linux-6.2-rc2/include/net/udp.h:399:9, False, False, False, True, False, False, False, true, eventually expands to a variadic macro
+INFFMESSAGE, extracted_programs/gv-3.7.4/src/message.h:179:12, False, False, False, True, False, False, False, true, also metaprogramming; stringifies an argument
+SECCLASS_BLUETOOTH_SOCKET, extracted_programs/linux-6.2-rc2/security/selinux/flask.h:80:9, True, False, False, False, False, False, False, true, enum
+DG1_DMC_VERSION_REQUIRED, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/display/intel_dmc.c:68:9, False, False, False, True, False, False, False, true, also definition-adapting; appears on RHS of assignment
+XSRETURN_NO, extracted_programs/perl-5.36.0/XSUB.h:337:9, False, True, True, True, True, False, False, true, void macro to function
+CTX_GTT_ADDRESS_MASK, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_lrc.h:90:9, False, False, False, True, False, False, False, true, definition-adapting; listed as csca because invoked inside a short-circuiting operation
+USB_DEVICE_ID_LD_MCT, extracted_programs/linux-6.2-rc2/drivers/hid/hid-ids.h:763:9, False, False, False, False, False, False, True, true, definition-adapting
+CTRL_H, extracted_programs/xfig-3.2.8b/src/d_text.c:69:9, True, False, False, False, False, False, False, true, enum
+iQcond_jump_narg_leq, extracted_programs/emacs-28.1/src/globals.h:1934:9, False, False, False, False, False, False, True, true, also metaprogramming; invocation was constructed fro token-pasting
+PTP_PEROUT_REQUEST, extracted_programs/linux-6.2-rc2/include/uapi/linux/ptp_clock.h:205:9, False, False, False, True, False, False, False, true, passes a type as an argument
+case_65_SBOX32, extracted_programs/perl-5.36.0/sbox32_hash.h:1070:9, False, False, False, True, False, False, False, true, expands to a case label and statement
+taint_env, extracted_programs/perl-5.36.0/embed.h:741:9, False, False, True, False, False, False, True, true, function alias
+Perl_reg_named_buff, extracted_programs/perl-5.36.0/ext/re/re_top.h:24:9, False, False, False, True, False, False, False, true, expands to a function name in a declaration
+ksiz, extracted_programs/perl-5.36.0/dist/Storable/Storable.c:601:9, False, False, False, False, False, False, True, true, calling-convention-adapting
+CHARSET_ATTR_UNIFY_MAP, extracted_programs/emacs-28.1/src/charset.h:280:9, False, False, False, False, False, False, True, true, scope-adapting
+C_and_POSIX_utf8ness, extracted_programs/perl-5.36.0/locale.c:115:9, False, False, False, False, False, False, True, true, definition-adapting string constant
+CLKGATE_DIS_MISC_DMASC_GATING_DIS, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:8133:10, False, False, False, True, False, False, False, true, definition-adapting but expands to a short-circuiting expression
+DISABLE_CALL_DEPTH_TRACKING, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/disabled-features.h:73:10, False, False, False, False, False, False, True, true, also definition-adapting
+XELPDP_DP_AUX_CH_CTL_POWER_REQUEST, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:3446:11, False, False, False, True, False, False, False, true, definition-adapting but expands to a short-circuiting expression
+Qscale, extracted_programs/emacs-28.1/src/globals.h:7694:10, False, False, True, False, False, False, True, true, function alias
+TOGGLE_USER_STATES, extracted_programs/fvwm-2.6.9/fvwm/window_flags.h:68:9, False, False, False, False, False, False, False, false, calling-convention-adapting; ^= a field of the first argument with second argument
+force_word, extracted_programs/perl-5.36.0/embed.h:1974:9, False, False, True, False, False, False, True, true, function alias
+X86_FEATURE_SPEC_CTRL, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/cpufeatures.h:414:9, False, False, True, False, False, False, True, true, also definition-adapting
+LSM_AUDIT_DATA_IBPKEY, extracted_programs/linux-6.2-rc2/include/linux/lsm_audit.h:75:9, True, False, False, False, False, False, False, true, enum
+NHMEX_M0_MSR_PMU_PLD, extracted_programs/linux-6.2-rc2/arch/x86/events/intel/uncore_nhmex.c:84:9, False, False, False, False, False, False, True, true, also definition-adapting
+PTR_RING_PEEK_CALL_BH, extracted_programs/linux-6.2-rc2/include/linux/ptr_ring.h:445:9, False, False, True, False, False, False, False, true, expands to statement expression
+SPRITE_YUV_ORDER_MASK, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:4416:11, False, False, False, False, False, False, True, true, definition-adapting but expands to a short-circuiting expression
+AE_CODE_PROGRAMMER, extracted_programs/linux-6.2-rc2/include/acpi/acexcep.h:19:9, False, False, False, False, False, False, True, true, also definition-adapting
+ACPI_EXTERNAL_RETURN_OK, extracted_programs/linux-6.2-rc2/include/acpi/acpixf.h:65:9, False, False, False, False, False, False, True, true, expands to a function declaration
+ARCH_LBR_REL_CALL, extracted_programs/linux-6.2-rc2/arch/x86/events/intel/lbr.c:89:9, False, False, False, False, False, False, True, true, also definition-adapting
+PAD_SAVE_SETNULLPAD, extracted_programs/perl-5.36.0/pad.h:381:9, False, False, False, True, False, False, False, true, expands to a sequence of statements
+w_acceptandinfernexthistory, extracted_programs/zsh-5.9/Src/Zle/zle_widget.h:8:9, False, False, False, False, False, False, True, true, also calling-convention-adapting; defined to a memory address
+XSubPPtmpAAAA, extracted_programs/perl-5.36.0/dist/PathTools/Cwd.c:717:9, False, False, False, True, False, False, False, true, only invoked in static conditionals
+USB_DEVICE_ID_GTCO_308, extracted_programs/linux-6.2-rc2/drivers/hid/hid-ids.h:567:9, False, False, False, False, False, False, True, true, also definition-adapting
+DM_ENDIO_INCOMPLETE, extracted_programs/linux-6.2-rc2/include/linux/device-mapper.h:626:9, True, False, False, False, False, False, False, true, enum
+I_ARCTYPE, extracted_programs/xfig-3.2.8b/src/w_indpanel.h:70:9, False, False, False, False, False, False, True, true, also definition-adapting
+get_bucket, extracted_programs/linux-6.2-rc2/net/unix/af_unix.c:3257:9, True, False, False, False, False, False, False, true, function
+NVRAM_MINOR, extracted_programs/linux-6.2-rc2/include/linux/miscdevice.h:32:9, False, False, False, False, False, False, True, true, also definition-adapting
+define_therm_throt_device_one_ro, extracted_programs/linux-6.2-rc2/drivers/thermal/intel/therm_throt.c:130:9, False, False, False, True, False, True, False, true, expands to a declaration
+IS_SYNC, extracted_programs/linux-6.2-rc2/include/linux/fs.h:2298:9, False, False, True, True, False, False, False, true, expanded in a short-circuiting operation
+SNDRV_SEQ_CLIENT_SYSTEM, extracted_programs/linux-6.2-rc2/include/uapi/sound/asequencer.h:318:9, True, False, False, False, False, False, False, true, enum
+OPEN_FMODE, extracted_programs/linux-6.2-rc2/include/linux/fs.h:3532:9, False, False, True, False, False, False, False, true, forward-references types
+iQmake_directory, extracted_programs/emacs-28.1/src/globals.h:2824:9, False, False, False, False, False, False, True, true, also metaprogramming; invocation was constructed from token-pasting
+SMALL, extracted_programs/linux-6.2-rc2/drivers/firmware/efi/libstub/vsprintf.c:148:9, False, False, False, False, False, False, True, true, also definition-adapting
+MINOR, extracted_programs/emacs-28.1/src/sysdep.c:3232:9, True, False, False, False, False, False, False, true, function
+YY_RESTORE_YY_MORE_OFFSET, extracted_programs/flex-2.6.4/src/scan.c:1843:9, False, False, False, True, False, False, True, true, empty definition
+Qoperations, extracted_programs/emacs-28.1/src/globals.h:7568:10, False, False, True, False, False, False, True, true, function alias
+INPUT_PROP_POINTER, extracted_programs/linux-6.2-rc2/include/uapi/linux/input-event-codes.h:23:9, False, False, False, False, False, False, True, true, also definition-adapting
+THRESHOLD_MAX, extracted_programs/linux-6.2-rc2/arch/x86/kernel/cpu/mce/amd.c:33:9, True, False, False, False, False, False, False, true, enum
+BPF_EXIT_INSN, extracted_programs/linux-6.2-rc2/include/linux/filter.h:387:9, True, False, False, False, False, False, False, true, function
+GEN7_SARCHKMD, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_gt_regs.h:947:9, False, False, False, True, False, False, False, true, defined to a non-constant expression
+dITEMS, extracted_programs/perl-5.36.0/XSUB.h:166:9, False, False, False, False, False, False, True, true, expands to a declaration
+HASHC, extracted_programs/gawk-5.1.1/str_array.c:571:9, False, False, False, True, False, False, False, true, expands to a sequence of statements
+ANNOTATE_NOENDBR, extracted_programs/linux-6.2-rc2/include/linux/objtool.h:87:9, False, False, False, True, False, False, True, true, invoked in non-c files and treated as a string literal (concatenation)
+KEY_getservent, extracted_programs/perl-5.36.0/keywords.h:115:9, True, False, False, False, False, False, False, true, enum
+with_intel_runtime_pm, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/intel_runtime_pm.h:205:9, False, False, False, True, False, False, False, true, expands to for loop condition (syntax fragment)
+PCI_DEVICE_ID_NETMOS_9745, extracted_programs/linux-6.2-rc2/include/linux/pci_ids.h:3079:9, True, False, False, False, False, False, False, true, enum
+QCcrop, extracted_programs/emacs-28.1/src/globals.h:6683:10, False, False, False, False, False, False, True, true, also scope-adapting; function alias
+AMD_EVENT_TYPE_MASK, extracted_programs/linux-6.2-rc2/arch/x86/events/amd/core.c:1005:9, True, False, False, False, False, False, False, true, enum
+FPS_IGNORE_RAISE_CLICK_MOTION, extracted_programs/fvwm-2.6.9/fvwm/focus_policy.h:106:9, False, False, True, False, False, False, False, false, also calling-convention-adapting; assigns a field of the first argument to the !! of the second argument; passed a macro invocation as an argument
+define_one_global_rw, extracted_programs/linux-6.2-rc2/include/linux/cpufreq.h:316:9, False, False, False, True, False, True, False, true, expands to a declaration
+GEN6_GT_PERF_STATUS, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/intel_mchbar_regs.h:207:9, False, False, False, True, False, False, False, true, also definition-adapting; expands to a short-circuiting expression
+OSC_PCI_CAPABILITY_DWORDS, extracted_programs/linux-6.2-rc2/include/linux/acpi.h:557:9, True, False, False, False, False, False, False, true, enum
+MAILBOX_SNDHOST_PROD_IDX_0, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:343:9, True, False, False, False, False, False, False, true, enum
+F_POLYGON, extracted_programs/xfig-3.2.8b/src/mode.h:46:10, True, False, False, False, False, False, False, true, enum
+PUREBEG, extracted_programs/emacs-28.1/src/alloc.c:343:9, False, False, False, False, False, False, False, false, calling-convention-adapting; object-like macro defined to a non-constant expression; RHS of assignment; defined to cast expression
+GROWING, extracted_programs/perl-5.36.0/pp_pack.c:375:9, False, True, True, False, False, False, True, true, none
+MAX_BLOCK_SIZE, extracted_programs/linux-6.2-rc2/arch/x86/mm/init_64.c:1424:9, True, False, False, False, False, False, False, true, enum
+_KERNEL_CAPABILITY_U32S, extracted_programs/linux-6.2-rc2/include/linux/capability.h:20:9, False, False, True, True, False, False, True, true, none
+DEVCG_DEV_CHAR, extracted_programs/linux-6.2-rc2/include/linux/device_cgroup.h:10:9, False, False, False, False, False, False, False, false, not classified; definition-adapting; ICE; RHS of assignment; passed to function call; RHS of comparison; bitwise expression
+t_Dundefinedkey, extracted_programs/zsh-5.9/Src/Zle/zle_things.h:610:9, False, False, False, False, False, False, True, true, also calling-convention-adapting; defined to a memory address and invoked in a non-c file
+MAD_DIMM_B_SIZE_MASK, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/intel_mchbar_regs.h:157:11, True, False, False, False, False, False, False, true, enum
+ACPI_EC_FLAG_BURST, extracted_programs/linux-6.2-rc2/drivers/acpi/ec.c:42:9, False, False, False, False, False, False, True, true, also definition-adapting
+CHAR_EOF, extracted_programs/m4-1.4.19/src/input.c:142:9, True, False, False, False, False, False, False, true, enum
+DOCK_DOCKING, extracted_programs/linux-6.2-rc2/drivers/acpi/dock.c:47:9, True, False, False, False, False, False, False, true, enum
+NEED_CMOV, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/required-features.h:33:10, False, False, False, False, False, False, True, true, also definition-adapting
+DEFAULT_BORDER_LP, extracted_programs/gnuplot-5.4.4/src/gadgets.c:155:10, False, False, False, False, False, False, False, false, calling-convention-adapting; scope-adapting; defined to struct literal but without wrapping cast expression so type is ambigious (could be an array initializer); RHS of assignment
+NFS4_dec_get_lease_time_sz, extracted_programs/linux-6.2-rc2/fs/nfs/nfs4xdr.c:857:9, False, False, False, False, False, False, True, true, scope-adapting; not sure where invoked
+DPFC_CTL_SR_EN, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:1319:11, False, False, False, True, False, False, False, true, also definition-adapting; expands to a short-circuiting operation
+PCI_VENDOR_ID_APPLE, extracted_programs/linux-6.2-rc2/include/linux/pci_ids.h:962:9, False, False, False, False, False, False, True, true, also definition-adapting
+newXSproto_portable, extracted_programs/perl-5.36.0/cpan/IPC-SysV/SysV.c:264:9, False, False, False, True, False, False, False, true, generic
+SECCOMP_LOG_TRACE, extracted_programs/linux-6.2-rc2/kernel/seccomp.c:941:9, True, False, False, False, False, False, False, true, enum
+iQcodeset, extracted_programs/emacs-28.1/src/globals.h:1884:9, False, False, False, False, False, False, True, true, also calling-convention-adapting; defined to a memory address and invoked in a non-c file
+EXT4_DEFM_UID16, extracted_programs/linux-6.2-rc2/fs/ext4/ext4.h:2255:9, True, False, False, False, False, False, False, true, enum
+for_each_migratetype_order, extracted_programs/linux-6.2-rc2/include/linux/mmzone.h:94:9, False, False, False, True, False, False, False, true, accepts a type as a first-class citizen
+NHMEX_M_PMON_CTL_COUNT_MODE_SHIFT, extracted_programs/linux-6.2-rc2/arch/x86/events/intel/uncore_nhmex.c:99:9, False, False, False, False, False, False, True, true, also definition-adapting
+Fstat, extracted_programs/perl-5.36.0/unixish.h:132:11, False, False, True, False, False, False, True, true, function alias; appears in a static declaration
+UNI_lower_values_index, extracted_programs/perl-5.36.0/charclass_invlists.h:430530:9, True, False, False, False, False, False, False, true, enum
+ALIAS_GLOBAL, extracted_programs/zsh-5.9/Src/zsh.h:1266:9, True, False, False, False, False, False, False, true, enum
+DKL_PLL_DIV1, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/display/intel_dkl_phy_regs.h:76:9, False, False, False, True, False, False, False, false, definition-adapting; expression statement; passed to function call; on RHS of assignment; nested invocations
+this_cpu_xchg, extracted_programs/linux-6.2-rc2/include/linux/percpu-defs.h:513:9, False, False, False, True, False, True, False, true, token-pasting
+SNDRV_PCM_HW_PARAMS_NO_PERIOD_WAKEUP, extracted_programs/linux-6.2-rc2/include/uapi/sound/asound.h:385:9, False, False, False, False, False, False, False, false, definition-adapting enum; RHS of assignment; conditional expr
+SECURITY__LOAD_POLICY, extracted_programs/linux-6.2-rc2/security/selinux/av_permissions.h:9:9, True, False, False, False, False, False, False, true, enum
+SWAP_RA_HITS_MAX, extracted_programs/linux-6.2-rc2/mm/swap_state.c:46:9, False, False, False, False, False, False, True, true, also definition-adapting
+_TRANS_A_SET_CONTEXT_LATENCY, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:7064:9, False, False, False, False, False, False, True, true, also definition-adapting
+TG3_INTERRUPT_TEST, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.c:449:9, False, True, False, False, False, False, False, false, definition-adapting; designated initializer
+HESHVAN, extracted_programs/remind/src/hbcal.c:35:9, False, True, False, False, False, False, False, false, definition-adapting; invoked as array index; on RHS of ==; on RHS of =
+EXPORT_TRACEPOINT_SYMBOL_GPL, extracted_programs/linux-6.2-rc2/include/linux/tracepoint.h:330:9, False, False, False, True, False, True, False, true, token-pasting
+CALLREGEXEC, extracted_programs/perl-5.36.0/perl.h:233:9, False, False, False, True, False, False, False, false, calling-convention-adapting; scope-adapting
+DP_REMOTE_DPCD_READ, extracted_programs/linux-6.2-rc2/include/drm/display/drm_dp.h:1480:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+COMPAT_START_THREAD, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/elf.h:175:9, False, False, False, True, False, False, False, true, only appears in static conditionals
+sg_printk, extracted_programs/linux-6.2-rc2/drivers/scsi/sg.c:209:9, False, False, False, False, False, False, True, true, also variadic
+list_for_each_entry_srcu, extracted_programs/linux-6.2-rc2/include/linux/rculist.h:408:9, False, False, False, True, False, False, False, true, expands to for loop fragment
+CR, extracted_programs/emacs-28.1/src/cm.h:113:9, False, True, False, False, False, False, False, true, invoked on LHS of an assignment
+SIXAXIS_CONTROLLER, extracted_programs/linux-6.2-rc2/drivers/hid/hid-sony.c:68:9, False, False, False, False, False, False, True, true, also definition-adapting; expands to short-circuiting operation
+TG3_RX_PTP_CTL_HWTS_INTERLOCK, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:836:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+NETLINK_F_BROADCAST_SEND_ERROR, extracted_programs/linux-6.2-rc2/net/netlink/af_netlink.h:13:9, True, False, False, False, False, False, False, true, enum
+CDROMCLOSETRAY, extracted_programs/linux-6.2-rc2/include/uapi/linux/cdrom.h:120:9, True, False, False, False, False, False, False, true, enum
+iQunhandled_file_name_directory, extracted_programs/emacs-28.1/src/globals.h:3690:9, False, False, False, False, False, False, True, true, also metaprogramming; invocation was constructed from token-pasting
+markkey, extracted_programs/lua-5.4.4/src/lgc.c:97:9, False, False, False, True, False, False, False, true, object-like macro expands to a void expression (a compound statement)
+PERL_ARGS_ASSERT_DO_PMOP_DUMP, extracted_programs/perl-5.36.0/proto.h:974:9, False, False, False, True, False, False, False, true, expands to a sequence of statements
+elf_prstatus, extracted_programs/linux-6.2-rc2/fs/compat_binfmt_elf.c:52:9, False, False, True, False, False, False, False, true, typedef
+USB_DEVICE_ID_LD_NETWORKANALYSER, extracted_programs/linux-6.2-rc2/drivers/hid/hid-ids.h:756:9, False, False, False, False, False, False, True, true, also definition-adapting
+__initdata_memblock, extracted_programs/linux-6.2-rc2/include/linux/memblock.h:102:9, False, False, False, True, False, False, False, true, expands to __section attribute
+Z_FINISH, extracted_programs/linux-6.2-rc2/include/linux/zlib.h:144:9, False, False, False, False, False, False, True, true, also definition-adapting
+IFLA_IPTUN_MAX, extracted_programs/linux-6.2-rc2/include/uapi/linux/if_tunnel.h:82:9, True, False, False, False, False, False, False, true, enum
+FINDBRK, extracted_programs/bash-5.2-rc1/xmalloc.c:67:9, True, False, False, False, False, False, False, true, function
+I365_CS_BVD2, extracted_programs/linux-6.2-rc2/drivers/pcmcia/i82365.h:57:9, True, False, False, False, False, False, False, true, enum
+ACPI_MSG_DEPENDENT_RETURN_VOID, extracted_programs/linux-6.2-rc2/include/acpi/acpixf.h:329:9, False, False, False, True, False, False, False, true, expands to a declaration
+DP_QUERY_STREAM_ENC_STATUS, extracted_programs/linux-6.2-rc2/include/drm/display/drm_dp.h:1487:9, False, False, False, False, False, False, True, true, also definition-adapting
+SIG_KTHREAD, extracted_programs/linux-6.2-rc2/include/linux/signal.h:297:9, False, False, False, False, False, False, False, false, not classified; nested invocations; cast expression; passed to function call
+BPF_MISC, extracted_programs/linux-6.2-rc2/include/uapi/linux/bpf_common.h:14:10, True, False, False, False, False, False, False, true, enum
+NETIF_MSG_TIMER, extracted_programs/linux-6.2-rc2/include/linux/netdevice.h:4274:9, False, False, False, True, False, True, True, true, contains a nested macro that uses token-pasting
+X86_FEATURE_DTES64, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/cpufeatures.h:118:9, False, False, False, False, False, False, True, true, also definition-adapting
+GSSX_RES_get_call_context_sz, extracted_programs/linux-6.2-rc2/net/sunrpc/auth_gss/gss_rpc_xdr.h:190:9, False, False, False, False, False, False, True, true, not classified; not invoked; definition-adapting
+READ_DEFECT_DATA_TIMEOUT, extracted_programs/linux-6.2-rc2/include/scsi/scsi.h:138:9, False, False, False, False, False, False, False, false, definition-adapting; RHS of assignment
+IORESOURCE_IO_16BIT_ADDR, extracted_programs/linux-6.2-rc2/include/linux/ioport.h:115:9, False, False, True, False, False, False, False, false, definition-adapting; RHS of |=; in ?:
+PCI_DEVICE_ID_ACCESSIO_PCIE_ICM232_2, extracted_programs/linux-6.2-rc2/drivers/tty/serial/8250/8250_pericom.c:38:9, False, False, False, False, False, False, True, true, also definition-adapting
+EXTENT_STATUS_REFERENCED, extracted_programs/linux-6.2-rc2/fs/ext4/extents_status.h:49:9, False, False, False, False, False, False, True, true, also definition-adapting
+GTF_C_PRIME, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/drm_modes.c:385:9, False, True, False, False, False, False, False, true, captures caller's parameters
+BLK_STS_PROTECTION, extracted_programs/linux-6.2-rc2/include/linux/blk_types.h:101:9, False, False, True, False, False, False, False, true, constant cast
+PCI_EXP_DEVCTL_READRQ, extracted_programs/linux-6.2-rc2/include/uapi/linux/pci_regs.h:517:10, True, False, False, False, False, False, False, true, enum
+KFPU_387, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/fpu/api.h:26:9, False, False, False, True, False, False, True, true, also metaprogramming; eventually expands to a macro that token-pastes
+TX_TIMEOUT, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/realtek/8139too.c:208:9, True, False, False, False, False, False, False, true, enum
+SAVEt_READONLY_OFF, extracted_programs/perl-5.36.0/scope.h:39:9, True, False, False, False, False, False, False, true, enum
+PLANE_STRIDE, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:4876:9, False, False, False, True, False, False, False, true, also definition-adapting; appears on RHS of an assignment
+MC_HEADER_SIZE, extracted_programs/linux-6.2-rc2/arch/x86/include/asm/microcode_intel.h:41:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+CONTEXT_PERMA_PIN, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_context_types.h:126:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+E1000_ICS_RXSEQ, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/intel/e1000e/defines.h:453:9, False, False, False, False, False, False, True, true, also definition-adapting
+PORT_16450, extracted_programs/linux-6.2-rc2/include/uapi/linux/serial.h:52:9, False, False, False, False, False, False, False, false, not classified; definition-adapting; conditional expr; comparison; RHS of assignment; designated initializer
+ETHTOOL_SRXCSUM, extracted_programs/linux-6.2-rc2/include/uapi/linux/ethtool.h:1562:9, True, False, False, False, False, False, False, true, enum
+decode_verifier_maxsz, extracted_programs/linux-6.2-rc2/fs/nfs/nfs4xdr.c:98:9, False, False, False, False, False, False, True, true, also definition-adapting
+MAC_RCV_VALUE_5, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:566:9, False, False, False, False, False, False, True, true, also definition-adapting
+latexline_height, extracted_programs/xfig-3.2.8b/src/w_icons.c:1663:9, True, False, False, False, False, False, False, true, enum
+PMSG_QUIESCE, extracted_programs/linux-6.2-rc2/include/linux/pm.h:526:9, False, False, True, False, False, False, False, true, struct literal
+INTEL_TGL_12_GT1_IDS, extracted_programs/linux-6.2-rc2/include/drm/i915_pciids.h:602:9, False, False, False, False, False, False, True, true, also unaligned
+for_each_reserved_mem_range, extracted_programs/linux-6.2-rc2/include/linux/memblock.h:244:9, False, False, False, True, False, False, False, true, expands to for loop syntax fragment
+XHCI_STATE_HALTED, extracted_programs/linux-6.2-rc2/drivers/usb/host/xhci.h:1842:9, True, False, False, False, False, False, False, true, enum
+PERL_ARGS_ASSERT_SET_REGEX_PV, extracted_programs/perl-5.36.0/proto.h:6028:9, False, False, False, True, False, True, False, true, expands to a sequence of asserts
+RFKILL_IOC_MAGIC, extracted_programs/linux-6.2-rc2/include/uapi/linux/rfkill.h:183:9, True, False, False, False, False, False, False, true, enum
+SKX_MSR_CPU_BUS_NUMBER, extracted_programs/linux-6.2-rc2/arch/x86/events/intel/uncore_snbep.c:297:9, True, False, False, False, False, False, False, true, enum
+PCI_DEVICE_ID_SI_961, extracted_programs/linux-6.2-rc2/include/linux/pci_ids.h:749:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+to_cycles, extracted_programs/linux-6.2-rc2/drivers/pcmcia/yenta_socket.c:61:9, True, False, False, False, False, False, False, true, function
+NLA_ENSURE_UINT_TYPE, extracted_programs/linux-6.2-rc2/include/net/netlink.h:385:9, False, False, False, False, False, False, True, true, also definition-adapting (conservatively call-site-context-altering because it expands to a short-circuiting operation)
+ARGI_METHODCALL_OP, extracted_programs/linux-6.2-rc2/drivers/acpi/acpica/acopcode.h:246:9, False, False, False, False, False, False, True, true, also definition-adapting
+ellrad_height_big, extracted_programs/xfig-3.2.8b/src/w_icons.c:784:9, True, False, False, False, False, False, False, true, enum
+checkresults, extracted_programs/lua-5.4.4/src/lapi.c:1002:9, False, False, False, True, False, False, False, true, also definition-adapting; expands to a short-circuiting operation
+AMD_141b_MMIO_HIGH_MMIOLIMIT_MASK, extracted_programs/linux-6.2-rc2/arch/x86/pci/fixup.c:682:9, False, False, False, True, False, False, False, true, also definition-adapting; expands to a short-circuiting operation
+__fid_stringify, extracted_programs/linux-6.2-rc2/include/linux/kernel_read_file.h:20:9, False, False, False, False, False, False, True, true, also metaprogramming; stringification
+LIB_PREVIEW_SIZE, extracted_programs/xfig-3.2.8b/src/w_library.c:64:9, False, False, False, False, False, False, True, true, also definition-adapting
+OPpSPLIT_ASSIGN, extracted_programs/perl-5.36.0/opcode.h:2321:9, False, False, True, False, False, False, False, false, definition-adapting; invoked in &&; on RHS of |=
+EPOLLET, extracted_programs/linux-6.2-rc2/include/uapi/linux/eventpoll.h:69:9, False, False, False, False, False, False, True, true, scope-adapting
+AC_GPIO_I_COUNT, extracted_programs/linux-6.2-rc2/include/sound/hda_verbs.h:197:9, False, False, False, False, False, False, True, true, also definition-adapting
+__fmode_flag, extracted_programs/linux-6.2-rc2/include/trace/misc/fs.h:42:9, False, False, False, False, False, False, True, true, also definition-adapting
+BLOCK_CHILD, extracted_programs/bash-5.2-rc1/sig.h:97:11, False, False, False, True, False, False, False, true, expands to a do-while
+sizeof_field, extracted_programs/linux-6.2-rc2/include/linux/stddef.h:24:9, False, False, False, True, False, False, True, true, accepts a type as a first-class citizen
+Ntick_metric, extracted_programs/xfig-3.2.8b/src/w_rulers.c:180:9, True, False, False, False, False, False, False, true, enum
+HOSTCC_STAT_COAL_TICKS, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.h:1269:9, False, False, False, False, False, False, True, true, also definition-adapting
+RTL_COALESCE_FRAME_MAX, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/realtek/r8169_main.c:221:9, True, False, False, False, False, False, False, true, enum
+DKL_PLL_TDC_FEED_FWD_GAIN_MASK, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/display/intel_dkl_phy_regs.h:108:11, True, False, False, False, False, False, False, true, enum
+AZX_DCAPS_4K_BDLE_BOUNDARY, extracted_programs/linux-6.2-rc2/sound/pci/hda/hda_controller.h:40:9, False, False, False, False, False, False, True, true, also definition-adapting
+DP_HDCP_2_2_AKE_STORED_KM_OFFSET, extracted_programs/linux-6.2-rc2/include/drm/display/drm_dp.h:1444:9, True, False, False, False, False, False, False, true, enum
+TP_MASK_EXT_DEV, extracted_programs/linux-6.2-rc2/drivers/input/mouse/trackpoint.h:91:9, False, False, False, False, False, False, True, true, also definition-adapting
+unix_state_lock_nested, extracted_programs/linux-6.2-rc2/include/net/af_unix.h:50:9, False, False, False, True, False, False, False, true, do-while
+KEY_FN_F12, extracted_programs/linux-6.2-rc2/include/uapi/linux/input-event-codes.h:541:9, True, False, False, False, False, False, False, true, enum
+BmUSEFUL, extracted_programs/perl-5.36.0/sv.h:1479:11, False, True, True, False, False, True, True, false, not metaprogramming; expression statement; RHS of assignment; in ||
+SNDRV_MINOR_SEQUENCER, extracted_programs/linux-6.2-rc2/include/sound/minors.h:19:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+_SPRB_GAMC, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:4479:9, False, False, False, False, False, False, True, true, also definition-adapting enum
+FS_IOC_FSGETXATTR, extracted_programs/linux-6.2-rc2/include/uapi/linux/fs.h:214:9, False, False, False, True, False, False, False, true, treats a type as a first-class citizen
+C64, extracted_programs/perl-5.36.0/cpan/Digest-SHA/src/sha64bit.c:26:9, False, False, False, False, False, False, False, false, alias for a metaprogramming macro that expands to token-pasting
+SS_ADD_DXPTR, extracted_programs/perl-5.36.0/scope.h:143:9, False, True, True, False, False, False, False, true, function
+MAX_FONT_SIZE, extracted_programs/xfig-3.2.8b/src/resources.h:60:9, False, False, False, False, False, False, True, true, also definition-adapting
+to_virtio_gpu_vram, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/virtio/virtgpu_drv.h:115:9, False, False, False, True, False, False, False, true, treats a type as a first-class citizen
+D_WATCH, extracted_programs/gawk-5.1.1/command.c:269:9, False, False, False, False, False, False, False, false, name is first used for an enum and then redefined as a macro; invoked in array initializer
+VLV_PLL_DW11, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:243:9, False, False, False, True, False, False, False, false, definition-adapting; pased to a function call; nested invocations
+EHCI_CONFIGFLAG, extracted_programs/linux-6.2-rc2/drivers/usb/host/pci-quirks.c:56:9, True, False, False, False, False, False, False, true, enum
+gv_fetchmethod_pv_flags, extracted_programs/perl-5.36.0/embed.h:227:9, False, False, False, True, False, False, True, true, also definition-adapting; call-site-context-adapting
+ICL_PW_CTL_IDX_DDI_E, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:6742:11, False, False, False, False, False, False, True, true, definition-adapting enum
+MDIO_PMA_NG_EXTABLE_2_5GBT, extracted_programs/linux-6.2-rc2/include/uapi/linux/mdio.h:377:9, True, False, False, False, False, False, False, true, enum
+YYACCEPT, extracted_programs/gawk-5.1.1/command.c:1091:9, False, False, False, False, False, False, False, false, not classified; expands to a goto statement
+pad_add_anon, extracted_programs/perl-5.36.0/embed.h:436:9, False, False, True, False, False, False, False, true, appears on RHS of assignment statements

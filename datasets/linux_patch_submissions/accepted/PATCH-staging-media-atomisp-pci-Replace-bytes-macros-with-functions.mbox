@@ -1,0 +1,1976 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from h5.fbrelay.privateemail.com (h5.fbrelay.privateemail.com [162.0.218.228])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26ECD2FAE
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 15:19:14 +0000 (UTC)
+Received: from MTA-09-3.privateemail.com (mta-09.privateemail.com [198.54.127.58])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits))
+	(No client certificate requested)
+	by h5.fbrelay.privateemail.com (Postfix) with ESMTPS id 3471660022
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 15:09:17 +0000 (UTC)
+Received: from mta-09.privateemail.com (localhost [127.0.0.1])
+	by mta-09.privateemail.com (Postfix) with ESMTP id ADA7818000A5;
+	Tue, 17 Jan 2023 10:09:08 -0500 (EST)
+Received: from anonymous-XPS-13-9310.ucf.edu (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-09.privateemail.com (Postfix) with ESMTPA id 3525E18000A6;
+	Tue, 17 Jan 2023 10:08:57 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1673968148;
+	bh=ZBTABHRAmG+D05AOR8APAmPUuxMqGh+RixprC8KC7Fg=;
+	h=From:To:Cc:Subject:Date:From;
+	b=ZtnUDEverhCjMgnJDlCnhUI7h5H3c8kniUIptA0zmVYo+aEOcUaiat+oSQD4yloR6
+	 hBA6xWBw3GinVz3D/O3H+bz3n6Hzst5Vo7TInceipqysJ1gL8ouZkvxp7XhdrJ7s+J
+	 AU9uB24zAq+TDpNPEz39gRdu+WNx0YPzbv/cfRJoBlDPP9huYpBM5Q2N/vdxTCMc6V
+	 amCczZc43PimUEekzqoZlLFrAunfTug1W9RqnJsI1Rhk/sRGnK4rH7JfeOmPvpCFvT
+	 y4+CtOqri1r+YwVearS2IwEW446tpKBT2jjPgqjG8F7Z9VtdQ+fJveBjzEFoE4fo7b
+	 KE7o1Ij3xNIQA==
+From: Anonymous <anonymous@anonymous.com>
+To: hdegoede@redhat.com
+Cc: mchehab@kernel.org,
+	ailus@linux.intel.com,
+	gregkh@linuxfoundation.org,
+	andy@kernel.org,
+	error27@gmail.com,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Anonymous <anonymous@anonymous.com>
+Subject: [PATCH] staging: media: atomisp: pci: Replace bytes macros with functions
+Date: Tue, 17 Jan 2023 10:08:41 -0500
+Message-Id: <20230117150841.18061-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Replace the function-like macros FPNTBL_BYTES, SCTBL_BYTES, and
+MORPH_PLANE_BYTES with static inline functions to comply with Linux coding
+style standards.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+ .../staging/media/atomisp/pci/sh_css_params.c | 34 +++++++++++--------
+ 1 file changed, 19 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+index f08564f58242..fe28d75a62a4 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css_params.c
++++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+@@ -98,17 +98,23 @@
+ #include "sh_css_frac.h"
+ #include "ia_css_bufq.h"
+ 
+-#define FPNTBL_BYTES(binary) \
+-	(sizeof(char) * (binary)->in_frame_info.res.height * \
+-	 (binary)->in_frame_info.padded_width)
++static inline size_t fpntbl_bytes(const struct ia_css_binary *binary)
++{
++	return (sizeof(char) * binary->in_frame_info.res.height *
++			binary->in_frame_info.padded_width);
++}
+ 
+-#define SCTBL_BYTES(binary) \
+-	(sizeof(unsigned short) * (binary)->sctbl_height * \
+-	 (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
++static inline size_t sctbl_bytes(const struct ia_css_binary *binary)
++{
++	return (sizeof(unsigned short) * binary->sctbl_height *
++			binary->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS);
++}
+ 
+-#define MORPH_PLANE_BYTES(binary) \
+-	(SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+-	 (binary)->morph_tbl_height)
++static inline size_t morph_plane_bytes(const struct ia_css_binary *binary)
++{
++	return (SH_CSS_MORPH_TABLE_ELEM_BYTES *
++			binary->morph_tbl_aligned_width * binary->morph_tbl_height);
++}
+ 
+ /* We keep a second copy of the ptr struct for the SP to access.
+    Again, this would not be necessary on the chip. */
+@@ -3279,7 +3285,7 @@ sh_css_params_write_to_ddr_internal(
+ 	if (binary->info->sp.enable.fpnr) {
+ 		buff_realloced = reallocate_buffer(&ddr_map->fpn_tbl,
+ 						   &ddr_map_size->fpn_tbl,
+-						   (size_t)(FPNTBL_BYTES(binary)),
++						   fpntbl_bytes(binary),
+ 						   params->config_changed[IA_CSS_FPN_ID],
+ 						   &err);
+ 		if (err) {
+@@ -3304,7 +3310,7 @@ sh_css_params_write_to_ddr_internal(
+ 
+ 		buff_realloced = reallocate_buffer(&ddr_map->sc_tbl,
+ 						   &ddr_map_size->sc_tbl,
+-						   SCTBL_BYTES(binary),
++						   sctbl_bytes(binary),
+ 						   params->sc_table_changed,
+ 						   &err);
+ 		if (err) {
+@@ -3538,8 +3544,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_x[i],
+ 					    virt_size_tetra_x[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+@@ -3549,8 +3554,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_y[i],
+ 					    virt_size_tetra_y[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7DB24C9A
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 15:34:21 +0000 (UTC)
+X-IronPort-AV: E=McAfee;i="6500,9779,10592"; a="389221881"
+X-IronPort-AV: E=Sophos;i="5.97,224,1669104000"; 
+   d="scan'208";a="389221881"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jan 2023 07:34:21 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10592"; a="609281951"
+X-IronPort-AV: E=Sophos;i="5.97,224,1669104000"; 
+   d="scan'208";a="609281951"
+Received: from smile.fi.intel.com ([10.237.72.54])
+  by orsmga003.jf.intel.com with ESMTP; 17 Jan 2023 07:34:14 -0800
+Received: from andy by smile.fi.intel.com with local (Exim 4.96)
+	(envelope-from <andy@kernel.org>)
+	id 1pHnyW-00Adds-2m;
+	Tue, 17 Jan 2023 17:34:12 +0200
+Date: Tue, 17 Jan 2023 17:34:12 +0200
+From: Andy Shevchenko <andy@kernel.org>
+To: Anonymous <anonymous@anonymous.com>
+Cc: hdegoede@redhat.com, mchehab@kernel.org, ailus@linux.intel.com,
+	gregkh@linuxfoundation.org, error27@gmail.com,
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] staging: media: atomisp: pci: Replace bytes macros with
+ functions
+Message-ID: <Y8a/9GI+OsSRo+te@smile.fi.intel.com>
+References: <20230117150841.18061-1-anonymous@anonymous.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230117150841.18061-1-anonymous@anonymous.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+
+On Tue, Jan 17, 2023 at 10:08:41AM -0500, Anonymous wrote:
+> Replace the function-like macros FPNTBL_BYTES, SCTBL_BYTES, and
+> MORPH_PLANE_BYTES with static inline functions to comply with Linux coding
+> style standards.
+
+Thank you!
+
+But I think what you need, besides dropping unneeded parentheses is to use some
+macros from overflow.h.
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B6B44C9A
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 15:35:46 +0000 (UTC)
+X-IronPort-AV: E=McAfee;i="6500,9779,10592"; a="323419841"
+X-IronPort-AV: E=Sophos;i="5.97,224,1669104000"; 
+   d="scan'208";a="323419841"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jan 2023 07:35:37 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10592"; a="801779057"
+X-IronPort-AV: E=Sophos;i="5.97,224,1669104000"; 
+   d="scan'208";a="801779057"
+Received: from smile.fi.intel.com ([10.237.72.54])
+  by fmsmga001.fm.intel.com with ESMTP; 17 Jan 2023 07:35:34 -0800
+Received: from andy by smile.fi.intel.com with local (Exim 4.96)
+	(envelope-from <andy@kernel.org>)
+	id 1pHnzo-00Adfu-26;
+	Tue, 17 Jan 2023 17:35:32 +0200
+Date: Tue, 17 Jan 2023 17:35:32 +0200
+From: Andy Shevchenko <andy@kernel.org>
+To: Anonymous <anonymous@anonymous.com>
+Cc: hdegoede@redhat.com, mchehab@kernel.org, ailus@linux.intel.com,
+	gregkh@linuxfoundation.org, error27@gmail.com,
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] staging: media: atomisp: pci: Replace bytes macros with
+ functions
+Message-ID: <Y8bARLuFubMVILIN@smile.fi.intel.com>
+References: <20230117150841.18061-1-anonymous@anonymous.com>
+ <Y8a/9GI+OsSRo+te@smile.fi.intel.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Y8a/9GI+OsSRo+te@smile.fi.intel.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+
+On Tue, Jan 17, 2023 at 05:34:12PM +0200, Andy Shevchenko wrote:
+> On Tue, Jan 17, 2023 at 10:08:41AM -0500, Anonymous wrote:
+> > Replace the function-like macros FPNTBL_BYTES, SCTBL_BYTES, and
+> > MORPH_PLANE_BYTES with static inline functions to comply with Linux coding
+> > style standards.
+> 
+> Thank you!
+> 
+> But I think what you need, besides dropping unneeded parentheses, is to use some
+> macros from overflow.h.
+
+And drop "staging:" prefix from the patch since media maintainer uses (dumb)
+script that adds "media:" if it doesn't lead the Subject.
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from h5.fbrelay.privateemail.com (h5.fbrelay.privateemail.com [162.0.218.228])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAEF24C9A
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 16:17:35 +0000 (UTC)
+Received: from MTA-06-3.privateemail.com (mta-06.privateemail.com [68.65.122.16])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits))
+	(No client certificate requested)
+	by h5.fbrelay.privateemail.com (Postfix) with ESMTPS id C67D5605C0
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 16:17:33 +0000 (UTC)
+Received: from mta-06.privateemail.com (localhost [127.0.0.1])
+	by mta-06.privateemail.com (Postfix) with ESMTP id C01FD18000A0;
+	Tue, 17 Jan 2023 11:17:25 -0500 (EST)
+Received: from anonymous-XPS-13-9310.ucf.edu (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-06.privateemail.com (Postfix) with ESMTPA id 33D7418000AA;
+	Tue, 17 Jan 2023 11:17:14 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1673972245;
+	bh=2SmQASqnGnVtA5Kz3u+Cb46Sf35Z/fNjuOekQAR+6fI=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=lFROjVOR69QpsJhr6SmMOchJrEhs1Zog59GnudKjzVLI8LcYH2khYP6v6y5NWngA0
+	 p/OFzS07M/QPDyyxlE1RAN8pk5wnf2f2XZV7+DssRBUrT6Kto8YRMl5diB/ttDMNnj
+	 IgHbQZ9F5n0sbgUJ6soy4hqIIkze9J50ctLimJtV4gPvJbPDoj6EjlIUOElzUHRmGd
+	 uvoGYX2ryVbmOrIFx7nRdkoFq+gq+vzHtlrInKRk9C3oBbOwRDOkxN802Bf/9nRV2M
+	 Maf3aMWhHXpT8hLdcyqKmpL4vBjxZdR3vV2kAI98vY+UJDBewN2q1RC8XdOT3TE3cQ
+	 MnKuXqhS5NEqw==
+From: Anonymous <anonymous@anonymous.com>
+To: andy@kernel.org
+Cc: ailus@linux.intel.com,
+	anonymous@anonymous.com,
+	error27@gmail.com,
+	gregkh@linuxfoundation.org,
+	hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	mchehab@kernel.org
+Subject: [PATCH v2] media: atomisp: pci: Replace bytes macros with functions
+Date: Tue, 17 Jan 2023 11:16:59 -0500
+Message-Id: <20230117161659.31232-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <Y8bARLuFubMVILIN@smile.fi.intel.com>
+References: <Y8bARLuFubMVILIN@smile.fi.intel.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Thank you for the advice Andy.
+I took a look in overflow.h and found the size_mul function, I assume this
+is what I should be using to prevent accidental overflow.
+I also removed the inline keyword from the function definitions because
+Dan (error27@gmail.com) recommended that I do so in reply to an earlier
+patch I submitted.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+Changelog:
+V1 -> V2: Use size_mul to perform size_t multiplication without risk of
+		  overflow.
+		  Remove the inline keyword from function definitions.
+
+ .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+ 1 file changed, 23 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+index f08564f58242..7e111df5c09d 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css_params.c
++++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+@@ -98,17 +98,27 @@
+ #include "sh_css_frac.h"
+ #include "ia_css_bufq.h"
+ 
+-#define FPNTBL_BYTES(binary) \
+-	(sizeof(char) * (binary)->in_frame_info.res.height * \
+-	 (binary)->in_frame_info.padded_width)
++static size_t fpntbl_bytes(const struct ia_css_binary *binary)
++{
++	return size_mul(sizeof(char),
++			size_mul(binary->in_frame_info.res.height,
++				 binary->in_frame_info.padded_width));
++}
+ 
+-#define SCTBL_BYTES(binary) \
+-	(sizeof(unsigned short) * (binary)->sctbl_height * \
+-	 (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
++static size_t sctbl_bytes(const struct ia_css_binary *binary)
++{
++	return size_mul(sizeof(unsigned short),
++				size_mul(binary->sctbl_height,
++					 size_mul(binary->sctbl_aligned_width_per_color,
++						  IA_CSS_SC_NUM_COLORS)));
++}
+ 
+-#define MORPH_PLANE_BYTES(binary) \
+-	(SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+-	 (binary)->morph_tbl_height)
++static size_t morph_plane_bytes(const struct ia_css_binary *binary)
++{
++	return size_mul(SH_CSS_MORPH_TABLE_ELEM_BYTES,
++					size_mul(binary->morph_tbl_aligned_width,
++						 binary->morph_tbl_height));
++}
+ 
+ /* We keep a second copy of the ptr struct for the SP to access.
+    Again, this would not be necessary on the chip. */
+@@ -3279,7 +3289,7 @@ sh_css_params_write_to_ddr_internal(
+ 	if (binary->info->sp.enable.fpnr) {
+ 		buff_realloced = reallocate_buffer(&ddr_map->fpn_tbl,
+ 						   &ddr_map_size->fpn_tbl,
+-						   (size_t)(FPNTBL_BYTES(binary)),
++						   fpntbl_bytes(binary),
+ 						   params->config_changed[IA_CSS_FPN_ID],
+ 						   &err);
+ 		if (err) {
+@@ -3304,7 +3314,7 @@ sh_css_params_write_to_ddr_internal(
+ 
+ 		buff_realloced = reallocate_buffer(&ddr_map->sc_tbl,
+ 						   &ddr_map_size->sc_tbl,
+-						   SCTBL_BYTES(binary),
++						   sctbl_bytes(binary),
+ 						   params->sc_table_changed,
+ 						   &err);
+ 		if (err) {
+@@ -3538,8 +3548,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_x[i],
+ 					    virt_size_tetra_x[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+@@ -3549,8 +3558,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_y[i],
+ 					    virt_size_tetra_y[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-qt1-f169.google.com (mail-qt1-f169.google.com [209.85.160.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0AAC2D51C
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 18:08:38 +0000 (UTC)
+Received: by mail-qt1-f169.google.com with SMTP id x7so17766366qtv.13
+        for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 10:08:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=mNtUwk8pZ+4ME/1vifRLekNO13Wg5Zu56Lt21b5zZ/E=;
+        b=NUkTrZoP7W+dbV5M8TQ8QZ6EJ7AeGCEJe1YDCK4M3eOtriQU0VMF0jrTQfZKZ04nX3
+         tObhhl6SQ2s5vYRuVz0gifyjTCXvFFqjWl+foeDKQjIJ1LSYJjYBhUE1xbKZtrcLqo2Z
+         WLSR545diQKAiZhOEwCRqYEnywadjsPloZrSJW1WjO9wH7ptol5kfIBGQT2J6Z+oPcUq
+         e5bKJNMfyBEPGKCPfLlc5LXIRFHEPjarEbVgrNua0YSVPStVGuCH2Ws6+4vRqOqHIOeR
+         oKWk5W/o7VnUE7D8rQpa5OwRaV6ErauCSQr0Tq2X2N6redlnD2o1Cs9bxxQz1s0511XO
+         CYlQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=mNtUwk8pZ+4ME/1vifRLekNO13Wg5Zu56Lt21b5zZ/E=;
+        b=4giogK8u8lo1R9Mha0ASR4KrgfdlTe31ME0wQsBz1jMH0ZhzZ1Rnu1wEfkFTDss/Rs
+         tk8cHzj7TK9XZ+4ojZqPo3O6WNMrzTiIQSsNTuHz8iFsI0OjwDUWa78IP4PfINVLI6WK
+         2awdwtJAMCyAyDKgewoYjz0eiR4d/5acX5q/PVm+vT8Qb8vdat9cwSSSHWqjRdfbN7yO
+         g5FXl7smgIwugdbbXmycxs8TYFu5z0ujpSBN0DA7HnVZn/gfofxojW/Qy/17da5Lw0YA
+         Xhxnrd/tPfaIHJvt87e6W7ybBLL90jYXbtfl73gi28CCRtZGiDN7oeVIHhF/8xCUrAIo
+         HJSw==
+X-Gm-Message-State: AFqh2kpg108LkBBtfsbkXHGjZ4YE0S5SPLtB+ijR7NJ10+q1WDGGHv2N
+	Kr3jvq2b4xFcEJG5kEjs/t4VhgbLVPwfXAVS4kM=
+X-Google-Smtp-Source: AMrXdXvNpef78aF7A4F+6Aj+fH25NTbcazp1VYsDIP18+HyLQeo70AF3aJANwdtMB6J/E6tCNsz6V29gc0SCtxWin7k=
+X-Received: by 2002:a05:622a:5c8c:b0:3b6:30c5:6d26 with SMTP id
+ ge12-20020a05622a5c8c00b003b630c56d26mr188562qtb.429.1673978917903; Tue, 17
+ Jan 2023 10:08:37 -0800 (PST)
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+References: <Y8bARLuFubMVILIN@smile.fi.intel.com> <20230117161659.31232-1-anonymous@anonymous.com>
+In-Reply-To: <20230117161659.31232-1-anonymous@anonymous.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Date: Tue, 17 Jan 2023 20:08:01 +0200
+Message-ID: <CAHp75VcxaSXeMNmkPoMnA+zjp+JWmHp5aE+2yPhXaqxMC6QWEQ@mail.gmail.com>
+Subject: Re: [PATCH v2] media: atomisp: pci: Replace bytes macros with functions
+To: Anonymous <anonymous@anonymous.com>
+Cc: andy@kernel.org, ailus@linux.intel.com, error27@gmail.com, 
+	gregkh@linuxfoundation.org, hdegoede@redhat.com, linux-kernel@vger.kernel.org, 
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev, 
+	mchehab@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+
+On Tue, Jan 17, 2023 at 6:17 PM Anonymous <anonymous@anonymous.com> wrote:
+>
+> Thank you for the advice Andy.
+> I took a look in overflow.h and found the size_mul function, I assume this
+> is what I should be using to prevent accidental overflow.
+> I also removed the inline keyword from the function definitions because
+> Dan (error27@gmail.com) recommended that I do so in reply to an earlier
+> patch I submitted.
+
+Now you need to properly form a commit message. What you have done
+above is good for the comment (goes near to changelog).
+
+...
+
+> +static size_t fpntbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +       return size_mul(sizeof(char),
+> +                       size_mul(binary->in_frame_info.res.height,
+> +                                binary->in_frame_info.padded_width));
+
+I recommend using array_size() and array3_size() rather than open coding them.
+
+> +}
+
+...
+
+> +       return size_mul(sizeof(unsigned short),
+
+> +                               size_mul(binary->sctbl_height,
+> +                                        size_mul(binary->sctbl_aligned_width_per_color,
+> +                                                 IA_CSS_SC_NUM_COLORS)));
+
+array3_size()
+
+and so on.
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from h7.fbrelay.privateemail.com (h7.fbrelay.privateemail.com [162.0.218.230])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D25241C13
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 18:32:24 +0000 (UTC)
+Received: from MTA-10-4.privateemail.com (mta-10.privateemail.com [68.65.122.20])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits))
+	(No client certificate requested)
+	by h7.fbrelay.privateemail.com (Postfix) with ESMTPS id C429560579
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 13:32:22 -0500 (EST)
+Received: from mta-10.privateemail.com (localhost [127.0.0.1])
+	by mta-10.privateemail.com (Postfix) with ESMTP id 5022918000A2;
+	Tue, 17 Jan 2023 13:32:15 -0500 (EST)
+Received: from anonymous-XPS-13-9310.net.ucf.edu (unknown [132.170.212.18])
+	by mta-10.privateemail.com (Postfix) with ESMTPA id 156F9180009F;
+	Tue, 17 Jan 2023 13:32:02 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1673980335;
+	bh=9tfJHMfquKiMaSi0dIV592j2HgRcbJho137zYx7AinU=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=m5m0mC81auHjGwcitxEiIW9qQZnWrm/aLrL5F6Vszpo803bmYPrx6OlmZpkvP3GBA
+	 jtr6lpaidV8qjwZnKQsRgK/IN9/VfGRCuFvArbUuEPqoNlp/ilH6fJf8H/t8h+0dB0
+	 Q+dZwhXl5MsqWiO5+3K6cfFbVNLRKHgUHQbZTKEGQMM3Q7MdgWNmAPpSGpO25Gnk5h
+	 Kzjug6I9Un70kzSl4q0Ntj4zdLUBNj/V7loq0afDt5bgWnaoWyBdEf+qHbwOngD16F
+	 9lPOJiVt5Cf9YObHfW/4LEFKvhJkh1dMOnDCZjVEzbLFmkMLUdE4KdELWOwWmhlUD6
+	 C8jMuh6ZeypFQ==
+From: Anonymous <anonymous@anonymous.com>
+To: andy.shevchenko@gmail.com
+Cc: ailus@linux.intel.com,
+	andy@kernel.org,
+	anonymous@anonymous.com,
+	error27@gmail.com,
+	gregkh@linuxfoundation.org,
+	hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	mchehab@kernel.org
+Subject: [PATCH v3] media: atomisp: pci: Replace bytes macros with functions
+Date: Tue, 17 Jan 2023 13:31:52 -0500
+Message-Id: <20230117183152.6521-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <CAHp75VcxaSXeMNmkPoMnA+zjp+JWmHp5aE+2yPhXaqxMC6QWEQ@mail.gmail.com>
+References: <CAHp75VcxaSXeMNmkPoMnA+zjp+JWmHp5aE+2yPhXaqxMC6QWEQ@mail.gmail.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Replace the function-like macros FPNTBL_BYTES, SCTBL_BYTES, and
+MORPH_PLANE_BYTES with static inline functions to comply with Linux coding
+style standards.
+Replace multiplication with calls to size_mul to prevent accidental
+arithmetic overflow.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+Changelog:
+V1 -> V2: Use size_mul to perform size_t multiplication without risk of
+		  overflow.
+		  Remove the inline keyword from function definitions.
+
+V2 -> V3: Add commit message.
+
+ .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+ 1 file changed, 23 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+index f08564f58242..7e111df5c09d 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css_params.c
++++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+@@ -98,17 +98,27 @@
+ #include "sh_css_frac.h"
+ #include "ia_css_bufq.h"
+ 
+-#define FPNTBL_BYTES(binary) \
+-	(sizeof(char) * (binary)->in_frame_info.res.height * \
+-	 (binary)->in_frame_info.padded_width)
++static size_t fpntbl_bytes(const struct ia_css_binary *binary)
++{
++	return size_mul(sizeof(char),
++			size_mul(binary->in_frame_info.res.height,
++				 binary->in_frame_info.padded_width));
++}
+ 
+-#define SCTBL_BYTES(binary) \
+-	(sizeof(unsigned short) * (binary)->sctbl_height * \
+-	 (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
++static size_t sctbl_bytes(const struct ia_css_binary *binary)
++{
++	return size_mul(sizeof(unsigned short),
++				size_mul(binary->sctbl_height,
++					 size_mul(binary->sctbl_aligned_width_per_color,
++						  IA_CSS_SC_NUM_COLORS)));
++}
+ 
+-#define MORPH_PLANE_BYTES(binary) \
+-	(SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+-	 (binary)->morph_tbl_height)
++static size_t morph_plane_bytes(const struct ia_css_binary *binary)
++{
++	return size_mul(SH_CSS_MORPH_TABLE_ELEM_BYTES,
++					size_mul(binary->morph_tbl_aligned_width,
++						 binary->morph_tbl_height));
++}
+ 
+ /* We keep a second copy of the ptr struct for the SP to access.
+    Again, this would not be necessary on the chip. */
+@@ -3279,7 +3289,7 @@ sh_css_params_write_to_ddr_internal(
+ 	if (binary->info->sp.enable.fpnr) {
+ 		buff_realloced = reallocate_buffer(&ddr_map->fpn_tbl,
+ 						   &ddr_map_size->fpn_tbl,
+-						   (size_t)(FPNTBL_BYTES(binary)),
++						   fpntbl_bytes(binary),
+ 						   params->config_changed[IA_CSS_FPN_ID],
+ 						   &err);
+ 		if (err) {
+@@ -3304,7 +3314,7 @@ sh_css_params_write_to_ddr_internal(
+ 
+ 		buff_realloced = reallocate_buffer(&ddr_map->sc_tbl,
+ 						   &ddr_map_size->sc_tbl,
+-						   SCTBL_BYTES(binary),
++						   sctbl_bytes(binary),
+ 						   params->sc_table_changed,
+ 						   &err);
+ 		if (err) {
+@@ -3538,8 +3548,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_x[i],
+ 					    virt_size_tetra_x[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+@@ -3549,8 +3558,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_y[i],
+ 					    virt_size_tetra_y[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D93F51C13
+	for <linux-staging@lists.linux.dev>; Tue, 17 Jan 2023 18:37:20 +0000 (UTC)
+X-IronPort-AV: E=McAfee;i="6500,9779,10593"; a="389279279"
+X-IronPort-AV: E=Sophos;i="5.97,224,1669104000"; 
+   d="scan'208";a="389279279"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jan 2023 10:37:20 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10593"; a="748138394"
+X-IronPort-AV: E=Sophos;i="5.97,224,1669104000"; 
+   d="scan'208";a="748138394"
+Received: from smile.fi.intel.com ([10.237.72.54])
+  by FMSMGA003.fm.intel.com with ESMTP; 17 Jan 2023 10:37:17 -0800
+Received: from andy by smile.fi.intel.com with local (Exim 4.96)
+	(envelope-from <andy.shevchenko@gmail.com>)
+	id 1pHqpf-00Aj8m-3D;
+	Tue, 17 Jan 2023 20:37:15 +0200
+Date: Tue, 17 Jan 2023 20:37:15 +0200
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+To: Anonymous <anonymous@anonymous.com>
+Cc: ailus@linux.intel.com, error27@gmail.com, gregkh@linuxfoundation.org,
+	hdegoede@redhat.com, linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev,
+	mchehab@kernel.org
+Subject: Re: [PATCH v3] media: atomisp: pci: Replace bytes macros with
+ functions
+Message-ID: <Y8bq25jjRdgTTd7/@smile.fi.intel.com>
+References: <CAHp75VcxaSXeMNmkPoMnA+zjp+JWmHp5aE+2yPhXaqxMC6QWEQ@mail.gmail.com>
+ <20230117183152.6521-1-anonymous@anonymous.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230117183152.6521-1-anonymous@anonymous.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+
+On Tue, Jan 17, 2023 at 01:31:52PM -0500, Anonymous wrote:
+
+Read to the end this message, please!
+
+> Replace the function-like macros FPNTBL_BYTES, SCTBL_BYTES, and
+> MORPH_PLANE_BYTES with static inline functions to comply with Linux coding
+> style standards.
+> Replace multiplication with calls to size_mul to prevent accidental
+> arithmetic overflow.
+
+We refer to MACRO() and func() as depicted.
+Otherwise looks good.
+
+...
+
+> Changelog:
+> V1 -> V2: Use size_mul to perform size_t multiplication without risk of
+> 		  overflow.
+> 		  Remove the inline keyword from function definitions.
+> 
+> V2 -> V3: Add commit message.
+
+You missed my other comments. Please, read reply in full and address all
+reviewer's comments.
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from h7.fbrelay.privateemail.com (h7.fbrelay.privateemail.com [162.0.218.230])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45B9A15CA
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 14:42:55 +0000 (UTC)
+Received: from MTA-07-4.privateemail.com (unknown [198.54.122.141])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits))
+	(No client certificate requested)
+	by h7.fbrelay.privateemail.com (Postfix) with ESMTPS id 3DB4E606CA
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 09:42:48 -0500 (EST)
+Received: from mta-07.privateemail.com (localhost [127.0.0.1])
+	by mta-07.privateemail.com (Postfix) with ESMTP id 404D41801119;
+	Wed, 18 Jan 2023 09:42:40 -0500 (EST)
+Received: from anonymous-XPS-13-9310.ucf.edu (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-07.privateemail.com (Postfix) with ESMTPA id CE0201801126;
+	Wed, 18 Jan 2023 09:42:28 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1674052960;
+	bh=FqDHCHvsB52HFi8bEmC/gtO/khX/839t5pQ/ZUuPeVI=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=nDX1ABUr4GRiT7rKx/G8R8mJ4M0QNyUby6oxCSCAIF8TZ59UJ4aBGuazu6aDiVKTj
+	 7JQ6ivf3fjLUcnHsVKDN2YOfFILVvLrXNTIJOjb6WtC57SZe5GViJxANiGVt2N46bk
+	 3V8m/8olN4+7A9jBysabb5U7Fq/gVWg7s49keBD3yONjEJE0LLD3WGtYUqFvxhEsT9
+	 mkqi690Mb2asL7jo6rnP8wT/oPcLK8HmEIVxy61RwGeJ70jbCMs7H+gxNyhmMJX+YY
+	 TZHyRzNnsP5Hyf002ikc9joVMOGp1YQZIZP1z0jfmYdRtTmOnChkjCkT8p4hLb4ztl
+	 YByZgGmFc6qrQ==
+From: Anonymous <anonymous@anonymous.com>
+To: andy.shevchenko@gmail.com
+Cc: ailus@linux.intel.com,
+	anonymous@anonymous.com,
+	error27@gmail.com,
+	gregkh@linuxfoundation.org,
+	hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	mchehab@kernel.org
+Subject: [PATCH v4] media: atomisp: pci: Replace bytes macros with functions
+Date: Wed, 18 Jan 2023 09:42:26 -0500
+Message-Id: <20230118144226.13127-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <Y8bq25jjRdgTTd7/@smile.fi.intel.com>
+References: <Y8bq25jjRdgTTd7/@smile.fi.intel.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Replace the function-like macros FPNTBL_BYTES(), SCTBL_BYTES(), and
+MORPH_PLANE_BYTES() with functions to comply with Linux coding style
+standards.
+Replace multiplication with calls to functions/macros from overflow.h
+to prevent accidental arithmetic overflow.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+Changelog:
+V1 -> V2: Use size_mul() to perform size_t multiplication without risk of
+		  overflow.
+		  Remove the inline keyword from function definitions.
+
+V2 -> V3: Add commit message.
+
+V3 -> V4: Use array_size() and array3_size() for multiplication.
+
+ .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+ 1 file changed, 23 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+index f08564f58242..7e111df5c09d 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css_params.c
++++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+@@ -98,17 +98,27 @@
+ #include "sh_css_frac.h"
+ #include "ia_css_bufq.h"
+ 
+-#define FPNTBL_BYTES(binary) \
+-	(sizeof(char) * (binary)->in_frame_info.res.height * \
+-	 (binary)->in_frame_info.padded_width)
++static size_t fpntbl_bytes(const struct ia_css_binary *binary)
++{
++	return array3_size(sizeof(char),
++			binary->in_frame_info.res.height,
++				 binary->in_frame_info.padded_width);
++}
+ 
+-#define SCTBL_BYTES(binary) \
+-	(sizeof(unsigned short) * (binary)->sctbl_height * \
+-	 (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
++static size_t sctbl_bytes(const struct ia_css_binary *binary)
++{
++	return array_size(sizeof(unsigned short),
++				array3_size(binary->sctbl_height,
++					    binary->sctbl_aligned_width_per_color,
++						  IA_CSS_SC_NUM_COLORS));
++}
+ 
+-#define MORPH_PLANE_BYTES(binary) \
+-	(SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+-	 (binary)->morph_tbl_height)
++static size_t morph_plane_bytes(const struct ia_css_binary *binary)
++{
++	return array3_size(SH_CSS_MORPH_TABLE_ELEM_BYTES,
++					binary->morph_tbl_aligned_width,
++						 binary->morph_tbl_height);
++}
+ 
+ /* We keep a second copy of the ptr struct for the SP to access.
+    Again, this would not be necessary on the chip. */
+@@ -3279,7 +3289,7 @@ sh_css_params_write_to_ddr_internal(
+ 	if (binary->info->sp.enable.fpnr) {
+ 		buff_realloced = reallocate_buffer(&ddr_map->fpn_tbl,
+ 						   &ddr_map_size->fpn_tbl,
+-						   (size_t)(FPNTBL_BYTES(binary)),
++						   fpntbl_bytes(binary),
+ 						   params->config_changed[IA_CSS_FPN_ID],
+ 						   &err);
+ 		if (err) {
+@@ -3304,7 +3314,7 @@ sh_css_params_write_to_ddr_internal(
+ 
+ 		buff_realloced = reallocate_buffer(&ddr_map->sc_tbl,
+ 						   &ddr_map_size->sc_tbl,
+-						   SCTBL_BYTES(binary),
++						   sctbl_bytes(binary),
+ 						   params->sc_table_changed,
+ 						   &err);
+ 		if (err) {
+@@ -3538,8 +3548,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_x[i],
+ 					    virt_size_tetra_x[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+@@ -3549,8 +3558,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_y[i],
+ 					    virt_size_tetra_y[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BE5B2F22
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 14:56:30 +0000 (UTC)
+Received: by mail-wm1-f43.google.com with SMTP id l8so7747340wms.3
+        for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 06:56:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=MaU4xcoIvuYlrJkvIksCMnsfWTJ9NQrt07UqgdSvUt8=;
+        b=cjAdENS67WVP+1GqCou7olNn5RC35WH4WRlkKDbs/3IG/+oHzdd58hv3xbOgmXydgy
+         RuG6uQW4Mml1SuomuHGOYsfyCRqcZ4WqDfzck0ooA+VcKNodUAi7mMq5zeJkSbsa3E6y
+         P/UT7PL9AANkKuYjuVapWLwst1YI7WzELKpB5zqFdB1fP9jQhEmh4QayDcnD1JHKCsn2
+         oMW8mC8Y9WVh63P0n2tgfgTGSBmnDChnX8JNe52D76/5HDqRuZ18Ux8HfFlQLy+a+d4V
+         yjAcAwDkcAYWAuu00c+ESEOSZai3UUnTAq7oUXCocGHgZ4s/x4Lzvwn/4nAkHJPj4puy
+         QMSQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=MaU4xcoIvuYlrJkvIksCMnsfWTJ9NQrt07UqgdSvUt8=;
+        b=wTMfiFgD+4Zg+AlYPQJrCAkhW/dEkwaJo1lSJpcJVSjUnQay2Q9pHB6JGKK6d6Et6z
+         f9cVtP46LTE33X+thZFv+8dfH3qXJWD47sFV1jsSqhf/F2PBT2utN+1XBodFmUYZO5nc
+         J88wgDx9yPH+xepLkpf2DlXAU4B8OYnZN0TJIkfJ/Oiof5AupbYU3g2fsPe6o/1+aIH1
+         ayV59tJu/o5Z5Hl08r+UWM/0JqZYvYAsjPVDcQPgVISTjTGJNPB3i51f6+ISv/QwWFAU
+         npoDK9QE7/VIAfk9yVHXU3vbeW3Ipq4x/ozxMkFJ1SfjYFX8m9Yc59Oq4DgGtDInqdYz
+         3Z/g==
+X-Gm-Message-State: AFqh2kq9/ucImNhBZ0d8HV7iZvRGXLq3TJTM8KCvOeWWJ4DE+KBIqRWe
+	ZzyBkdljxewTMSER+88wOEg=
+X-Google-Smtp-Source: AMrXdXs8GnprtjlQg8wOe27VuMXLmamnap+2Vh2Z5ePwcvK++/uQ0cMcbw/Mooxb6Q+yt5LCzwdEmw==
+X-Received: by 2002:a05:600c:ad0:b0:3d9:ebab:ccff with SMTP id c16-20020a05600c0ad000b003d9ebabccffmr15616483wmr.33.1674053788750;
+        Wed, 18 Jan 2023 06:56:28 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id l11-20020a1ced0b000000b003dafb0c8dfbsm2674533wmh.14.2023.01.18.06.56.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Jan 2023 06:56:28 -0800 (PST)
+Date: Wed, 18 Jan 2023 17:56:24 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: Anonymous <anonymous@anonymous.com>
+Cc: andy.shevchenko@gmail.com, ailus@linux.intel.com,
+	gregkh@linuxfoundation.org, hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org, linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev, mchehab@kernel.org
+Subject: Re: [PATCH v4] media: atomisp: pci: Replace bytes macros with
+ functions
+Message-ID: <Y8gImBdR6YpEKZEb@kadam>
+References: <Y8bq25jjRdgTTd7/@smile.fi.intel.com>
+ <20230118144226.13127-1-anonymous@anonymous.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230118144226.13127-1-anonymous@anonymous.com>
+
+On Wed, Jan 18, 2023 at 09:42:26AM -0500, Anonymous wrote:
+> Replace the function-like macros FPNTBL_BYTES(), SCTBL_BYTES(), and
+> MORPH_PLANE_BYTES() with functions to comply with Linux coding style
+> standards.
+> Replace multiplication with calls to functions/macros from overflow.h
+> to prevent accidental arithmetic overflow.
+> 
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+> ---
+> Changelog:
+> V1 -> V2: Use size_mul() to perform size_t multiplication without risk of
+> 		  overflow.
+> 		  Remove the inline keyword from function definitions.
+> 
+> V2 -> V3: Add commit message.
+> 
+> V3 -> V4: Use array_size() and array3_size() for multiplication.
+> 
+>  .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+>  1 file changed, 23 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+> index f08564f58242..7e111df5c09d 100644
+> --- a/drivers/staging/media/atomisp/pci/sh_css_params.c
+> +++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+> @@ -98,17 +98,27 @@
+>  #include "sh_css_frac.h"
+>  #include "ia_css_bufq.h"
+>  
+> -#define FPNTBL_BYTES(binary) \
+> -	(sizeof(char) * (binary)->in_frame_info.res.height * \
+> -	 (binary)->in_frame_info.padded_width)
+> +static size_t fpntbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +	return array3_size(sizeof(char),
+> +			binary->in_frame_info.res.height,
+> +				 binary->in_frame_info.padded_width);
+
+This indenting is not correct.  Do it the way that checkpatch.pl likes:
+
+	return array3_size(sizeof(char),
+			   binary->in_frame_info.res.height,
+			   binary->in_frame_info.padded_width);
+
+[tab][tab][tab][space][space][space]binary->in_frame_info.res.height,
+[tab][tab][tab][space][space][space]binary->in_frame_info.padded_width);
+
+(Same for the rest obviously)
+
+regards,
+dan carpenter
+
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from MTA-12-4.privateemail.com (mta-12-4.privateemail.com [198.54.127.107])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B8CF3205
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 15:17:59 +0000 (UTC)
+Received: from mta-12.privateemail.com (localhost [127.0.0.1])
+	by mta-12.privateemail.com (Postfix) with ESMTP id 10B6518000A1;
+	Wed, 18 Jan 2023 10:17:59 -0500 (EST)
+Received: from anonymous-XPS-13-9310.ucf.edu (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-12.privateemail.com (Postfix) with ESMTPA id 1F52F18000B0;
+	Wed, 18 Jan 2023 10:17:46 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1674055078;
+	bh=GaG5ivZ8Ij1QWHykTH32ER/QkBhR2QBhWKICtTznnZI=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=CAbaOxapoXd055Uvxx/ooLJSVtF0pxqk2IBHOdQlew1FSH4ErMeT9c54npu66n8K7
+	 ymgSOQWMNpCwPsy+dFnn2zXy04wjBALjuo3TXPeN0fHfYxEPtWr3OMIqtYcK36jNZ9
+	 XPlb7qWywlcQTUUm3V+w11h20CcLE8yYkuowdfz8gSRF4gnxIeQPcM8r/x/is3+I6W
+	 kZAJ7OUv5oRXeAqS5n7XbcPFME9fwpV01ZiYI5Vtuhjc/l8UDNg4t669TBD6b5t/ds
+	 YsZfFRnCxMglO9Obi5ThI0R+YBdgGG0ZOyDesnQHvyMt1k2Jkh170Ryo4H79PmL60u
+	 BUHU9FYVPBE5w==
+From: Anonymous <anonymous@anonymous.com>
+To: error27@gmail.com
+Cc: ailus@linux.intel.com,
+	andy.shevchenko@gmail.com,
+	anonymous@anonymous.com,
+	gregkh@linuxfoundation.org,
+	hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	mchehab@kernel.org
+Subject: [PATCH v5] media: atomisp: pci: Replace bytes macros with functions
+Date: Wed, 18 Jan 2023 10:16:56 -0500
+Message-Id: <20230118151656.20558-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <Y8gImBdR6YpEKZEb@kadam>
+References: <Y8gImBdR6YpEKZEb@kadam>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Replace the function-like macros FPNTBL_BYTES(), SCTBL_BYTES(), and
+MORPH_PLANE_BYTES() with functions to comply with Linux coding style
+standards.
+Replace multiplication with calls to array_size() and array3_size()
+to prevent accidental arithmetic overflow.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+Changelog:
+V1 -> V2: Use size_mul() to perform size_t multiplication without risk of
+		  overflow.
+		  Remove the inline keyword from function definitions.
+
+V2 -> V3: Add commit message.
+
+V3 -> V4: Use array_size() and array3_size() for multiplication.
+
+V4 -> V5: Fix indentation.
+
+ .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+ 1 file changed, 23 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+index f08564f58242..7e111df5c09d 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css_params.c
++++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+@@ -98,17 +98,27 @@
+ #include "sh_css_frac.h"
+ #include "ia_css_bufq.h"
+ 
+-#define FPNTBL_BYTES(binary) \
+-	(sizeof(char) * (binary)->in_frame_info.res.height * \
+-	 (binary)->in_frame_info.padded_width)
++static size_t fpntbl_bytes(const struct ia_css_binary *binary)
++{
++	return array3_size(sizeof(char),
++					   binary->in_frame_info.res.height,
++					   binary->in_frame_info.padded_width);
++}
+ 
+-#define SCTBL_BYTES(binary) \
+-	(sizeof(unsigned short) * (binary)->sctbl_height * \
+-	 (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
++static size_t sctbl_bytes(const struct ia_css_binary *binary)
++{
++	return array_size(sizeof(unsigned short),
++					  array3_size(binary->sctbl_height,
++						      binary->sctbl_aligned_width_per_color,
++								  IA_CSS_SC_NUM_COLORS));
++}
+ 
+-#define MORPH_PLANE_BYTES(binary) \
+-	(SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+-	 (binary)->morph_tbl_height)
++static size_t morph_plane_bytes(const struct ia_css_binary *binary)
++{
++	return array3_size(SH_CSS_MORPH_TABLE_ELEM_BYTES,
++					   binary->morph_tbl_aligned_width,
++					   binary->morph_tbl_height);
++}
+ 
+ /* We keep a second copy of the ptr struct for the SP to access.
+    Again, this would not be necessary on the chip. */
+@@ -3279,7 +3289,7 @@ sh_css_params_write_to_ddr_internal(
+ 	if (binary->info->sp.enable.fpnr) {
+ 		buff_realloced = reallocate_buffer(&ddr_map->fpn_tbl,
+ 						   &ddr_map_size->fpn_tbl,
+-						   (size_t)(FPNTBL_BYTES(binary)),
++						   fpntbl_bytes(binary),
+ 						   params->config_changed[IA_CSS_FPN_ID],
+ 						   &err);
+ 		if (err) {
+@@ -3304,7 +3314,7 @@ sh_css_params_write_to_ddr_internal(
+ 
+ 		buff_realloced = reallocate_buffer(&ddr_map->sc_tbl,
+ 						   &ddr_map_size->sc_tbl,
+-						   SCTBL_BYTES(binary),
++						   sctbl_bytes(binary),
+ 						   params->sc_table_changed,
+ 						   &err);
+ 		if (err) {
+@@ -3538,8 +3548,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_x[i],
+ 					    virt_size_tetra_x[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+@@ -3549,8 +3558,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_y[i],
+ 					    virt_size_tetra_y[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22B283205
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 15:26:56 +0000 (UTC)
+Received: by mail-wr1-f49.google.com with SMTP id b5so13150685wrn.0
+        for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 07:26:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=ypPAzYEJSbtUHwI+8APhdCEH8lcbIVf9Cb/fG9P1p/Q=;
+        b=b1LFdXq6UsyoNYZJSZ7z8zdAZJUQLpfM6RxV1TR5vx6KIgxuoZC3qsNzovOh7JxmRQ
+         6nIahIMfk2OG02NbwbUDdoJvTV4IfPa0t5kepbJN307sQzfI8PlGNtccTZ32nadKN7TV
+         8ZLcuBHPCHaGNkRujMRps8KheTLYciw3l987dtIRqa7jRQZUarzSPGKC3wwSGS/QatUd
+         PxOz4L8+gSqtPXnNdqt/VcSL5sLr9HQDZ+U6z/9zjCT1ai3ly7jyLJhSBurpHwMv2kJ7
+         dLWlkA/GJZJ+xpVocP9jSjzD5PWfSYz+XMuMDLk928f8SRGesjK4lp2NXTdQPKLNoTcU
+         m+Wg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ypPAzYEJSbtUHwI+8APhdCEH8lcbIVf9Cb/fG9P1p/Q=;
+        b=QhUYwLbY1lHZlzueRK3U+EzP1B0dueDF/l3G+WtKo6Ja6yCWsYKQ6Gs7nlOR+VmIdg
+         EKZ7umj/kqHzR0CKMX7YG0RjjBqPmooSBFwhfwi89fzc5TGXo9E0+kX8kNeriPVLHqwh
+         SEWOVfOd9jMr9YzgbDxBkFJbZpiFu1mx5CtOKb9Y8zREPM1hMfyCaKl6ZbTswVNKxXeJ
+         Ozi4I7+yEk8uv9sdmGtxUNuaF6Q7NC7xApW2RFBmqjTwrHIsH+hJAEU+uMT/6SIprL0K
+         no1wQT/8O9BST0xmitBKgQ5pVLPLcrz2LhC2LUDIMs2XITEmtPJEQGv14OTmT9x/jbIZ
+         90sQ==
+X-Gm-Message-State: AFqh2kpIcgRp+2xvqJOZ09qcXzVfM+p5LuDgnBrKYfDWI4XdJaF53nLn
+	3w8kIsDIeN/r2fJ2ra/rYsE=
+X-Google-Smtp-Source: AMrXdXuCq08opotKRprCnH9Sx/BDKWlGWP9FMJHuvV3tcH8bNrfV2MD+oeI500xtKhdsjeZCYtClJg==
+X-Received: by 2002:a05:6000:5c2:b0:2bb:eb3d:8d20 with SMTP id bh2-20020a05600005c200b002bbeb3d8d20mr3483580wrb.43.1674055614334;
+        Wed, 18 Jan 2023 07:26:54 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id bu9-20020a056000078900b002be1dcb6efbsm5451116wrb.9.2023.01.18.07.26.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Jan 2023 07:26:53 -0800 (PST)
+Date: Wed, 18 Jan 2023 18:26:50 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: Anonymous <anonymous@anonymous.com>
+Cc: ailus@linux.intel.com, andy.shevchenko@gmail.com,
+	gregkh@linuxfoundation.org, hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org, linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev, mchehab@kernel.org
+Subject: Re: [PATCH v5] media: atomisp: pci: Replace bytes macros with
+ functions
+Message-ID: <Y8gPuh+WDO6vJPu+@kadam>
+References: <Y8gImBdR6YpEKZEb@kadam>
+ <20230118151656.20558-1-anonymous@anonymous.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230118151656.20558-1-anonymous@anonymous.com>
+
+On Wed, Jan 18, 2023 at 10:16:56AM -0500, Anonymous wrote:
+> Replace the function-like macros FPNTBL_BYTES(), SCTBL_BYTES(), and
+> MORPH_PLANE_BYTES() with functions to comply with Linux coding style
+> standards.
+> Replace multiplication with calls to array_size() and array3_size()
+> to prevent accidental arithmetic overflow.
+> 
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+> ---
+> Changelog:
+> V1 -> V2: Use size_mul() to perform size_t multiplication without risk of
+> 		  overflow.
+> 		  Remove the inline keyword from function definitions.
+> 
+> V2 -> V3: Add commit message.
+> 
+> V3 -> V4: Use array_size() and array3_size() for multiplication.
+> 
+> V4 -> V5: Fix indentation.
+> 
+>  .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+>  1 file changed, 23 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+> index f08564f58242..7e111df5c09d 100644
+> --- a/drivers/staging/media/atomisp/pci/sh_css_params.c
+> +++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+> @@ -98,17 +98,27 @@
+>  #include "sh_css_frac.h"
+>  #include "ia_css_bufq.h"
+>  
+> -#define FPNTBL_BYTES(binary) \
+> -	(sizeof(char) * (binary)->in_frame_info.res.height * \
+> -	 (binary)->in_frame_info.padded_width)
+> +static size_t fpntbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +	return array3_size(sizeof(char),
+> +					   binary->in_frame_info.res.height,
+> +					   binary->in_frame_info.padded_width);
+
+Nope.
+
+> +}
+>  
+> -#define SCTBL_BYTES(binary) \
+> -	(sizeof(unsigned short) * (binary)->sctbl_height * \
+> -	 (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
+> +static size_t sctbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +	return array_size(sizeof(unsigned short),
+> +					  array3_size(binary->sctbl_height,
+> +						      binary->sctbl_aligned_width_per_color,
+> +								  IA_CSS_SC_NUM_COLORS));
+
+Also nope.
+
+> +}
+>  
+> -#define MORPH_PLANE_BYTES(binary) \
+> -	(SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+> -	 (binary)->morph_tbl_height)
+> +static size_t morph_plane_bytes(const struct ia_css_binary *binary)
+> +{
+> +	return array3_size(SH_CSS_MORPH_TABLE_ELEM_BYTES,
+> +					   binary->morph_tbl_aligned_width,
+> +					   binary->morph_tbl_height);
+
+Nope.
+
+> +}
+
+regards,
+dan carpenter
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-qv1-f45.google.com (mail-qv1-f45.google.com [209.85.219.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96A5233C7
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 15:54:22 +0000 (UTC)
+Received: by mail-qv1-f45.google.com with SMTP id h10so24039756qvq.7
+        for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 07:54:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=Dp/FF/OlNcvD2TDo83pV39FfZ/33m8fmuUNBlmKGb1A=;
+        b=lnETeaMUTNuDwBg/aRYZXHd9v8+aK6tgbqCGA8aM9w0TW39275mAI+th2srtPCybxj
+         uf+W4QaUEenDlDJzsp8ezJ7AwY2cCFf2moaeoIloh/++r384Rl6d6Rp+dNh9oEQM46QL
+         BFHM77xNS1E+zqFrfG5CrxsrJVGqwZreaRRjV99hUWgc9wPUMKMpLFQlkCG250ACnNMi
+         r126XRMLt4Wsv2KO8KYZESE/D9MGFIgltQFuABSV7sOky1DxCogZv8holEs8dhEgHMF5
+         JPJnbJRsQj4P73gLnn6Y4vFaMYf8UrCCs7EersAss0MvjY/S3wdE6Y8Eagi2g2Evf7A9
+         1Urw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Dp/FF/OlNcvD2TDo83pV39FfZ/33m8fmuUNBlmKGb1A=;
+        b=4i3wyLCzHc29OuSzlMH/eFbekqK5hy7325i/gZD4BjiTj63SZbDPdYopAMLppdoPxy
+         EFy6UbFhOHkzZaojmKU9LkSn4NgrqBj9TcQ3ANe63BZcZsfXrZIztjuQpZrU6wLX53v6
+         l7hfVG4lc5Ai31bEAWRRjBknEyOFDdbVq3MxD3zfsOJBflt9ubLG1iE8RO3vAfmhj8u+
+         nfHA90XEArxqN4LlP95U+znPHQgsNhRXU0bsiyUYljqw5jZaeVn7vuAbw9bolp4GBneb
+         4zWiKc0FrEMDVBE6NvXVsKvbJIjIyhUJJuQk3DY913zVkF8Hwchq0rfjSlxTXR9Bmdr8
+         c5Pg==
+X-Gm-Message-State: AFqh2kqtJVe7ujD5+Xx47J147qutzoePx3NcD3bCOddI3etK1o/uEtqK
+	/TyJBFB4T8IUt3dI5QhnjjnNXIKxtdE6A0f8vx4=
+X-Google-Smtp-Source: AMrXdXuyrdQ92kiDwWynQkXu3LhRr0aTzZX68EoFvg/xNQF0bdBeBJK4b3kzt1XggPD5xzBnMIVoL1vugEhWI7rq8/8=
+X-Received: by 2002:a0c:b208:0:b0:534:3c7d:97fc with SMTP id
+ x8-20020a0cb208000000b005343c7d97fcmr429300qvd.11.1674057261293; Wed, 18 Jan
+ 2023 07:54:21 -0800 (PST)
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+References: <Y8gImBdR6YpEKZEb@kadam> <20230118151656.20558-1-anonymous@anonymous.com>
+In-Reply-To: <20230118151656.20558-1-anonymous@anonymous.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Date: Wed, 18 Jan 2023 17:53:45 +0200
+Message-ID: <CAHp75VcxvPZOZpGMSQXkCFv+WekHckMJkympfdR0ih72AjjkNw@mail.gmail.com>
+Subject: Re: [PATCH v5] media: atomisp: pci: Replace bytes macros with functions
+To: Anonymous <anonymous@anonymous.com>
+Cc: error27@gmail.com, ailus@linux.intel.com, gregkh@linuxfoundation.org, 
+	hdegoede@redhat.com, linux-kernel@vger.kernel.org, 
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev, 
+	mchehab@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+
+On Wed, Jan 18, 2023 at 5:17 PM Anonymous <anonymous@anonymous.com> wrote:
+>
+> Replace the function-like macros FPNTBL_BYTES(), SCTBL_BYTES(), and
+> MORPH_PLANE_BYTES() with functions to comply with Linux coding style
+> standards.
+> Replace multiplication with calls to array_size() and array3_size()
+> to prevent accidental arithmetic overflow.
+
+...
+
+> +static size_t sctbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +       return array_size(sizeof(unsigned short),
+
+I would use size_mul() here, but either would work.
+
+> +                                         array3_size(binary->sctbl_height,
+> +                                                     binary->sctbl_aligned_width_per_color,
+> +                                                                 IA_CSS_SC_NUM_COLORS));
+> +}
+
+...
+
+Please, fix indentations and patch will be good enough, thank you!
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from MTA-05-3.privateemail.com (mta-05-3.privateemail.com [68.65.122.15])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECC1E33C7
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 16:08:27 +0000 (UTC)
+Received: from mta-05.privateemail.com (localhost [127.0.0.1])
+	by mta-05.privateemail.com (Postfix) with ESMTP id DCCE918000A3;
+	Wed, 18 Jan 2023 11:08:26 -0500 (EST)
+Received: from anonymous-XPS-13-9310.lan (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-05.privateemail.com (Postfix) with ESMTPA id DA8AF18000B8;
+	Wed, 18 Jan 2023 11:08:15 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1674058106;
+	bh=0pnQkSVKgVwax8n2M69/7j2IjDnGi9PBcODjS9XvliE=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=JwOJJZrLMZ7NuEfcO5/0Ji82TbUU1hWDVIRKI14aeylV/oUs1aNdpw0fGY6AeQQbq
+	 RMSl8pXntV5UUC4irwzxR4n+953qmwFZLUbCdNq+7QTYRaMUa86QvIpcUsP431kyyU
+	 YhAxCZ2hIyPcQGZmolDJQlSurvYVBeezkK1R8upfcVV4IRAp/n1W/VdUDpjMWiwPpc
+	 sDNhhKX5i4hk9AABpy3yiePCAR2x4w7nJXPJyrxiZI+eBvwAaRnVXKol7IA/pZ/16j
+	 kOucmXUP1E25X0+28z85LNla3dA1B+bu5P+QDK1iXlmjhK/EDrFDxQRtCdUsngnzrL
+	 u9FUYsmib9ptQ==
+From: Anonymous <anonymous@anonymous.com>
+To: andy.shevchenko@gmail.com
+Cc: ailus@linux.intel.com,
+	anonymous@anonymous.com,
+	error27@gmail.com,
+	gregkh@linuxfoundation.org,
+	hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	mchehab@kernel.org
+Subject: [PATCH v6] media: atomisp: pci: Replace bytes macros with functions
+Date: Wed, 18 Jan 2023 11:07:39 -0500
+Message-Id: <20230118160739.26059-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <CAHp75VcxvPZOZpGMSQXkCFv+WekHckMJkympfdR0ih72AjjkNw@mail.gmail.com>
+References: <CAHp75VcxvPZOZpGMSQXkCFv+WekHckMJkympfdR0ih72AjjkNw@mail.gmail.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Replace the function-like macros FPNTBL_BYTES(), SCTBL_BYTES(), and
+MORPH_PLANE_BYTES() with functions to comply with Linux coding style
+standards.
+Replace multiplication with calls to array_size() and array3_size()
+to prevent accidental arithmetic overflow.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+Changelog:
+V1 -> V2: Use size_mul() to perform size_t multiplication without risk of
+		  overflow.
+		  Remove the inline keyword from function definitions.
+
+V2 -> V3: Add commit message.
+
+V3 -> V4: Use array_size() and array3_size() for multiplication.
+
+V4 -> V5: Fix indentation.
+
+V5 -> V6: Try again to fix indentation (use tabs of size 8).
+
+ .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+ 1 file changed, 23 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+index f08564f58242..7e111df5c09d 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css_params.c
++++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+@@ -98,17 +98,27 @@
+ #include "sh_css_frac.h"
+ #include "ia_css_bufq.h"
+ 
+-#define FPNTBL_BYTES(binary) \
+-	(sizeof(char) * (binary)->in_frame_info.res.height * \
+-	 (binary)->in_frame_info.padded_width)
++static size_t fpntbl_bytes(const struct ia_css_binary *binary)
++{
++	return array3_size(sizeof(char),
++			   binary->in_frame_info.res.height,
++			   binary->in_frame_info.padded_width);
++}
+ 
+-#define SCTBL_BYTES(binary) \
+-	(sizeof(unsigned short) * (binary)->sctbl_height * \
+-	 (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
++static size_t sctbl_bytes(const struct ia_css_binary *binary)
++{
++	return size_mul(sizeof(unsigned short),
++			  array3_size(binary->sctbl_height,
++				      binary->sctbl_aligned_width_per_color,
++				      IA_CSS_SC_NUM_COLORS));
++}
+ 
+-#define MORPH_PLANE_BYTES(binary) \
+-	(SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+-	 (binary)->morph_tbl_height)
++static size_t morph_plane_bytes(const struct ia_css_binary *binary)
++{
++	return array3_size(SH_CSS_MORPH_TABLE_ELEM_BYTES,
++			   binary->morph_tbl_aligned_width,
++			   binary->morph_tbl_height);
++}
+ 
+ /* We keep a second copy of the ptr struct for the SP to access.
+    Again, this would not be necessary on the chip. */
+@@ -3279,7 +3289,7 @@ sh_css_params_write_to_ddr_internal(
+ 	if (binary->info->sp.enable.fpnr) {
+ 		buff_realloced = reallocate_buffer(&ddr_map->fpn_tbl,
+ 						   &ddr_map_size->fpn_tbl,
+-						   (size_t)(FPNTBL_BYTES(binary)),
++						   fpntbl_bytes(binary),
+ 						   params->config_changed[IA_CSS_FPN_ID],
+ 						   &err);
+ 		if (err) {
+@@ -3304,7 +3314,7 @@ sh_css_params_write_to_ddr_internal(
+ 
+ 		buff_realloced = reallocate_buffer(&ddr_map->sc_tbl,
+ 						   &ddr_map_size->sc_tbl,
+-						   SCTBL_BYTES(binary),
++						   sctbl_bytes(binary),
+ 						   params->sc_table_changed,
+ 						   &err);
+ 		if (err) {
+@@ -3538,8 +3548,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_x[i],
+ 					    virt_size_tetra_x[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+@@ -3549,8 +3558,7 @@ sh_css_params_write_to_ddr_internal(
+ 			buff_realloced |=
+ 			    reallocate_buffer(virt_addr_tetra_y[i],
+ 					    virt_size_tetra_y[i],
+-					    (size_t)
+-					    (MORPH_PLANE_BYTES(binary)),
++					    morph_plane_bytes(binary),
+ 					    params->morph_table_changed,
+ 					    &err);
+ 			if (err) {
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-qt1-f175.google.com (mail-qt1-f175.google.com [209.85.160.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B10F43C16
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 16:18:04 +0000 (UTC)
+Received: by mail-qt1-f175.google.com with SMTP id x7so20101385qtv.13
+        for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 08:18:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=OMMu3XovHqwLeu0gHfs9xCvQZaDl1KpPgg4sPO5JPY8=;
+        b=PTj+AMj1P8vRit+dcK05Jx2X7ySZUq8HNs0uBdGF9PwJlCw7bl8/YtzpVcJQIaLSoN
+         hD4uiIyyDFjsMYopDsmWa3wXKhJ/E7NO9MDYS98j3dtou+K0EMgTUk/iJUGHxEREzMwF
+         B8/XC84Lx/H2N9LFKlKc65cLuHrx4YrZwSjTuvsVQuyGGvbfvxC8myrZPo/pUkJM3vhW
+         XWV8RgCf3NjUkJGew7DYRaWZ3PujeIkxHQr4R8DFgcT5FYiUEw5RJ3yF/SJE1EWzKrLP
+         OS2F6JjJ+5wipzh764Y3CZDT2tDcnycNes+V4BwOKxxRFI/bhMktewv2wQuYGjpwLRqz
+         XiFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=OMMu3XovHqwLeu0gHfs9xCvQZaDl1KpPgg4sPO5JPY8=;
+        b=vwtTzCGMAlRb/GHMM+Kpsf/JIV35CtG05p1v65nrvbSCHpismF8lGuxlo5fsO7dGg0
+         cM84LRcSKR183WNUIlc7yPOVCL8W+PZiPYiIPuTcVsWQd1XjGh1j7yxiDrGEFnidtJCM
+         JGPUdysAHz/AfW/jMRxjDzsk/5pFIbmOFt7R3UYpPwCuBwloy5Kg7gmeoUpyyyYvAq2Q
+         Jv/zGrsuqSSrVhJBAmrrKIuhfBzHzow93qpGJ6ub++GNeXoE4AMwKXtLMTb2c330XE7c
+         GbfJOrUaWLe7hoMW+W1pAezdBJIYSpesKnzJWKd1xIjxdP0zUXLO5rAuyiAHBdO0kaS7
+         MrZw==
+X-Gm-Message-State: AFqh2krRjNL9L2uc95k5/6ZJ6Ni2VHhguE89E8nIiEvSgsLJY9SfUqcs
+	iPSadOjYALKIWpHZVIySo9EEM8KauINuZTx5aMs=
+X-Google-Smtp-Source: AMrXdXvvmUfykE6Z5yGDFpO8mZ7rNMTtzVx/lK8I1taRVEeqLVqPLwwL4C+PuW1djDYIUxVLKjAj29X3QA5e/Oa+5sA=
+X-Received: by 2002:ac8:6e81:0:b0:3b6:3c45:ada4 with SMTP id
+ c1-20020ac86e81000000b003b63c45ada4mr340174qtv.481.1674058683393; Wed, 18 Jan
+ 2023 08:18:03 -0800 (PST)
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+References: <CAHp75VcxvPZOZpGMSQXkCFv+WekHckMJkympfdR0ih72AjjkNw@mail.gmail.com>
+ <20230118160739.26059-1-anonymous@anonymous.com>
+In-Reply-To: <20230118160739.26059-1-anonymous@anonymous.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Date: Wed, 18 Jan 2023 18:17:27 +0200
+Message-ID: <CAHp75VeP42nhAnjWMXnsHpd7SQhJ2G1kqX6mbEHxnpFHhKWYHg@mail.gmail.com>
+Subject: Re: [PATCH v6] media: atomisp: pci: Replace bytes macros with functions
+To: Anonymous <anonymous@anonymous.com>
+Cc: ailus@linux.intel.com, error27@gmail.com, gregkh@linuxfoundation.org, 
+	hdegoede@redhat.com, linux-kernel@vger.kernel.org, 
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev, 
+	mchehab@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+
+On Wed, Jan 18, 2023 at 6:08 PM Anonymous <anonymous@anonymous.com> wrote:
+>
+> Replace the function-like macros FPNTBL_BYTES(), SCTBL_BYTES(), and
+> MORPH_PLANE_BYTES() with functions to comply with Linux coding style
+> standards.
+> Replace multiplication with calls to array_size() and array3_size()
+> to prevent accidental arithmetic overflow.
+
+In my MUA I don't clearly see if indentations are really being fixed,
+assuming that
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Thank you and keep going!
+
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+> ---
+> Changelog:
+> V1 -> V2: Use size_mul() to perform size_t multiplication without risk of
+>                   overflow.
+>                   Remove the inline keyword from function definitions.
+>
+> V2 -> V3: Add commit message.
+>
+> V3 -> V4: Use array_size() and array3_size() for multiplication.
+>
+> V4 -> V5: Fix indentation.
+>
+> V5 -> V6: Try again to fix indentation (use tabs of size 8).
+>
+>  .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+>  1 file changed, 23 insertions(+), 15 deletions(-)
+>
+> diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+> index f08564f58242..7e111df5c09d 100644
+> --- a/drivers/staging/media/atomisp/pci/sh_css_params.c
+> +++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+> @@ -98,17 +98,27 @@
+>  #include "sh_css_frac.h"
+>  #include "ia_css_bufq.h"
+>
+> -#define FPNTBL_BYTES(binary) \
+> -       (sizeof(char) * (binary)->in_frame_info.res.height * \
+> -        (binary)->in_frame_info.padded_width)
+> +static size_t fpntbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +       return array3_size(sizeof(char),
+> +                          binary->in_frame_info.res.height,
+> +                          binary->in_frame_info.padded_width);
+> +}
+>
+> -#define SCTBL_BYTES(binary) \
+> -       (sizeof(unsigned short) * (binary)->sctbl_height * \
+> -        (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
+> +static size_t sctbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +       return size_mul(sizeof(unsigned short),
+> +                         array3_size(binary->sctbl_height,
+> +                                     binary->sctbl_aligned_width_per_color,
+> +                                     IA_CSS_SC_NUM_COLORS));
+> +}
+>
+> -#define MORPH_PLANE_BYTES(binary) \
+> -       (SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+> -        (binary)->morph_tbl_height)
+> +static size_t morph_plane_bytes(const struct ia_css_binary *binary)
+> +{
+> +       return array3_size(SH_CSS_MORPH_TABLE_ELEM_BYTES,
+> +                          binary->morph_tbl_aligned_width,
+> +                          binary->morph_tbl_height);
+> +}
+>
+>  /* We keep a second copy of the ptr struct for the SP to access.
+>     Again, this would not be necessary on the chip. */
+> @@ -3279,7 +3289,7 @@ sh_css_params_write_to_ddr_internal(
+>         if (binary->info->sp.enable.fpnr) {
+>                 buff_realloced = reallocate_buffer(&ddr_map->fpn_tbl,
+>                                                    &ddr_map_size->fpn_tbl,
+> -                                                  (size_t)(FPNTBL_BYTES(binary)),
+> +                                                  fpntbl_bytes(binary),
+>                                                    params->config_changed[IA_CSS_FPN_ID],
+>                                                    &err);
+>                 if (err) {
+> @@ -3304,7 +3314,7 @@ sh_css_params_write_to_ddr_internal(
+>
+>                 buff_realloced = reallocate_buffer(&ddr_map->sc_tbl,
+>                                                    &ddr_map_size->sc_tbl,
+> -                                                  SCTBL_BYTES(binary),
+> +                                                  sctbl_bytes(binary),
+>                                                    params->sc_table_changed,
+>                                                    &err);
+>                 if (err) {
+> @@ -3538,8 +3548,7 @@ sh_css_params_write_to_ddr_internal(
+>                         buff_realloced |=
+>                             reallocate_buffer(virt_addr_tetra_x[i],
+>                                             virt_size_tetra_x[i],
+> -                                           (size_t)
+> -                                           (MORPH_PLANE_BYTES(binary)),
+> +                                           morph_plane_bytes(binary),
+>                                             params->morph_table_changed,
+>                                             &err);
+>                         if (err) {
+> @@ -3549,8 +3558,7 @@ sh_css_params_write_to_ddr_internal(
+>                         buff_realloced |=
+>                             reallocate_buffer(virt_addr_tetra_y[i],
+>                                             virt_size_tetra_y[i],
+> -                                           (size_t)
+> -                                           (MORPH_PLANE_BYTES(binary)),
+> +                                           morph_plane_bytes(binary),
+>                                             params->morph_table_changed,
+>                                             &err);
+>                         if (err) {
+> --
+> 2.34.1
+>
+
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from MTA-11-3.privateemail.com (mta-11-3.privateemail.com [198.54.122.105])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EACF3C2D
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 17:41:55 +0000 (UTC)
+Received: from mta-11.privateemail.com (localhost [127.0.0.1])
+	by mta-11.privateemail.com (Postfix) with ESMTP id E9FC818000A4;
+	Wed, 18 Jan 2023 12:41:48 -0500 (EST)
+Received: from anonymous.com (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-11.privateemail.com (Postfix) with ESMTPA id F33A018000A8;
+	Wed, 18 Jan 2023 12:41:38 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1674063708;
+	bh=D7WHsXyXqtqJWxl+4AA+cbRa4gc8zNjQxP2TO71jpHU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=FKJ78MCIj8RQxUTJAJzyJonlBSXjGLX/1+BIy3ysTyJAUyYB/JdRj1e8GYa8zQpMm
+	 LNyfGg4qG/ukz4it8cTkmkqAFu6+jyq7YIG6GxfyN2tO3FNAjOPDPlho52sDRE5aQf
+	 Hru1Ri3XaDd8jgcsGf5xfoeswQDayvWcwmMlN/k6F5MLM223SizJPaTTsIZus5kLbQ
+	 LBVGoe6kpGBNBeHU6FJcM3USIrtPpJSZTPrm4eYxpn7G/f7y8NFJVEEqhVPbok/MRq
+	 d3C43QpdkqcK9K3UPktq7NoGYG9WkZPq5A30lghDkQKwLyIu3+PIXlWgx+U1v59Fk4
+	 o7/uLItoaMO4g==
+Date: Wed, 18 Jan 2023 12:41:36 -0500
+From: Anonymous <anonymous@anonymous.com>
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: ailus@linux.intel.com, error27@gmail.com, gregkh@linuxfoundation.org,
+	hdegoede@redhat.com, linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev,
+	mchehab@kernel.org
+Subject: Re: [PATCH v6] media: atomisp: pci: Replace bytes macros with
+ functions
+Message-ID: <Y8gvUG6ncjZ0WG/v@anonymous.com>
+References: <CAHp75VcxvPZOZpGMSQXkCFv+WekHckMJkympfdR0ih72AjjkNw@mail.gmail.com>
+ <20230118160739.26059-1-anonymous@anonymous.com>
+ <CAHp75VeP42nhAnjWMXnsHpd7SQhJ2G1kqX6mbEHxnpFHhKWYHg@mail.gmail.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAHp75VeP42nhAnjWMXnsHpd7SQhJ2G1kqX6mbEHxnpFHhKWYHg@mail.gmail.com>
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+> In my MUA I don't clearly see if indentations are really being fixed,
+> assuming that
+
+The issue I was having was that my editor had tabs set to size 4.
+I switched them to size 8 and could see the issues that Dan was seeing.
+I've ran checkpatch.pl on the patch and it passes, but if you see an
+issue I will address it.
+
+> Thank you and keep going!
+
+Thank you for your patience.
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32E5B7C
+	for <linux-staging@lists.linux.dev>; Mon, 23 Jan 2023 12:27:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1674476877;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Y8EL4a7vt9YoRH2uQ3LUcgsvGE0j3ZgGDUhZzXtuW0o=;
+	b=YEdpnmPPRY2XX7uPk1Dfj9AdJPz50VW4m2ihh/gkKkyzhUWXOJRk2R2AUdvlN2elqpzJF9
+	IT/wN/1smAz7HwPS3AREe/QJ9Ge21u0wJcmNFGsixzFLPd/j13ThGfIndwt4cCroEOGNy8
+	w9ToMsDyKII771b/fHC/A4ZXlDh54M4=
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
+ [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-18-zmRGgNsAOzinrtvHsmc32Q-1; Mon, 23 Jan 2023 07:27:56 -0500
+X-MC-Unique: zmRGgNsAOzinrtvHsmc32Q-1
+Received: by mail-ej1-f72.google.com with SMTP id sa32-20020a1709076d2000b0084d4593797eso7621645ejc.16
+        for <linux-staging@lists.linux.dev>; Mon, 23 Jan 2023 04:27:56 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Y8EL4a7vt9YoRH2uQ3LUcgsvGE0j3ZgGDUhZzXtuW0o=;
+        b=Psxs+aeYh5AdXSRv8Phi69vw60e3k08CiNAwErAR1eKJLV5E3yys5NkkBgrSJOT1Pp
+         zU6v+j0zxmjmIa2zpgvKQpAqjdKkGWUVNcAHyAIGDVY/juv/QSZVi+XuCR5XTwntXoBr
+         04DQmAOP+nV/5ztE6GfEoYz8wzXXcafcRSKP0LqFv/nQf91164p9TooAcrfA/6Ih3I7Q
+         mXGbPCyI3Rs0J6e7Tgc3AV2PPoWJW7jG5zB4elxV9K+fAqsb3L3EVWo3HHuAE4t04grC
+         snM6ANpjkn4kfJ+/6f712OgivcjgeNojpjsAMNksjk44huO1RxZhzbi1bmnJUoEHFfka
+         /NiA==
+X-Gm-Message-State: AFqh2krcqQdnLFPs4bm3ak6TZdNtmVfnIe5bDDt36msMNQgurQ//C6AE
+	8JV6L1zQt2bjKC/AZ5bCUVS+fPkQOGdKNjSgKpY6LY0Mq5njLpetm5S/XwqAqDU0nvZQYuauaLU
+	jduZ2Uplu6BhKR7UQAGNWTP43dQ==
+X-Received: by 2002:a17:906:6b13:b0:872:cc12:f712 with SMTP id q19-20020a1709066b1300b00872cc12f712mr22432602ejr.43.1674476875554;
+        Mon, 23 Jan 2023 04:27:55 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXsUq/Q66Db25Cp9CBpPwyu76f1Jixb+J0Ie/WrZ2C239Oa3Z1Glt23XEHOuP2EHwbgYtOS2Vg==
+X-Received: by 2002:a17:906:6b13:b0:872:cc12:f712 with SMTP id q19-20020a1709066b1300b00872cc12f712mr22432586ejr.43.1674476875307;
+        Mon, 23 Jan 2023 04:27:55 -0800 (PST)
+Received: from [10.40.98.142] ([78.108.130.194])
+        by smtp.gmail.com with ESMTPSA id o11-20020a170906768b00b0084d242d07ffsm21647277ejm.8.2023.01.23.04.27.54
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 23 Jan 2023 04:27:54 -0800 (PST)
+Message-ID: <cba8bfbf-187d-3ba2-3d2d-cdac88fa9362@redhat.com>
+Date: Mon, 23 Jan 2023 13:27:53 +0100
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.0
+Subject: Re: [PATCH v6] media: atomisp: pci: Replace bytes macros with
+ functions
+To: Anonymous <anonymous@anonymous.com>, andy.shevchenko@gmail.com
+Cc: ailus@linux.intel.com, error27@gmail.com, gregkh@linuxfoundation.org,
+ linux-kernel@vger.kernel.org, linux-media@vger.kernel.org,
+ linux-staging@lists.linux.dev, mchehab@kernel.org
+References: <CAHp75VcxvPZOZpGMSQXkCFv+WekHckMJkympfdR0ih72AjjkNw@mail.gmail.com>
+ <20230118160739.26059-1-anonymous@anonymous.com>
+From: Hans de Goede <hdegoede@redhat.com>
+In-Reply-To: <20230118160739.26059-1-anonymous@anonymous.com>
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: redhat.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+Hi,
+
+On 1/18/23 17:07, Anonymous wrote:
+> Replace the function-like macros FPNTBL_BYTES(), SCTBL_BYTES(), and
+> MORPH_PLANE_BYTES() with functions to comply with Linux coding style
+> standards.
+> Replace multiplication with calls to array_size() and array3_size()
+> to prevent accidental arithmetic overflow.
+> 
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+
+Thank you.
+
+I have added this to my personal git tree now and I will include
+this in the atomisp driver pull-req which I will send to the
+media-subsystem maintainer in a couple of weeks.
+
+Regards,
+
+Hans
+
+
+
+
+> ---
+> Changelog:
+> V1 -> V2: Use size_mul() to perform size_t multiplication without risk of
+> 		  overflow.
+> 		  Remove the inline keyword from function definitions.
+> 
+> V2 -> V3: Add commit message.
+> 
+> V3 -> V4: Use array_size() and array3_size() for multiplication.
+> 
+> V4 -> V5: Fix indentation.
+> 
+> V5 -> V6: Try again to fix indentation (use tabs of size 8).
+> 
+>  .../staging/media/atomisp/pci/sh_css_params.c | 38 +++++++++++--------
+>  1 file changed, 23 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/staging/media/atomisp/pci/sh_css_params.c b/drivers/staging/media/atomisp/pci/sh_css_params.c
+> index f08564f58242..7e111df5c09d 100644
+> --- a/drivers/staging/media/atomisp/pci/sh_css_params.c
+> +++ b/drivers/staging/media/atomisp/pci/sh_css_params.c
+> @@ -98,17 +98,27 @@
+>  #include "sh_css_frac.h"
+>  #include "ia_css_bufq.h"
+>  
+> -#define FPNTBL_BYTES(binary) \
+> -	(sizeof(char) * (binary)->in_frame_info.res.height * \
+> -	 (binary)->in_frame_info.padded_width)
+> +static size_t fpntbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +	return array3_size(sizeof(char),
+> +			   binary->in_frame_info.res.height,
+> +			   binary->in_frame_info.padded_width);
+> +}
+>  
+> -#define SCTBL_BYTES(binary) \
+> -	(sizeof(unsigned short) * (binary)->sctbl_height * \
+> -	 (binary)->sctbl_aligned_width_per_color * IA_CSS_SC_NUM_COLORS)
+> +static size_t sctbl_bytes(const struct ia_css_binary *binary)
+> +{
+> +	return size_mul(sizeof(unsigned short),
+> +			  array3_size(binary->sctbl_height,
+> +				      binary->sctbl_aligned_width_per_color,
+> +				      IA_CSS_SC_NUM_COLORS));
+> +}
+>  
+> -#define MORPH_PLANE_BYTES(binary) \
+> -	(SH_CSS_MORPH_TABLE_ELEM_BYTES * (binary)->morph_tbl_aligned_width * \
+> -	 (binary)->morph_tbl_height)
+> +static size_t morph_plane_bytes(const struct ia_css_binary *binary)
+> +{
+> +	return array3_size(SH_CSS_MORPH_TABLE_ELEM_BYTES,
+> +			   binary->morph_tbl_aligned_width,
+> +			   binary->morph_tbl_height);
+> +}
+>  
+>  /* We keep a second copy of the ptr struct for the SP to access.
+>     Again, this would not be necessary on the chip. */
+> @@ -3279,7 +3289,7 @@ sh_css_params_write_to_ddr_internal(
+>  	if (binary->info->sp.enable.fpnr) {
+>  		buff_realloced = reallocate_buffer(&ddr_map->fpn_tbl,
+>  						   &ddr_map_size->fpn_tbl,
+> -						   (size_t)(FPNTBL_BYTES(binary)),
+> +						   fpntbl_bytes(binary),
+>  						   params->config_changed[IA_CSS_FPN_ID],
+>  						   &err);
+>  		if (err) {
+> @@ -3304,7 +3314,7 @@ sh_css_params_write_to_ddr_internal(
+>  
+>  		buff_realloced = reallocate_buffer(&ddr_map->sc_tbl,
+>  						   &ddr_map_size->sc_tbl,
+> -						   SCTBL_BYTES(binary),
+> +						   sctbl_bytes(binary),
+>  						   params->sc_table_changed,
+>  						   &err);
+>  		if (err) {
+> @@ -3538,8 +3548,7 @@ sh_css_params_write_to_ddr_internal(
+>  			buff_realloced |=
+>  			    reallocate_buffer(virt_addr_tetra_x[i],
+>  					    virt_size_tetra_x[i],
+> -					    (size_t)
+> -					    (MORPH_PLANE_BYTES(binary)),
+> +					    morph_plane_bytes(binary),
+>  					    params->morph_table_changed,
+>  					    &err);
+>  			if (err) {
+> @@ -3549,8 +3558,7 @@ sh_css_params_write_to_ddr_internal(
+>  			buff_realloced |=
+>  			    reallocate_buffer(virt_addr_tetra_y[i],
+>  					    virt_size_tetra_y[i],
+> -					    (size_t)
+> -					    (MORPH_PLANE_BYTES(binary)),
+> +					    morph_plane_bytes(binary),
+>  					    params->morph_table_changed,
+>  					    &err);
+>  			if (err) {
+
+

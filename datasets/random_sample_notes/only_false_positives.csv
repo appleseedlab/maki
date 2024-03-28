@@ -1,0 +1,22 @@
+name, definition location, definition-adapting, calling-convention-adapting, scope-adapting, call-site-context-adapting, thunkizing, metaprogramming, nested invocations, correct classification, notes
+
+## False positives due to GCC-specific language extensions
+TAINT_MACHINE_CHECK, extracted_programs/linux-6.2-rc2/include/linux/panic.h:58:9, False, False, True, False, False, False, False, false, definition-adapting to enum; passed to a function call; used as a designated initializer
+MSG_IDLE_VCS6, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/gt/intel_gt_regs.h:912:9, False, False, False, True, False, False, False, false, definition-adapting; designated initializer; nested invocations
+TG3_INTERRUPT_TEST, extracted_programs/linux-6.2-rc2/drivers/net/ethernet/broadcom/tg3.c:449:9, False, True, False, False, False, False, False, false, definition-adapting; designated initializer
+DSPCLK_GATE_D, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:1572:9, False, False, False, True, False, False, False, false, should be definition-adapting; expression statement; passed to function call; nested invocations
+DKL_PLL_DIV1, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/display/intel_dkl_phy_regs.h:76:9, False, False, False, True, False, False, False, false, definition-adapting; expression statement; passed to function call; on RHS of assignment; nested invocations
+ICL_DSC0_RC_RANGE_PARAMETERS_1, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:2293:9, False, False, False, True, False, False, False, false, calling-convention-adapting; scope-adapting; expression statement
+BmUSEFUL, extracted_programs/perl-5.36.0/sv.h:1479:11, False, True, True, False, False, True, True, false, not metaprogramming; expression statement; RHS of assignment; in ||
+
+## False positives due to Maki failing to align the macro with the correct AST node
+SWAP_MAP_SHMEM, extracted_programs/linux-6.2-rc2/include/linux/swap.h:220:9, False, False, True, False, False, False, False, false, definition-adapting; on RHS of ==; passed to a function call
+PAGE_MAPCOUNT_RESERVE, extracted_programs/linux-6.2-rc2/include/linux/page-flags.h:919:9, False, False, True, False, False, False, False, false, appears to be definition-adapting; on RHS of <
+FS_DQ_BIGTIME, extracted_programs/linux-6.2-rc2/include/uapi/linux/dqblk_xfs.h:132:9, False, False, True, False, False, False, False, false, definition-adapting; on RHS of &; on RHS of |=
+ATTR_KILL_SGID, extracted_programs/linux-6.2-rc2/include/linux/fs.h:202:9, False, False, True, False, False, False, False, false, definition-adapting; used as return value; on RHS of |; on RHS of &; in RHS of &=; on LHS of &&; on RHS of |=; 
+do_intl, extracted_programs/gawk-5.1.1/awk.h:1181:9, False, False, True, False, False, False, False, false, should also be calling-convention-adapting; invoked in &&
+OPpSPLIT_ASSIGN, extracted_programs/perl-5.36.0/opcode.h:2321:9, False, False, True, False, False, False, False, false, definition-adapting; invoked in &&; on RHS of |=
+IORESOURCE_IO_16BIT_ADDR, extracted_programs/linux-6.2-rc2/include/linux/ioport.h:115:9, False, False, True, False, False, False, False, false, definition-adapting; RHS of |=; in ?:;
+VLV_PLL_DW11, extracted_programs/linux-6.2-rc2/drivers/gpu/drm/i915/i915_reg.h:243:9, False, False, False, True, False, False, False, false, definition-adapting; pased to a function call; nested invocations
+HESHVAN, extracted_programs/remind/src/hbcal.c:35:9, False, True, False, False, False, False, False, false, definition-adapting; invoked as array index; on RHS of ==; on RHS of =
+CALLREGEXEC, extracted_programs/perl-5.36.0/perl.h:233:9, False, False, False, True, False, False, False, false, calling-convention-adapting; scope-adapting

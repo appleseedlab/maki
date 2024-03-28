@@ -1,0 +1,1317 @@
+diff --git a/ipc/mqueue.c b/ipc/mqueue.c
+index d09aa1c1e..5a669767e 100644
+--- a/ipc/mqueue.c
++++ b/ipc/mqueue.c
+@@ -48,15 +48,15 @@ struct mqueue_fs_context {
+ 	bool			 newns;	/* Set if newly created ipc namespace */
+ };
+ 
+-#define MQUEUE_MAGIC	0x19800202
+-#define DIRENT_SIZE	20
+-#define FILENT_SIZE	80
++enum { MQUEUE_MAGIC = 0x19800202 };
++enum { DIRENT_SIZE = 20 };
++enum { FILENT_SIZE = 80 };
+ 
+-#define SEND		0
+-#define RECV		1
++enum { SEND = 0 };
++enum { RECV = 1 };
+ 
+-#define STATE_NONE	0
+-#define STATE_READY	1
++enum { STATE_NONE = 0 };
++enum { STATE_READY = 1 };
+ 
+ struct posix_msg_tree_node {
+ 	struct rb_node		rb_node;
+diff --git a/ipc/msg.c b/ipc/msg.c
+index fd08b3cb3..37033fea8 100644
+--- a/ipc/msg.c
++++ b/ipc/msg.c
+@@ -91,17 +91,20 @@ struct msg_sender {
+ 	size_t                  msgsz;
+ };
+ 
+-#define SEARCH_ANY		1
+-#define SEARCH_EQUAL		2
+-#define SEARCH_NOTEQUAL		3
+-#define SEARCH_LESSEQUAL	4
+-#define SEARCH_NUMBER		5
++enum { SEARCH_ANY = 1 };
++enum { SEARCH_EQUAL = 2 };
++enum { SEARCH_NOTEQUAL = 3 };
++enum { SEARCH_LESSEQUAL = 4 };
++enum { SEARCH_NUMBER = 5 };
+ 
+-#define msg_ids(ns)	((ns)->ids[IPC_MSG_IDS])
++static struct ipc_ids *msg_ids(struct ipc_namespace *ns)
++{
++	return &((ns)->ids[IPC_MSG_IDS]);
++}
+ 
+ static inline struct msg_queue *msq_obtain_object(struct ipc_namespace *ns, int id)
+ {
+-	struct kern_ipc_perm *ipcp = ipc_obtain_object_idr(&msg_ids(ns), id);
++	struct kern_ipc_perm *ipcp = ipc_obtain_object_idr(msg_ids(ns), id);
+ 
+ 	if (IS_ERR(ipcp))
+ 		return ERR_CAST(ipcp);
+@@ -112,7 +115,7 @@ static inline struct msg_queue *msq_obtain_object(struct ipc_namespace *ns, int
+ static inline struct msg_queue *msq_obtain_object_check(struct ipc_namespace *ns,
+ 							int id)
+ {
+-	struct kern_ipc_perm *ipcp = ipc_obtain_object_check(&msg_ids(ns), id);
++	struct kern_ipc_perm *ipcp = ipc_obtain_object_check(msg_ids(ns), id);
+ 
+ 	if (IS_ERR(ipcp))
+ 		return ERR_CAST(ipcp);
+@@ -122,7 +125,7 @@ static inline struct msg_queue *msq_obtain_object_check(struct ipc_namespace *ns
+ 
+ static inline void msg_rmid(struct ipc_namespace *ns, struct msg_queue *s)
+ {
+-	ipc_rmid(&msg_ids(ns), &s->q_perm);
++	ipc_rmid(msg_ids(ns), &s->q_perm);
+ }
+ 
+ static void msg_rcu_free(struct rcu_head *head)
+@@ -172,7 +175,7 @@ static int newque(struct ipc_namespace *ns, struct ipc_params *params)
+ 	INIT_LIST_HEAD(&msq->q_senders);
+ 
+ 	/* ipc_addid() locks msq upon success. */
+-	retval = ipc_addid(&msg_ids(ns), &msq->q_perm, ns->msg_ctlmni);
++	retval = ipc_addid(msg_ids(ns), &msq->q_perm, ns->msg_ctlmni);
+ 	if (retval < 0) {
+ 		ipc_rcu_putref(&msq->q_perm, msg_rcu_free);
+ 		return retval;
+@@ -309,7 +312,7 @@ long ksys_msgget(key_t key, int msgflg)
+ 	msg_params.key = key;
+ 	msg_params.flg = msgflg;
+ 
+-	return ipcget(ns, &msg_ids(ns), &msg_ops, &msg_params);
++	return ipcget(ns, msg_ids(ns), &msg_ops, &msg_params);
+ }
+ 
+ SYSCALL_DEFINE2(msgget, key_t, key, int, msgflg)
+@@ -405,10 +408,10 @@ static int msgctl_down(struct ipc_namespace *ns, int msqid, int cmd,
+ 	struct msg_queue *msq;
+ 	int err;
+ 
+-	down_write(&msg_ids(ns).rwsem);
++	down_write(&(msg_ids(ns)->rwsem));
+ 	rcu_read_lock();
+ 
+-	ipcp = ipcctl_obtain_check(ns, &msg_ids(ns), msqid, cmd,
++	ipcp = ipcctl_obtain_check(ns, msg_ids(ns), msqid, cmd,
+ 				      perm, msg_qbytes);
+ 	if (IS_ERR(ipcp)) {
+ 		err = PTR_ERR(ipcp);
+@@ -470,7 +473,7 @@ static int msgctl_down(struct ipc_namespace *ns, int msqid, int cmd,
+ out_unlock1:
+ 	rcu_read_unlock();
+ out_up:
+-	up_write(&msg_ids(ns).rwsem);
++	up_write(&(msg_ids(ns)->rwsem));
+ 	return err;
+ }
+ 
+@@ -495,11 +498,11 @@ static int msgctl_info(struct ipc_namespace *ns, int msqid,
+ 	msginfo->msgmnb = ns->msg_ctlmnb;
+ 	msginfo->msgssz = MSGSSZ;
+ 	msginfo->msgseg = MSGSEG;
+-	down_read(&msg_ids(ns).rwsem);
++	down_read(&(msg_ids(ns)->rwsem));
+ 	if (cmd == MSG_INFO)
+-		msginfo->msgpool = msg_ids(ns).in_use;
+-	max_idx = ipc_get_maxidx(&msg_ids(ns));
+-	up_read(&msg_ids(ns).rwsem);
++		msginfo->msgpool = msg_ids(ns)->in_use;
++	max_idx = ipc_get_maxidx(msg_ids(ns));
++	up_read(&(msg_ids(ns)->rwsem));
+ 	if (cmd == MSG_INFO) {
+ 		msginfo->msgmap = min_t(int,
+ 				     percpu_counter_sum(&ns->percpu_msg_hdrs),
+@@ -1329,7 +1332,7 @@ int msg_init_ns(struct ipc_namespace *ns)
+ #ifdef CONFIG_IPC_NS
+ void msg_exit_ns(struct ipc_namespace *ns)
+ {
+-	free_ipcs(ns, &msg_ids(ns), freeque);
++	free_ipcs(ns, msg_ids(ns), freeque);
+ 	idr_destroy(&ns->ids[IPC_MSG_IDS].ipcs_idr);
+ 	rhashtable_destroy(&ns->ids[IPC_MSG_IDS].key_ht);
+ 	percpu_counter_destroy(&ns->percpu_msg_bytes);
+diff --git a/ipc/msgutil.c b/ipc/msgutil.c
+index d0a0e877c..7d988f9f6 100644
+--- a/ipc/msgutil.c
++++ b/ipc/msgutil.c
+@@ -39,8 +39,8 @@ struct msg_msgseg {
+ 	/* the next part of the message follows immediately */
+ };
+ 
+-#define DATALEN_MSG	((size_t)PAGE_SIZE-sizeof(struct msg_msg))
+-#define DATALEN_SEG	((size_t)PAGE_SIZE-sizeof(struct msg_msgseg))
++enum { DATALEN_MSG = ((size_t) PAGE_SIZE - sizeof(struct msg_msg)) };
++enum { DATALEN_SEG = ((size_t) PAGE_SIZE - sizeof(struct msg_msgseg)) };
+ 
+ 
+ static struct msg_msg *alloc_msg(size_t len)
+@@ -49,7 +49,7 @@ static struct msg_msg *alloc_msg(size_t len)
+ 	struct msg_msgseg **pseg;
+ 	size_t alen;
+ 
+-	alen = min(len, DATALEN_MSG);
++	alen = min(len, ((size_t)DATALEN_MSG));
+ 	msg = kmalloc(sizeof(*msg) + alen, GFP_KERNEL_ACCOUNT);
+ 	if (msg == NULL)
+ 		return NULL;
+@@ -64,7 +64,7 @@ static struct msg_msg *alloc_msg(size_t len)
+ 
+ 		cond_resched();
+ 
+-		alen = min(len, DATALEN_SEG);
++		alen = min(len, ((size_t)DATALEN_SEG));
+ 		seg = kmalloc(sizeof(*seg) + alen, GFP_KERNEL_ACCOUNT);
+ 		if (seg == NULL)
+ 			goto out_err;
+@@ -92,14 +92,14 @@ struct msg_msg *load_msg(const void __user *src, size_t len)
+ 	if (msg == NULL)
+ 		return ERR_PTR(-ENOMEM);
+ 
+-	alen = min(len, DATALEN_MSG);
++	alen = min(len, ((size_t)DATALEN_MSG));
+ 	if (copy_from_user(msg + 1, src, alen))
+ 		goto out_err;
+ 
+ 	for (seg = msg->next; seg != NULL; seg = seg->next) {
+ 		len -= alen;
+ 		src = (char __user *)src + alen;
+-		alen = min(len, DATALEN_SEG);
++		alen = min(len, ((size_t)DATALEN_SEG));
+ 		if (copy_from_user(seg + 1, src, alen))
+ 			goto out_err;
+ 	}
+@@ -124,7 +124,7 @@ struct msg_msg *copy_msg(struct msg_msg *src, struct msg_msg *dst)
+ 	if (src->m_ts > dst->m_ts)
+ 		return ERR_PTR(-EINVAL);
+ 
+-	alen = min(len, DATALEN_MSG);
++	alen = min(len, ((size_t)DATALEN_MSG));
+ 	memcpy(dst + 1, src + 1, alen);
+ 
+ 	for (dst_pseg = dst->next, src_pseg = src->next;
+@@ -132,7 +132,7 @@ struct msg_msg *copy_msg(struct msg_msg *src, struct msg_msg *dst)
+ 	     dst_pseg = dst_pseg->next, src_pseg = src_pseg->next) {
+ 
+ 		len -= alen;
+-		alen = min(len, DATALEN_SEG);
++		alen = min(len, ((size_t)DATALEN_SEG));
+ 		memcpy(dst_pseg + 1, src_pseg + 1, alen);
+ 	}
+ 
+@@ -152,14 +152,14 @@ int store_msg(void __user *dest, struct msg_msg *msg, size_t len)
+ 	size_t alen;
+ 	struct msg_msgseg *seg;
+ 
+-	alen = min(len, DATALEN_MSG);
++	alen = min(len, ((size_t)DATALEN_MSG));
+ 	if (copy_to_user(dest, msg + 1, alen))
+ 		return -1;
+ 
+ 	for (seg = msg->next; seg != NULL; seg = seg->next) {
+ 		len -= alen;
+ 		dest = (char __user *)dest + alen;
+-		alen = min(len, DATALEN_SEG);
++		alen = min(len, ((size_t)DATALEN_SEG));
+ 		if (copy_to_user(dest, seg + 1, alen))
+ 			return -1;
+ 	}
+diff --git a/ipc/sem.c b/ipc/sem.c
+index 00f88aa01..0add0e582 100644
+--- a/ipc/sem.c
++++ b/ipc/sem.c
+@@ -166,7 +166,10 @@ struct sem_undo_list {
+ };
+ 
+ 
+-#define sem_ids(ns)	((ns)->ids[IPC_SEM_IDS])
++static struct ipc_ids *sem_ids(struct ipc_namespace *ns)
++{
++	return &((ns)->ids[IPC_SEM_IDS]);
++}
+ 
+ static int newary(struct ipc_namespace *, struct ipc_params *);
+ static void freeary(struct ipc_namespace *, struct kern_ipc_perm *);
+@@ -174,15 +177,15 @@ static void freeary(struct ipc_namespace *, struct kern_ipc_perm *);
+ static int sysvipc_sem_proc_show(struct seq_file *s, void *it);
+ #endif
+ 
+-#define SEMMSL_FAST	256 /* 512 bytes on stack */
+-#define SEMOPM_FAST	64  /* ~ 372 bytes on stack */
++enum { SEMMSL_FAST = 256 /* 512 bytes on stack */ };
++enum { SEMOPM_FAST = 64  /* ~ 372 bytes on stack */ };
+ 
+ /*
+  * Switching from the mode suitable for simple ops
+  * to the mode for complex ops is costly. Therefore:
+  * use some hysteresis
+  */
+-#define USE_GLOBAL_LOCK_HYSTERESIS	10
++enum { USE_GLOBAL_LOCK_HYSTERESIS = 10 };
+ 
+ /*
+  * Locking:
+@@ -241,17 +244,17 @@ static int sysvipc_sem_proc_show(struct seq_file *s, void *it);
+  * See also ipc/mqueue.c for more details on the covered races.
+  */
+ 
+-#define sc_semmsl	sem_ctls[0]
+-#define sc_semmns	sem_ctls[1]
+-#define sc_semopm	sem_ctls[2]
+-#define sc_semmni	sem_ctls[3]
++static int *sc_semmsl(struct ipc_namespace *ns) { return &ns->sem_ctls[0]; }
++static int *sc_semmns(struct ipc_namespace *ns) { return &ns->sem_ctls[1]; }
++static int *sc_semopm(struct ipc_namespace *ns) { return &ns->sem_ctls[2]; }
++static int *sc_semmni(struct ipc_namespace *ns) { return &ns->sem_ctls[3]; }
+ 
+ void sem_init_ns(struct ipc_namespace *ns)
+ {
+-	ns->sc_semmsl = SEMMSL;
+-	ns->sc_semmns = SEMMNS;
+-	ns->sc_semopm = SEMOPM;
+-	ns->sc_semmni = SEMMNI;
++	*sc_semmsl(ns) = SEMMSL;
++	*sc_semmns(ns) = SEMMNS;
++	*sc_semopm(ns) = SEMOPM;
++	*sc_semmni(ns) = SEMMNI;
+ 	ns->used_sems = 0;
+ 	ipc_init_ids(&ns->ids[IPC_SEM_IDS]);
+ }
+@@ -259,7 +262,7 @@ void sem_init_ns(struct ipc_namespace *ns)
+ #ifdef CONFIG_IPC_NS
+ void sem_exit_ns(struct ipc_namespace *ns)
+ {
+-	free_ipcs(ns, &sem_ids(ns), freeary);
++	free_ipcs(ns, sem_ids(ns), freeary);
+ 	idr_destroy(&ns->ids[IPC_SEM_IDS].ipcs_idr);
+ 	rhashtable_destroy(&ns->ids[IPC_SEM_IDS].key_ht);
+ }
+@@ -378,7 +381,7 @@ static void complexmode_tryleave(struct sem_array *sma)
+ 	}
+ }
+ 
+-#define SEM_GLOBAL_LOCK	(-1)
++enum { SEM_GLOBAL_LOCK = (-1) };
+ /*
+  * If the request contains only one semaphore operation, and there are
+  * no complex transactions pending, lock only the semaphore involved.
+@@ -477,7 +480,7 @@ static inline void sem_unlock(struct sem_array *sma, int locknum)
+  */
+ static inline struct sem_array *sem_obtain_object(struct ipc_namespace *ns, int id)
+ {
+-	struct kern_ipc_perm *ipcp = ipc_obtain_object_idr(&sem_ids(ns), id);
++	struct kern_ipc_perm *ipcp = ipc_obtain_object_idr(sem_ids(ns), id);
+ 
+ 	if (IS_ERR(ipcp))
+ 		return ERR_CAST(ipcp);
+@@ -488,7 +491,7 @@ static inline struct sem_array *sem_obtain_object(struct ipc_namespace *ns, int
+ static inline struct sem_array *sem_obtain_object_check(struct ipc_namespace *ns,
+ 							int id)
+ {
+-	struct kern_ipc_perm *ipcp = ipc_obtain_object_check(&sem_ids(ns), id);
++	struct kern_ipc_perm *ipcp = ipc_obtain_object_check(sem_ids(ns), id);
+ 
+ 	if (IS_ERR(ipcp))
+ 		return ERR_CAST(ipcp);
+@@ -504,7 +507,7 @@ static inline void sem_lock_and_putref(struct sem_array *sma)
+ 
+ static inline void sem_rmid(struct ipc_namespace *ns, struct sem_array *s)
+ {
+-	ipc_rmid(&sem_ids(ns), &s->sem_perm);
++	ipc_rmid(sem_ids(ns), &s->sem_perm);
+ }
+ 
+ static struct sem_array *sem_alloc(size_t nsems)
+@@ -539,7 +542,7 @@ static int newary(struct ipc_namespace *ns, struct ipc_params *params)
+ 
+ 	if (!nsems)
+ 		return -EINVAL;
+-	if (ns->used_sems + nsems > ns->sc_semmns)
++	if (ns->used_sems + nsems > *sc_semmns(ns))
+ 		return -ENOSPC;
+ 
+ 	sma = sem_alloc(nsems);
+@@ -571,7 +574,7 @@ static int newary(struct ipc_namespace *ns, struct ipc_params *params)
+ 	sma->sem_ctime = ktime_get_real_seconds();
+ 
+ 	/* ipc_addid() locks sma upon success. */
+-	retval = ipc_addid(&sem_ids(ns), &sma->sem_perm, ns->sc_semmni);
++	retval = ipc_addid(sem_ids(ns), &sma->sem_perm, *sc_semmni(ns));
+ 	if (retval < 0) {
+ 		ipc_rcu_putref(&sma->sem_perm, sem_rcu_free);
+ 		return retval;
+@@ -611,14 +614,14 @@ long ksys_semget(key_t key, int nsems, int semflg)
+ 
+ 	ns = current->nsproxy->ipc_ns;
+ 
+-	if (nsems < 0 || nsems > ns->sc_semmsl)
++	if (nsems < 0 || nsems > *sc_semmsl(ns))
+ 		return -EINVAL;
+ 
+ 	sem_params.key = key;
+ 	sem_params.flg = semflg;
+ 	sem_params.u.nsems = nsems;
+ 
+-	return ipcget(ns, &sem_ids(ns), &sem_ops, &sem_params);
++	return ipcget(ns, sem_ids(ns), &sem_ops, &sem_params);
+ }
+ 
+ SYSCALL_DEFINE3(semget, key_t, key, int, nsems, int, semflg)
+@@ -1317,24 +1320,24 @@ static int semctl_info(struct ipc_namespace *ns, int semid,
+ 		return err;
+ 
+ 	memset(&seminfo, 0, sizeof(seminfo));
+-	seminfo.semmni = ns->sc_semmni;
+-	seminfo.semmns = ns->sc_semmns;
+-	seminfo.semmsl = ns->sc_semmsl;
+-	seminfo.semopm = ns->sc_semopm;
++	seminfo.semmni = *sc_semmni(ns);
++	seminfo.semmns = *sc_semmns(ns);
++	seminfo.semmsl = *sc_semmsl(ns);
++	seminfo.semopm = *sc_semopm(ns);
+ 	seminfo.semvmx = SEMVMX;
+ 	seminfo.semmnu = SEMMNU;
+ 	seminfo.semmap = SEMMAP;
+ 	seminfo.semume = SEMUME;
+-	down_read(&sem_ids(ns).rwsem);
++	down_read(&(sem_ids(ns)->rwsem));
+ 	if (cmd == SEM_INFO) {
+-		seminfo.semusz = sem_ids(ns).in_use;
++		seminfo.semusz = sem_ids(ns)->in_use;
+ 		seminfo.semaem = ns->used_sems;
+ 	} else {
+ 		seminfo.semusz = SEMUSZ;
+ 		seminfo.semaem = SEMAEM;
+ 	}
+-	max_idx = ipc_get_maxidx(&sem_ids(ns));
+-	up_read(&sem_ids(ns).rwsem);
++	max_idx = ipc_get_maxidx(sem_ids(ns));
++	up_read(&(sem_ids(ns)->rwsem));
+ 	if (copy_to_user(p, &seminfo, sizeof(struct seminfo)))
+ 		return -EFAULT;
+ 	return (max_idx < 0) ? 0 : max_idx;
+@@ -1605,10 +1608,10 @@ static int semctl_down(struct ipc_namespace *ns, int semid,
+ 	int err;
+ 	struct kern_ipc_perm *ipcp;
+ 
+-	down_write(&sem_ids(ns).rwsem);
++	down_write(&(sem_ids(ns)->rwsem));
+ 	rcu_read_lock();
+ 
+-	ipcp = ipcctl_obtain_check(ns, &sem_ids(ns), semid, cmd,
++	ipcp = ipcctl_obtain_check(ns, sem_ids(ns), semid, cmd,
+ 				      &semid64->sem_perm, 0);
+ 	if (IS_ERR(ipcp)) {
+ 		err = PTR_ERR(ipcp);
+@@ -1644,7 +1647,7 @@ static int semctl_down(struct ipc_namespace *ns, int semid,
+ out_unlock1:
+ 	rcu_read_unlock();
+ out_up:
+-	up_write(&sem_ids(ns).rwsem);
++	up_write(&(sem_ids(ns)->rwsem));
+ 	return err;
+ }
+ 
+@@ -1999,7 +2002,7 @@ long __do_semtimedop(int semid, struct sembuf *sops,
+ 
+ 	if (nsops < 1 || semid < 0)
+ 		return -EINVAL;
+-	if (nsops > ns->sc_semopm)
++	if (nsops > *sc_semopm(ns))
+ 		return -E2BIG;
+ 
+ 	if (timeout) {
+@@ -2230,7 +2233,7 @@ static long do_semtimedop(int semid, struct sembuf __user *tsops,
+ 	int ret;
+ 
+ 	ns = current->nsproxy->ipc_ns;
+-	if (nsops > ns->sc_semopm)
++	if (nsops > *sc_semopm(ns))
+ 		return -E2BIG;
+ 	if (nsops < 1)
+ 		return -EINVAL;
+diff --git a/ipc/shm.c b/ipc/shm.c
+index bd2fcc4d4..1026d322b 100644
+--- a/ipc/shm.c
++++ b/ipc/shm.c
+@@ -77,8 +77,8 @@ struct shmid_kernel /* private to the kernel */
+ } __randomize_layout;
+ 
+ /* shm_mode upper byte flags */
+-#define SHM_DEST	01000	/* segment will be destroyed on last detach */
+-#define SHM_LOCKED	02000   /* segment will not be swapped */
++enum { SHM_DEST = 01000 };	/* segment will be destroyed on last detach */
++enum { SHM_LOCKED = 02000 };   /* segment will not be swapped */
+ 
+ struct shm_file_data {
+ 	int id;
+@@ -87,15 +87,23 @@ struct shm_file_data {
+ 	const struct vm_operations_struct *vm_ops;
+ };
+ 
+-#define shm_file_data(file) (*((struct shm_file_data **)&(file)->private_data))
++struct shm_file_data **shm_file_data(struct file *file)
++{
++	return &(*((struct shm_file_data **) &(file)->private_data));
++}
+ 
+ static const struct file_operations shm_file_operations;
+ static const struct vm_operations_struct shm_vm_ops;
+ 
+-#define shm_ids(ns)	((ns)->ids[IPC_SHM_IDS])
++static struct ipc_ids *shm_ids(struct ipc_namespace *ns)
++{
++	return &((ns)->ids[IPC_SHM_IDS]);
++}
+ 
+-#define shm_unlock(shp)			\
+-	ipc_unlock(&(shp)->shm_perm)
++static void shm_unlock(struct shmid_kernel *shp)
++{
++	ipc_unlock(&(shp)->shm_perm);
++}
+ 
+ static int newseg(struct ipc_namespace *, struct ipc_params *);
+ static void shm_open(struct vm_area_struct *vma);
+@@ -112,7 +120,7 @@ void shm_init_ns(struct ipc_namespace *ns)
+ 	ns->shm_ctlmni = SHMMNI;
+ 	ns->shm_rmid_forced = 0;
+ 	ns->shm_tot = 0;
+-	ipc_init_ids(&shm_ids(ns));
++	ipc_init_ids(shm_ids(ns));
+ }
+ 
+ /*
+@@ -129,7 +137,7 @@ static void do_shm_rmid(struct ipc_namespace *ns, struct kern_ipc_perm *ipcp)
+ 	if (shp->shm_nattch) {
+ 		shp->shm_perm.mode |= SHM_DEST;
+ 		/* Do not find it any more */
+-		ipc_set_key_private(&shm_ids(ns), &shp->shm_perm);
++		ipc_set_key_private(shm_ids(ns), &shp->shm_perm);
+ 		shm_unlock(shp);
+ 	} else
+ 		shm_destroy(ns, shp);
+@@ -138,7 +146,7 @@ static void do_shm_rmid(struct ipc_namespace *ns, struct kern_ipc_perm *ipcp)
+ #ifdef CONFIG_IPC_NS
+ void shm_exit_ns(struct ipc_namespace *ns)
+ {
+-	free_ipcs(ns, &shm_ids(ns), do_shm_rmid);
++	free_ipcs(ns, shm_ids(ns), do_shm_rmid);
+ 	idr_destroy(&ns->ids[IPC_SHM_IDS].ipcs_idr);
+ 	rhashtable_destroy(&ns->ids[IPC_SHM_IDS].key_ht);
+ }
+@@ -165,7 +173,7 @@ void __init shm_init(void)
+ 
+ static inline struct shmid_kernel *shm_obtain_object(struct ipc_namespace *ns, int id)
+ {
+-	struct kern_ipc_perm *ipcp = ipc_obtain_object_idr(&shm_ids(ns), id);
++	struct kern_ipc_perm *ipcp = ipc_obtain_object_idr(shm_ids(ns), id);
+ 
+ 	if (IS_ERR(ipcp))
+ 		return ERR_CAST(ipcp);
+@@ -175,7 +183,7 @@ static inline struct shmid_kernel *shm_obtain_object(struct ipc_namespace *ns, i
+ 
+ static inline struct shmid_kernel *shm_obtain_object_check(struct ipc_namespace *ns, int id)
+ {
+-	struct kern_ipc_perm *ipcp = ipc_obtain_object_check(&shm_ids(ns), id);
++	struct kern_ipc_perm *ipcp = ipc_obtain_object_check(shm_ids(ns), id);
+ 
+ 	if (IS_ERR(ipcp))
+ 		return ERR_CAST(ipcp);
+@@ -192,7 +200,7 @@ static inline struct shmid_kernel *shm_lock(struct ipc_namespace *ns, int id)
+ 	struct kern_ipc_perm *ipcp;
+ 
+ 	rcu_read_lock();
+-	ipcp = ipc_obtain_object_idr(&shm_ids(ns), id);
++	ipcp = ipc_obtain_object_idr(shm_ids(ns), id);
+ 	if (IS_ERR(ipcp))
+ 		goto err;
+ 
+@@ -271,7 +279,7 @@ static inline void shm_clist_rm(struct shmid_kernel *shp)
+ static inline void shm_rmid(struct shmid_kernel *s)
+ {
+ 	shm_clist_rm(s);
+-	ipc_rmid(&shm_ids(s->ns), &s->shm_perm);
++	ipc_rmid(shm_ids(s->ns), &s->shm_perm);
+ }
+ 
+ 
+@@ -301,7 +309,7 @@ static int __shm_open(struct shm_file_data *sfd)
+ static void shm_open(struct vm_area_struct *vma)
+ {
+ 	struct file *file = vma->vm_file;
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 	int err;
+ 
+ 	/* Always call underlying open if present */
+@@ -370,7 +378,7 @@ static void __shm_close(struct shm_file_data *sfd)
+ 	struct shmid_kernel *shp;
+ 	struct ipc_namespace *ns = sfd->ns;
+ 
+-	down_write(&shm_ids(ns).rwsem);
++	down_write(&shm_ids(ns)->rwsem);
+ 	/* remove from the list of attaches of the shm segment */
+ 	shp = shm_lock(ns, sfd->id);
+ 
+@@ -389,13 +397,13 @@ static void __shm_close(struct shm_file_data *sfd)
+ 	else
+ 		shm_unlock(shp);
+ done:
+-	up_write(&shm_ids(ns).rwsem);
++	up_write(&shm_ids(ns)->rwsem);
+ }
+ 
+ static void shm_close(struct vm_area_struct *vma)
+ {
+ 	struct file *file = vma->vm_file;
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 
+ 	/* Always call underlying close if present */
+ 	if (sfd->vm_ops->close)
+@@ -404,7 +412,7 @@ static void shm_close(struct vm_area_struct *vma)
+ 	__shm_close(sfd);
+ }
+ 
+-/* Called with ns->shm_ids(ns).rwsem locked */
++/* Called with shm_ids(ns)->rwsem locked */
+ static int shm_try_destroy_orphaned(int id, void *p, void *data)
+ {
+ 	struct ipc_namespace *ns = data;
+@@ -429,10 +437,10 @@ static int shm_try_destroy_orphaned(int id, void *p, void *data)
+ 
+ void shm_destroy_orphaned(struct ipc_namespace *ns)
+ {
+-	down_write(&shm_ids(ns).rwsem);
+-	if (shm_ids(ns).in_use)
+-		idr_for_each(&shm_ids(ns).ipcs_idr, &shm_try_destroy_orphaned, ns);
+-	up_write(&shm_ids(ns).rwsem);
++	down_write(&shm_ids(ns)->rwsem);
++	if (shm_ids(ns)->in_use)
++		idr_for_each(&shm_ids(ns)->ipcs_idr, &shm_try_destroy_orphaned, ns);
++	up_write(&shm_ids(ns)->rwsem);
+ }
+ 
+ /* Locking assumes this will only be called with task == current */
+@@ -504,7 +512,7 @@ void exit_shm(struct task_struct *task)
+ 		 * 6) we have all references
+ 		 *    Thus lock & if needed destroy shp.
+ 		 */
+-		down_write(&shm_ids(ns).rwsem);
++		down_write(&shm_ids(ns)->rwsem);
+ 		shm_lock_by_ptr(shp);
+ 		/*
+ 		 * rcu_read_lock was implicitly taken in shm_lock_by_ptr, it's
+@@ -526,7 +534,7 @@ void exit_shm(struct task_struct *task)
+ 			shm_unlock(shp);
+ 		}
+ 
+-		up_write(&shm_ids(ns).rwsem);
++		up_write(&shm_ids(ns)->rwsem);
+ 		put_ipc_ns(ns); /* paired with get_ipc_ns_not_zero */
+ 	}
+ }
+@@ -534,7 +542,7 @@ void exit_shm(struct task_struct *task)
+ static vm_fault_t shm_fault(struct vm_fault *vmf)
+ {
+ 	struct file *file = vmf->vma->vm_file;
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 
+ 	return sfd->vm_ops->fault(vmf);
+ }
+@@ -542,7 +550,7 @@ static vm_fault_t shm_fault(struct vm_fault *vmf)
+ static int shm_may_split(struct vm_area_struct *vma, unsigned long addr)
+ {
+ 	struct file *file = vma->vm_file;
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 
+ 	if (sfd->vm_ops->may_split)
+ 		return sfd->vm_ops->may_split(vma, addr);
+@@ -553,7 +561,7 @@ static int shm_may_split(struct vm_area_struct *vma, unsigned long addr)
+ static unsigned long shm_pagesize(struct vm_area_struct *vma)
+ {
+ 	struct file *file = vma->vm_file;
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 
+ 	if (sfd->vm_ops->pagesize)
+ 		return sfd->vm_ops->pagesize(vma);
+@@ -565,7 +573,7 @@ static unsigned long shm_pagesize(struct vm_area_struct *vma)
+ static int shm_set_policy(struct vm_area_struct *vma, struct mempolicy *new)
+ {
+ 	struct file *file = vma->vm_file;
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 	int err = 0;
+ 
+ 	if (sfd->vm_ops->set_policy)
+@@ -577,7 +585,7 @@ static struct mempolicy *shm_get_policy(struct vm_area_struct *vma,
+ 					unsigned long addr)
+ {
+ 	struct file *file = vma->vm_file;
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 	struct mempolicy *pol = NULL;
+ 
+ 	if (sfd->vm_ops->get_policy)
+@@ -591,7 +599,7 @@ static struct mempolicy *shm_get_policy(struct vm_area_struct *vma,
+ 
+ static int shm_mmap(struct file *file, struct vm_area_struct *vma)
+ {
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 	int ret;
+ 
+ 	/*
+@@ -618,18 +626,18 @@ static int shm_mmap(struct file *file, struct vm_area_struct *vma)
+ 
+ static int shm_release(struct inode *ino, struct file *file)
+ {
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 
+ 	put_ipc_ns(sfd->ns);
+ 	fput(sfd->file);
+-	shm_file_data(file) = NULL;
++	*shm_file_data(file) = NULL;
+ 	kfree(sfd);
+ 	return 0;
+ }
+ 
+ static int shm_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+ {
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 
+ 	if (!sfd->file->f_op->fsync)
+ 		return -EINVAL;
+@@ -639,7 +647,7 @@ static int shm_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+ static long shm_fallocate(struct file *file, int mode, loff_t offset,
+ 			  loff_t len)
+ {
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 
+ 	if (!sfd->file->f_op->fallocate)
+ 		return -EOPNOTSUPP;
+@@ -650,7 +658,7 @@ static unsigned long shm_get_unmapped_area(struct file *file,
+ 	unsigned long addr, unsigned long len, unsigned long pgoff,
+ 	unsigned long flags)
+ {
+-	struct shm_file_data *sfd = shm_file_data(file);
++	struct shm_file_data *sfd = *shm_file_data(file);
+ 
+ 	return sfd->file->f_op->get_unmapped_area(sfd->file, addr, len,
+ 						pgoff, flags);
+@@ -780,7 +788,7 @@ static int newseg(struct ipc_namespace *ns, struct ipc_params *params)
+ 	shp->shm_creator = current;
+ 
+ 	/* ipc_addid() locks shp upon success. */
+-	error = ipc_addid(&shm_ids(ns), &shp->shm_perm, ns->shm_ctlmni);
++	error = ipc_addid(shm_ids(ns), &shp->shm_perm, ns->shm_ctlmni);
+ 	if (error < 0)
+ 		goto no_id;
+ 
+@@ -844,7 +852,7 @@ long ksys_shmget(key_t key, size_t size, int shmflg)
+ 	shm_params.flg = shmflg;
+ 	shm_params.u.size = size;
+ 
+-	return ipcget(ns, &shm_ids(ns), &shm_ops, &shm_params);
++	return ipcget(ns, shm_ids(ns), &shm_ops, &shm_params);
+ }
+ 
+ SYSCALL_DEFINE3(shmget, key_t, key, size_t, size, int, shmflg)
+@@ -971,13 +979,13 @@ static void shm_get_stat(struct ipc_namespace *ns, unsigned long *rss,
+ 	*rss = 0;
+ 	*swp = 0;
+ 
+-	in_use = shm_ids(ns).in_use;
++	in_use = shm_ids(ns)->in_use;
+ 
+ 	for (total = 0, next_id = 0; total < in_use; next_id++) {
+ 		struct kern_ipc_perm *ipc;
+ 		struct shmid_kernel *shp;
+ 
+-		ipc = idr_find(&shm_ids(ns).ipcs_idr, next_id);
++		ipc = idr_find(&shm_ids(ns)->ipcs_idr, next_id);
+ 		if (ipc == NULL)
+ 			continue;
+ 		shp = container_of(ipc, struct shmid_kernel, shm_perm);
+@@ -1000,10 +1008,10 @@ static int shmctl_down(struct ipc_namespace *ns, int shmid, int cmd,
+ 	struct shmid_kernel *shp;
+ 	int err;
+ 
+-	down_write(&shm_ids(ns).rwsem);
++	down_write(&shm_ids(ns)->rwsem);
+ 	rcu_read_lock();
+ 
+-	ipcp = ipcctl_obtain_check(ns, &shm_ids(ns), shmid, cmd,
++	ipcp = ipcctl_obtain_check(ns, shm_ids(ns), shmid, cmd,
+ 				      &shmid64->shm_perm, 0);
+ 	if (IS_ERR(ipcp)) {
+ 		err = PTR_ERR(ipcp);
+@@ -1039,7 +1047,7 @@ static int shmctl_down(struct ipc_namespace *ns, int shmid, int cmd,
+ out_unlock1:
+ 	rcu_read_unlock();
+ out_up:
+-	up_write(&shm_ids(ns).rwsem);
++	up_write(&shm_ids(ns)->rwsem);
+ 	return err;
+ }
+ 
+@@ -1053,9 +1061,9 @@ static int shmctl_ipc_info(struct ipc_namespace *ns,
+ 		shminfo->shmmax = ns->shm_ctlmax;
+ 		shminfo->shmall = ns->shm_ctlall;
+ 		shminfo->shmmin = SHMMIN;
+-		down_read(&shm_ids(ns).rwsem);
+-		err = ipc_get_maxidx(&shm_ids(ns));
+-		up_read(&shm_ids(ns).rwsem);
++		down_read(&shm_ids(ns)->rwsem);
++		err = ipc_get_maxidx(shm_ids(ns));
++		up_read(&shm_ids(ns)->rwsem);
+ 		if (err < 0)
+ 			err = 0;
+ 	}
+@@ -1068,14 +1076,14 @@ static int shmctl_shm_info(struct ipc_namespace *ns,
+ 	int err = security_shm_shmctl(NULL, SHM_INFO);
+ 	if (!err) {
+ 		memset(shm_info, 0, sizeof(*shm_info));
+-		down_read(&shm_ids(ns).rwsem);
+-		shm_info->used_ids = shm_ids(ns).in_use;
++		down_read(&shm_ids(ns)->rwsem);
++		shm_info->used_ids = shm_ids(ns)->in_use;
+ 		shm_get_stat(ns, &shm_info->shm_rss, &shm_info->shm_swp);
+ 		shm_info->shm_tot = ns->shm_tot;
+ 		shm_info->swap_attempts = 0;
+ 		shm_info->swap_successes = 0;
+-		err = ipc_get_maxidx(&shm_ids(ns));
+-		up_read(&shm_ids(ns).rwsem);
++		err = ipc_get_maxidx(shm_ids(ns));
++		up_read(&shm_ids(ns)->rwsem);
+ 		if (err < 0)
+ 			err = 0;
+ 	}
+@@ -1676,7 +1684,7 @@ long do_shmat(int shmid, char __user *shmaddr, int shmflg,
+ 	fput(file);
+ 
+ out_nattch:
+-	down_write(&shm_ids(ns).rwsem);
++	down_write(&shm_ids(ns)->rwsem);
+ 	shp = shm_lock(ns, shmid);
+ 	shp->shm_nattch--;
+ 
+@@ -1684,7 +1692,7 @@ long do_shmat(int shmid, char __user *shmaddr, int shmflg,
+ 		shm_destroy(ns, shp);
+ 	else
+ 		shm_unlock(shp);
+-	up_write(&shm_ids(ns).rwsem);
++	up_write(&shm_ids(ns)->rwsem);
+ 	return err;
+ 
+ out_unlock:
+@@ -1708,7 +1716,7 @@ SYSCALL_DEFINE3(shmat, int, shmid, char __user *, shmaddr, int, shmflg)
+ #ifdef CONFIG_COMPAT
+ 
+ #ifndef COMPAT_SHMLBA
+-#define COMPAT_SHMLBA	SHMLBA
++enum { COMPAT_SHMLBA = SHMLBA };
+ #endif
+ 
+ COMPAT_SYSCALL_DEFINE3(shmat, int, shmid, compat_uptr_t, shmaddr, int, shmflg)
+@@ -1847,20 +1855,23 @@ static int sysvipc_shm_proc_show(struct seq_file *s, void *it)
+ 	struct kern_ipc_perm *ipcp = it;
+ 	struct shmid_kernel *shp;
+ 	unsigned long rss = 0, swp = 0;
++	#if BITS_PER_LONG <= 32
++	static const char *SIZE_SPEC =
++		"%10d %10d  %4o " "%10lu" " %5u %5u  "
++		"%5lu %5u %5u %5u %5u %10llu %10llu %10llu "
++		"%10lu" " " "%10lu" "\n";
++#else
++	static const char *SIZE_SPEC =
++		"%10d %10d  %4o " "%21lu" " %5u %5u  "
++		"%5lu %5u %5u %5u %5u %10llu %10llu %10llu "
++		"%21lu" " " "%21lu" "\n";
++#endif
+ 
+ 	shp = container_of(ipcp, struct shmid_kernel, shm_perm);
+ 	shm_add_rss_swap(shp, &rss, &swp);
+ 
+-#if BITS_PER_LONG <= 32
+-#define SIZE_SPEC "%10lu"
+-#else
+-#define SIZE_SPEC "%21lu"
+-#endif
+-
+ 	seq_printf(s,
+-		   "%10d %10d  %4o " SIZE_SPEC " %5u %5u  "
+-		   "%5lu %5u %5u %5u %5u %10llu %10llu %10llu "
+-		   SIZE_SPEC " " SIZE_SPEC "\n",
++		   SIZE_SPEC,
+ 		   shp->shm_perm.key,
+ 		   shp->shm_perm.id,
+ 		   shp->shm_perm.mode,
+diff --git a/ipc/syscall.c b/ipc/syscall.c
+index dfb0e988d..4bd635db9 100644
+--- a/ipc/syscall.c
++++ b/ipc/syscall.c
+@@ -118,7 +118,7 @@ SYSCALL_DEFINE6(ipc, unsigned int, call, int, first, unsigned long, second,
+ #include <linux/compat.h>
+ 
+ #ifndef COMPAT_SHMLBA
+-#define COMPAT_SHMLBA	SHMLBA
++enum { COMPAT_SHMLBA = SHMLBA };
+ #endif
+ 
+ struct compat_ipc_kludge {
+diff --git a/ipc/util.h b/ipc/util.h
+index b2906e366..223b9c131 100644
+--- a/ipc/util.h
++++ b/ipc/util.h
+@@ -25,26 +25,26 @@
+  *   bits  0-23: index (16M, 24 bits)
+  *   bits 24-30: sequence number (128, 7 bits)
+  */
+-#define IPCMNI_SHIFT		15
+-#define IPCMNI_EXTEND_SHIFT	24
+-#define IPCMNI_EXTEND_MIN_CYCLE	(RADIX_TREE_MAP_SIZE * RADIX_TREE_MAP_SIZE)
+-#define IPCMNI			(1 << IPCMNI_SHIFT)
+-#define IPCMNI_EXTEND		(1 << IPCMNI_EXTEND_SHIFT)
++enum { IPCMNI_SHIFT = 15 };
++enum { IPCMNI_EXTEND_SHIFT = 24 };
++enum { IPCMNI_EXTEND_MIN_CYCLE = (RADIX_TREE_MAP_SIZE * RADIX_TREE_MAP_SIZE) };
++enum { IPCMNI = (1 << IPCMNI_SHIFT) };
++enum { IPCMNI_EXTEND = (1 << IPCMNI_EXTEND_SHIFT) };
+ 
+ #ifdef CONFIG_SYSVIPC_SYSCTL
+ extern int ipc_mni;
+ extern int ipc_mni_shift;
+ extern int ipc_min_cycle;
+ 
+-#define ipcmni_seq_shift()	ipc_mni_shift
+-#define IPCMNI_IDX_MASK		((1 << ipc_mni_shift) - 1)
++static int ipcmni_seq_shift(void) { return ipc_mni_shift; }
++static int IPCMNI_IDX_MASK(void) { return ((1 << ipc_mni_shift) - 1); }
+ 
+ #else /* CONFIG_SYSVIPC_SYSCTL */
+ 
+-#define ipc_mni			IPCMNI
+-#define ipc_min_cycle		((int)RADIX_TREE_MAP_SIZE)
+-#define ipcmni_seq_shift()	IPCMNI_SHIFT
+-#define IPCMNI_IDX_MASK		((1 << IPCMNI_SHIFT) - 1)
++enum { ipc_mni = IPCMNI };
++enum { ipc_min_cycle = ((int)RADIX_TREE_MAP_SIZE) };
++static int ipcmni_seq_shift(void) { return IPCMNI_SHIFT; }
++static int IPCMNI_IDX_MASK(void) { return ((1 << IPCMNI_SHIFT) - 1); }
+ #endif /* CONFIG_SYSVIPC_SYSCTL */
+ 
+ void sem_init(void);
+@@ -118,16 +118,21 @@ void __init ipc_init_proc_interface(const char *path, const char *header,
+ 		int ids, int (*show)(struct seq_file *, void *));
+ struct pid_namespace *ipc_seq_pid_ns(struct seq_file *);
+ #else
+-#define ipc_init_proc_interface(path, header, ids, show) do {} while (0)
++static void ipc_init_proc_interface(
++	const char *path, const char *header,
++	int ids, int (*show)(struct seq_file *, void *))
++{
++	do {} while (0);
++}
+ #endif
+ 
+-#define IPC_SEM_IDS	0
+-#define IPC_MSG_IDS	1
+-#define IPC_SHM_IDS	2
++enum { IPC_SEM_IDS = 0 };
++enum { IPC_MSG_IDS = 1 };
++enum { IPC_SHM_IDS = 2 };
+ 
+-#define ipcid_to_idx(id)  ((id) & IPCMNI_IDX_MASK)
+-#define ipcid_to_seqx(id) ((id) >> ipcmni_seq_shift())
+-#define ipcid_seq_max()	  (INT_MAX >> ipcmni_seq_shift())
++static int ipcid_to_idx(int id) { return ((id) & (IPCMNI_IDX_MASK())); }
++static int ipcid_to_seqx(int id) { return ((id) >> ipcmni_seq_shift()); }
++static int ipcid_seq_max(void) { return (INT_MAX >> ipcmni_seq_shift()); }
+ 
+ /* must be called with ids->rwsem acquired for writing */
+ int ipc_addid(struct ipc_ids *, struct kern_ipc_perm *, int);
+diff --git a/sound/atmel/ac97c.c b/sound/atmel/ac97c.c
+index 66ecbd4d0..bbdef038e 100644
+--- a/sound/atmel/ac97c.c
++++ b/sound/atmel/ac97c.c
+@@ -54,12 +54,70 @@ struct atmel_ac97c {
+ 	struct gpio_desc		*reset_pin;
+ };
+ 
+-#define get_chip(card) ((struct atmel_ac97c *)(card)->private_data)
++static struct atmel_ac97c *ac97c_get_chip(struct snd_ac97 *card) {
++	return ((struct atmel_ac97c *) (card)->private_data);
++}
++
++static struct atmel_ac97c *snd_card_get_chip(struct snd_card *card) {
++	return ((struct atmel_ac97c *) (card)->private_data);
++}
++
++enum ac97c_reg_names {
++	CAMR,
++	CASR,
++	CORHR,
++	COMR,
++	COSR,
++	COTHR,
++	ICA,
++	IER,
++	IMR,
++	MR,
++	OCA,
++	SR
++};
++
++static void ac97c_writel(struct atmel_ac97c *chip,
++			 enum ac97c_reg_names reg, u32 val)
++{
++	switch (reg)
++	{
++	case CAMR: __raw_writel((val), (chip)->regs + AC97C_CAMR); break;
++	case CASR: __raw_writel((val), (chip)->regs + AC97C_CASR); break;
++	case CORHR: __raw_writel((val), (chip)->regs + AC97C_CORHR); break;
++	case COMR: __raw_writel((val), (chip)->regs + AC97C_COMR); break;
++	case COSR: __raw_writel((val), (chip)->regs + AC97C_COSR); break;
++	case COTHR: __raw_writel((val), (chip)->regs + AC97C_COTHR); break;
++	case ICA: __raw_writel((val), (chip)->regs + AC97C_ICA); break;
++	case IER: __raw_writel((val), (chip)->regs + AC97C_IER); break;
++	case IMR: __raw_writel((val), (chip)->regs + AC97C_IMR); break;
++	case MR: __raw_writel((val), (chip)->regs + AC97C_MR); break;
++	case OCA: __raw_writel((val), (chip)->regs + AC97C_OCA); break;
++	case SR: __raw_writel((val), (chip)->regs + AC97C_SR); break;
++	default: break;
++	}
++}
+ 
+-#define ac97c_writel(chip, reg, val)			\
+-	__raw_writel((val), (chip)->regs + AC97C_##reg)
+-#define ac97c_readl(chip, reg)				\
+-	__raw_readl((chip)->regs + AC97C_##reg)
++static u32 ac97c_readl(struct atmel_ac97c *chip,
++		       enum ac97c_reg_names reg) {
++	switch (reg)
++	{
++	case CAMR: return __raw_readl((chip)->regs + AC97C_CAMR);
++	case CASR: return __raw_readl((chip)->regs + AC97C_CASR);
++	case CORHR: return __raw_readl((chip)->regs + AC97C_CORHR);
++	case COMR: return __raw_readl((chip)->regs + AC97C_COMR);
++	case COSR: return __raw_readl((chip)->regs + AC97C_COSR);
++	case COTHR: return __raw_readl((chip)->regs + AC97C_COTHR);
++	case ICA: return __raw_readl((chip)->regs + AC97C_ICA);
++	case IER: return __raw_readl((chip)->regs + AC97C_IER);
++	case IMR: return __raw_readl((chip)->regs + AC97C_IMR);
++	case MR: return __raw_readl((chip)->regs + AC97C_MR);
++	case OCA: return __raw_readl((chip)->regs + AC97C_OCA);
++	case SR: return __raw_readl((chip)->regs + AC97C_SR);
++	default: return 0;
++	}
++	return 0;
++}
+ 
+ static const struct snd_pcm_hardware atmel_ac97c_hw = {
+ 	.info			= (SNDRV_PCM_INFO_MMAP
+@@ -192,16 +250,17 @@ static int atmel_ac97c_playback_prepare(struct snd_pcm_substream *substream)
+ 	int retval;
+ 
+ 	chip->playback_period = 0;
+-	word &= ~(AC97C_CH_MASK(PCM_LEFT) | AC97C_CH_MASK(PCM_RIGHT));
++	word &= ~(AC97C_CH_MASK(AC97_SLOT_PCM_LEFT) | 
++		  AC97C_CH_MASK(AC97_SLOT_PCM_RIGHT));
+ 
+ 	/* assign channels to AC97C channel A */
+ 	switch (runtime->channels) {
+ 	case 1:
+-		word |= AC97C_CH_ASSIGN(PCM_LEFT, A);
++		word |= AC97C_CH_ASSIGN(AC97_SLOT_PCM_LEFT, AC97C_CHANNEL_A);
+ 		break;
+ 	case 2:
+-		word |= AC97C_CH_ASSIGN(PCM_LEFT, A)
+-			| AC97C_CH_ASSIGN(PCM_RIGHT, A);
++		word |= AC97C_CH_ASSIGN(AC97_SLOT_PCM_LEFT, AC97C_CHANNEL_A)
++			| AC97C_CH_ASSIGN(AC97_SLOT_PCM_RIGHT, AC97C_CHANNEL_A);
+ 		break;
+ 	default:
+ 		/* TODO: support more than two channels */
+@@ -224,7 +283,8 @@ static int atmel_ac97c_playback_prepare(struct snd_pcm_substream *substream)
+ 		break;
+ 	default:
+ 		word = ac97c_readl(chip, OCA);
+-		word &= ~(AC97C_CH_MASK(PCM_LEFT) | AC97C_CH_MASK(PCM_RIGHT));
++		word &= ~(AC97C_CH_MASK(AC97_SLOT_PCM_LEFT) | 
++			  AC97C_CH_MASK(AC97_SLOT_PCM_RIGHT));
+ 		ac97c_writel(chip, OCA, word);
+ 		return -EINVAL;
+ 	}
+@@ -274,16 +334,17 @@ static int atmel_ac97c_capture_prepare(struct snd_pcm_substream *substream)
+ 	int retval;
+ 
+ 	chip->capture_period = 0;
+-	word &= ~(AC97C_CH_MASK(PCM_LEFT) | AC97C_CH_MASK(PCM_RIGHT));
++	word &= ~(AC97C_CH_MASK(AC97_SLOT_PCM_LEFT) | 
++		  AC97C_CH_MASK(AC97_SLOT_PCM_RIGHT));
+ 
+ 	/* assign channels to AC97C channel A */
+ 	switch (runtime->channels) {
+ 	case 1:
+-		word |= AC97C_CH_ASSIGN(PCM_LEFT, A);
++		word |= AC97C_CH_ASSIGN(AC97_SLOT_PCM_LEFT, AC97C_CHANNEL_A);
+ 		break;
+ 	case 2:
+-		word |= AC97C_CH_ASSIGN(PCM_LEFT, A)
+-			| AC97C_CH_ASSIGN(PCM_RIGHT, A);
++		word |= AC97C_CH_ASSIGN(AC97_SLOT_PCM_LEFT, AC97C_CHANNEL_A)
++			| AC97C_CH_ASSIGN(AC97_SLOT_PCM_RIGHT, AC97C_CHANNEL_A);
+ 		break;
+ 	default:
+ 		/* TODO: support more than two channels */
+@@ -306,7 +367,8 @@ static int atmel_ac97c_capture_prepare(struct snd_pcm_substream *substream)
+ 		break;
+ 	default:
+ 		word = ac97c_readl(chip, ICA);
+-		word &= ~(AC97C_CH_MASK(PCM_LEFT) | AC97C_CH_MASK(PCM_RIGHT));
++		word &= ~(AC97C_CH_MASK(AC97_SLOT_PCM_LEFT) | 
++			  AC97C_CH_MASK(AC97_SLOT_PCM_RIGHT));
+ 		ac97c_writel(chip, ICA, word);
+ 		return -EINVAL;
+ 	}
+@@ -607,7 +669,7 @@ static int atmel_ac97c_mixer_new(struct atmel_ac97c *chip)
+ static void atmel_ac97c_write(struct snd_ac97 *ac97, unsigned short reg,
+ 		unsigned short val)
+ {
+-	struct atmel_ac97c *chip = get_chip(ac97);
++	struct atmel_ac97c *chip = ac97c_get_chip(ac97);
+ 	unsigned long word;
+ 	int timeout = 40;
+ 
+@@ -627,7 +689,7 @@ static void atmel_ac97c_write(struct snd_ac97 *ac97, unsigned short reg,
+ static unsigned short atmel_ac97c_read(struct snd_ac97 *ac97,
+ 		unsigned short reg)
+ {
+-	struct atmel_ac97c *chip = get_chip(ac97);
++	struct atmel_ac97c *chip = ac97c_get_chip(ac97);
+ 	unsigned long word;
+ 	int timeout = 40;
+ 	int write = 10;
+@@ -738,7 +800,7 @@ static int atmel_ac97c_probe(struct platform_device *pdev)
+ 		goto err_snd_card_new;
+ 	}
+ 
+-	chip = get_chip(card);
++	chip = snd_card_get_chip(card);
+ 
+ 	retval = request_irq(irq, atmel_ac97c_interrupt, 0, "AC97C", chip);
+ 	if (retval) {
+@@ -818,6 +880,25 @@ static int atmel_ac97c_probe(struct platform_device *pdev)
+ 	return retval;
+ }
+ 
++static int atmel_ac97c_remove(struct platform_device *pdev)
++{
++	struct snd_card *card = platform_get_drvdata(pdev);
++	struct atmel_ac97c *chip = snd_card_get_chip(card);
++
++	ac97c_writel(chip, CAMR, 0);
++	ac97c_writel(chip, COMR, 0);
++	ac97c_writel(chip, MR,   0);
++
++	clk_disable_unprepare(chip->pclk);
++	clk_put(chip->pclk);
++	iounmap(chip->regs);
++	free_irq(chip->irq, chip);
++
++	snd_card_free(card);
++
++	return 0;
++}
++
+ #ifdef CONFIG_PM_SLEEP
+ static int atmel_ac97c_suspend(struct device *pdev)
+ {
+@@ -838,39 +919,27 @@ static int atmel_ac97c_resume(struct device *pdev)
+ }
+ 
+ static SIMPLE_DEV_PM_OPS(atmel_ac97c_pm, atmel_ac97c_suspend, atmel_ac97c_resume);
+-#define ATMEL_AC97C_PM_OPS	&atmel_ac97c_pm
++static struct platform_driver atmel_ac97c_driver = {
++	.probe		= atmel_ac97c_probe,
++	.remove		= atmel_ac97c_remove,
++	.driver		= {
++		.name	= "atmel_ac97c",
++		.pm	= &atmel_ac97c_pm,
++		.of_match_table = atmel_ac97c_dt_ids,
++	},
++};
+ #else
+-#define ATMEL_AC97C_PM_OPS	NULL
+-#endif
+-
+-static int atmel_ac97c_remove(struct platform_device *pdev)
+-{
+-	struct snd_card *card = platform_get_drvdata(pdev);
+-	struct atmel_ac97c *chip = get_chip(card);
+-
+-	ac97c_writel(chip, CAMR, 0);
+-	ac97c_writel(chip, COMR, 0);
+-	ac97c_writel(chip, MR,   0);
+-
+-	clk_disable_unprepare(chip->pclk);
+-	clk_put(chip->pclk);
+-	iounmap(chip->regs);
+-	free_irq(chip->irq, chip);
+-
+-	snd_card_free(card);
+-
+-	return 0;
+-}
+-
+ static struct platform_driver atmel_ac97c_driver = {
+ 	.probe		= atmel_ac97c_probe,
+ 	.remove		= atmel_ac97c_remove,
+ 	.driver		= {
+ 		.name	= "atmel_ac97c",
+-		.pm	= ATMEL_AC97C_PM_OPS,
++		.pm	= NULL,
+ 		.of_match_table = atmel_ac97c_dt_ids,
+ 	},
+ };
++#endif
++
+ module_platform_driver(atmel_ac97c_driver);
+ 
+ MODULE_LICENSE("GPL");
+diff --git a/sound/atmel/ac97c.h b/sound/atmel/ac97c.h
+index 6fe9245c4..41fc48546 100644
+--- a/sound/atmel/ac97c.h
++++ b/sound/atmel/ac97c.h
+@@ -7,64 +7,55 @@
+ #ifndef __SOUND_ATMEL_AC97C_H
+ #define __SOUND_ATMEL_AC97C_H
+ 
+-#define AC97C_MR		0x08
+-#define AC97C_ICA		0x10
+-#define AC97C_OCA		0x14
+-#define AC97C_CARHR		0x20
+-#define AC97C_CATHR		0x24
+-#define AC97C_CASR		0x28
+-#define AC97C_CAMR		0x2c
+-#define AC97C_CORHR		0x40
+-#define AC97C_COTHR		0x44
+-#define AC97C_COSR		0x48
+-#define AC97C_COMR		0x4c
+-#define AC97C_SR		0x50
+-#define AC97C_IER		0x54
+-#define AC97C_IDR		0x58
+-#define AC97C_IMR		0x5c
+-#define AC97C_VERSION		0xfc
+-
+-#define AC97C_CATPR		PDC_TPR
+-#define AC97C_CATCR		PDC_TCR
+-#define AC97C_CATNPR		PDC_TNPR
+-#define AC97C_CATNCR		PDC_TNCR
+-#define AC97C_CARPR		PDC_RPR
+-#define AC97C_CARCR		PDC_RCR
+-#define AC97C_CARNPR		PDC_RNPR
+-#define AC97C_CARNCR		PDC_RNCR
+-#define AC97C_PTCR		PDC_PTCR
+-
+-#define AC97C_MR_ENA		(1 << 0)
+-#define AC97C_MR_WRST		(1 << 1)
+-#define AC97C_MR_VRA		(1 << 2)
+-
+-#define AC97C_CSR_TXRDY		(1 << 0)
+-#define AC97C_CSR_TXEMPTY	(1 << 1)
+-#define AC97C_CSR_UNRUN		(1 << 2)
+-#define AC97C_CSR_RXRDY		(1 << 4)
+-#define AC97C_CSR_OVRUN		(1 << 5)
+-#define AC97C_CSR_ENDTX		(1 << 10)
+-#define AC97C_CSR_ENDRX		(1 << 14)
+-
+-#define AC97C_CMR_SIZE_20	(0 << 16)
+-#define AC97C_CMR_SIZE_18	(1 << 16)
+-#define AC97C_CMR_SIZE_16	(2 << 16)
+-#define AC97C_CMR_SIZE_10	(3 << 16)
+-#define AC97C_CMR_CEM_LITTLE	(1 << 18)
+-#define AC97C_CMR_CEM_BIG	(0 << 18)
+-#define AC97C_CMR_CENA		(1 << 21)
+-#define AC97C_CMR_DMAEN		(1 << 22)
+-
+-#define AC97C_SR_CAEVT		(1 << 3)
+-#define AC97C_SR_COEVT		(1 << 2)
+-#define AC97C_SR_WKUP		(1 << 1)
+-#define AC97C_SR_SOF		(1 << 0)
+-
+-#define AC97C_CH_MASK(slot)						\
+-	(0x7 << (3 * (AC97_SLOT_##slot - 3)))
+-#define AC97C_CH_ASSIGN(slot, channel)					\
+-	(AC97C_CHANNEL_##channel << (3 * (AC97_SLOT_##slot - 3)))
+-#define AC97C_CHANNEL_NONE	0x0
+-#define AC97C_CHANNEL_A		0x1
++enum { AC97C_MR = 0x08 };
++enum { AC97C_ICA = 0x10 };
++enum { AC97C_OCA = 0x14 };
++enum { AC97C_CARHR = 0x20 };
++enum { AC97C_CATHR = 0x24 };
++enum { AC97C_CASR = 0x28 };
++enum { AC97C_CAMR = 0x2c };
++enum { AC97C_CORHR = 0x40 };
++enum { AC97C_COTHR = 0x44 };
++enum { AC97C_COSR = 0x48 };
++enum { AC97C_COMR = 0x4c };
++enum { AC97C_SR = 0x50 };
++enum { AC97C_IER = 0x54 };
++enum { AC97C_IDR = 0x58 };
++enum { AC97C_IMR = 0x5c };
++enum { AC97C_VERSION = 0xfc };
++
++enum { AC97C_MR_ENA = (1 << 0) };
++enum { AC97C_MR_WRST = (1 << 1) };
++enum { AC97C_MR_VRA = (1 << 2) };
++
++enum { AC97C_CSR_TXRDY = (1 << 0) };
++enum { AC97C_CSR_TXEMPTY = (1 << 1) };
++enum { AC97C_CSR_UNRUN = (1 << 2) };
++enum { AC97C_CSR_RXRDY = (1 << 4) };
++enum { AC97C_CSR_OVRUN = (1 << 5) };
++enum { AC97C_CSR_ENDTX = (1 << 10) };
++enum { AC97C_CSR_ENDRX = (1 << 14) };
++
++enum { AC97C_CMR_SIZE_20 = (0 << 16) };
++enum { AC97C_CMR_SIZE_18 = (1 << 16) };
++enum { AC97C_CMR_SIZE_16 = (2 << 16) };
++enum { AC97C_CMR_SIZE_10 = (3 << 16) };
++enum { AC97C_CMR_CEM_LITTLE = (1 << 18) };
++enum { AC97C_CMR_CEM_BIG = (0 << 18) };
++enum { AC97C_CMR_CENA = (1 << 21) };
++enum { AC97C_CMR_DMAEN = (1 << 22) };
++
++enum { AC97C_SR_CAEVT = (1 << 3) };
++enum { AC97C_SR_COEVT = (1 << 2) };
++enum { AC97C_SR_WKUP = (1 << 1) };
++enum { AC97C_SR_SOF = (1 << 0) };
++
++static int AC97C_CH_MASK(int slot) { return (0x7 << (3 * (slot - 3))); }
++static int AC97C_CH_ASSIGN(int slot, int channel)
++{
++	return (channel << (3 * (slot - 3)));
++}
++enum { AC97C_CHANNEL_NONE = 0x0 };
++enum { AC97C_CHANNEL_A = 0x1 };
+ 
+ #endif /* __SOUND_ATMEL_AC97C_H */

@@ -1,0 +1,771 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from h5.fbrelay.privateemail.com (h5.fbrelay.privateemail.com [162.0.218.228])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D9A17471
+	for <linux-staging@lists.linux.dev>; Thu, 19 Jan 2023 13:43:08 +0000 (UTC)
+Received: from MTA-13-3.privateemail.com (mta-13-1.privateemail.com [198.54.122.107])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits))
+	(No client certificate requested)
+	by h5.fbrelay.privateemail.com (Postfix) with ESMTPS id F170260550
+	for <linux-staging@lists.linux.dev>; Thu, 19 Jan 2023 13:43:00 +0000 (UTC)
+Received: from mta-13.privateemail.com (localhost [127.0.0.1])
+	by mta-13.privateemail.com (Postfix) with ESMTP id 9A43B18000B2;
+	Thu, 19 Jan 2023 08:42:53 -0500 (EST)
+Received: from anonymous-XPS-13-9310.ucf.edu (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-13.privateemail.com (Postfix) with ESMTPA id 42E3B18000AE;
+	Thu, 19 Jan 2023 08:42:42 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1674135773;
+	bh=OqhTI0JnyhpAPSkx4ylvuoAQKclxNMjvVyiT/4YlsiU=;
+	h=From:To:Cc:Subject:Date:From;
+	b=H4A37OHivaNSB21JWpSLdSsyRSBe8WXbFevwV/zw+NQ2h3H+AkvcOlcS/n8q0r7xv
+	 bf4fFWy3/SLk0qYkh82gwPLIdNTbGA/YRgT+9j2LEvCm56+Dc9pSEjFEmbPtqzpa7i
+	 T6pO3o2nkmyK7fZROIaDbYuRvlfoN955POEKebMaxlO+5qPL00uy/WpdufVCHm2vr2
+	 daYDx6pvxg6GHxoxpKIexLkdWrakKaVg8paxQHD7pwgU3L9KHziljC8NP78/c0auF/
+	 Ih5kKBC5UWYP8VJThOY90sCRThE4fm/dAAYnHKQy7LATR/4CCvvi9+mxxVI5Ns++ny
+	 ah6iaCfoblinw==
+From: Anonymous <anonymous@anonymous.com>
+To: hdegoede@redhat.com
+Cc: mchehab@kernel.org,
+	sakari.ailus@linux.intel.com,
+	gregkh@linuxfoundation.org,
+	andy@kernel.org,
+	colin.i.king@gmail.com,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Anonymous <anonymous@anonymous.com>
+Subject: [PATCH] media: atomisp: pci: sh_css: Replace macro STATS_ENABLED() with function
+Date: Thu, 19 Jan 2023 08:42:18 -0500
+Message-Id: <20230119134218.12280-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Replace the macro STATS_ENABLED() with a static function to conform to
+Linux coding style standards.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+ drivers/staging/media/atomisp/pci/sh_css.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css.c b/drivers/staging/media/atomisp/pci/sh_css.c
+index 726cb7aa4ecd..753b3e0fcb07 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css.c
++++ b/drivers/staging/media/atomisp/pci/sh_css.c
+@@ -97,8 +97,12 @@
+  */
+ #define JPEG_BYTES (16 * 1024 * 1024)
+ 
+-#define STATS_ENABLED(stage) (stage && stage->binary && stage->binary->info && \
+-	(stage->binary->info->sp.enable.s3a || stage->binary->info->sp.enable.dis))
++static bool stats_enabled(struct ia_css_pipeline_stage *stage)
++{
++	return stage && stage->binary && stage->binary->info &&
++	       (stage->binary->info->sp.enable.s3a ||
++		stage->binary->info->sp.enable.dis);
++}
+ 
+ struct sh_css my_css;
+ 
+@@ -3743,7 +3747,7 @@ ia_css_pipe_enqueue_buffer(struct ia_css_pipe *pipe,
+ 			 * The SP will read the params after it got
+ 			 * empty 3a and dis
+ 			 */
+-			if (STATS_ENABLED(stage)) {
++			if (stats_enabled(stage)) {
+ 				/* there is a stage that needs it */
+ 				return_err = ia_css_bufq_enqueue_buffer(thread_id,
+ 									queue_id,
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-qv1-f51.google.com (mail-qv1-f51.google.com [209.85.219.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52E0D7471
+	for <linux-staging@lists.linux.dev>; Thu, 19 Jan 2023 14:07:47 +0000 (UTC)
+Received: by mail-qv1-f51.google.com with SMTP id p96so1561729qvp.13
+        for <linux-staging@lists.linux.dev>; Thu, 19 Jan 2023 06:07:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=lI7bNBM712aJHyLKJ5fyHPeJK8BWNRSC3RcpgvndO94=;
+        b=KHtYoiEGDHvGcMAIId58pIH/ad712Vd1Ipc/s9+GUT72Bk5MszZ/aYutEJu4zAuVCu
+         OFCTh5hVApxS6FTKAQaWZsjqmW37l5RoZ+Juat+KT05dMBkJHHH1Zy+HcP7nd9KVni8T
+         fjpZWSFZ/epe9iIS/fOYd96JzirjpCrUHwLaD1xOh3D4HuEILxQEtGr0yIKKwoLizZ49
+         9A3lIx2RODW7WnKBTl4jiJFvha0jVi0lys5EI+Y77zVlyaSZVtcsg+OYDXP4hAHQlSes
+         c3aq/uLhTlNjanPmyp/41DZ4vyhxiq97KRceC9aqb2MssK8tL002ApEoMUEoLowi1QNK
+         kQ3g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=lI7bNBM712aJHyLKJ5fyHPeJK8BWNRSC3RcpgvndO94=;
+        b=pXkcvarZ7ekFLOD7gAo0KYWH7NRcuHjL2ZPOYQUbUTRi+K0QfGfX4Ota+uo7ZySPBV
+         kwikwkCY5d1+yu2FUg2Y6eMhRsySXjQ3SPQQgE91owseWJRBsfWC1IvxbnSF+J31Ir5A
+         j11Ru1x1MLFxLeFTVNmSVcMcxFfb1U5I16nvz7ZVItLqWhTnevTQQ4Yy3qoV4v/B9DxE
+         ejgyvhny01IpQA4rOjxYBAeNy9gKpKWNMv1NeXiui9QVWqoOjBnrIcATUtDxOS3hN9Xl
+         XJeYfVKxz60B9ryv3qPY2GJvgU9wBl1RS9AyGWppZ7raxftSBBu7uBa99+ik1ZJbqJwW
+         v9jg==
+X-Gm-Message-State: AFqh2kp4zeRjJM1FvuVhEzYRXxNvWTy49+ynzqMBup3UD/nDbmQPpgtu
+	mex0bcoJy5G3Lf+nblchy3A1EP9BFwJxLuH5vVM=
+X-Google-Smtp-Source: AMrXdXsH7RqaoxO0iZCH40SaRq1NMTaoNUhOBacXaJih3JlcUdNFDSYkeyz/5LfMLBYhKnC1N/vUZsTKn5dr0MMMxWM=
+X-Received: by 2002:a05:6214:4c08:b0:4c7:1ebf:719f with SMTP id
+ qh8-20020a0562144c0800b004c71ebf719fmr418413qvb.64.1674137266231; Thu, 19 Jan
+ 2023 06:07:46 -0800 (PST)
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+References: <20230119134218.12280-1-anonymous@anonymous.com>
+In-Reply-To: <20230119134218.12280-1-anonymous@anonymous.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Date: Thu, 19 Jan 2023 16:07:10 +0200
+Message-ID: <CAHp75Vc4QS=Gr-DSvf7pzCKktqGPfno4TBDmicj5CKgyHGjSsw@mail.gmail.com>
+Subject: Re: [PATCH] media: atomisp: pci: sh_css: Replace macro
+ STATS_ENABLED() with function
+To: Anonymous <anonymous@anonymous.com>
+Cc: hdegoede@redhat.com, mchehab@kernel.org, sakari.ailus@linux.intel.com, 
+	gregkh@linuxfoundation.org, andy@kernel.org, colin.i.king@gmail.com, 
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+
+On Thu, Jan 19, 2023 at 3:43 PM Anonymous <anonymous@anonymous.com> wrote:
+>
+> Replace the macro STATS_ENABLED() with a static function to conform to
+> Linux coding style standards.
+
+I believe the best approach here is to drop that completely and move
+its content to be inline in the only caller.
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from MTA-10-4.privateemail.com (mta-10-4.privateemail.com [198.54.122.149])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DBAA77485
+	for <linux-staging@lists.linux.dev>; Thu, 19 Jan 2023 14:42:35 +0000 (UTC)
+Received: from mta-10.privateemail.com (localhost [127.0.0.1])
+	by mta-10.privateemail.com (Postfix) with ESMTP id 5914618000A8;
+	Thu, 19 Jan 2023 09:42:29 -0500 (EST)
+Received: from anonymous-XPS-13-9310.ucf.edu (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-10.privateemail.com (Postfix) with ESMTPA id 42B2218000A6;
+	Thu, 19 Jan 2023 09:42:17 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1674139349;
+	bh=OvjuU8Er9NffYgNl0xuyyr+JSQYsrtMIdTAEnQq5WTo=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=nOXLzkyosRaBdcMN0ZtH9/fbx+5YhAyqwHHv5q6hJa62Uz3nqSUeMi5h/tCyIRMyK
+	 4vHtnIVbhL5ijYpmiIk1adATGuASKjFzwenkc1dejLQdaFvQ3LtLvkHUTejSknAHDY
+	 RIoQmrHhhEwWG1c47UaYT4r2q7KW4TxnoL85j+Yv2ROaWHz1yzCHJkj69k0UKiiAgQ
+	 gvlXQINieg7EN7utJaTLzAllIGXjeUqz6vDFKnoa9FEUz4/UOQw7aQ/Q2js2zUCuPs
+	 61Brz1d7i3QnXi4ctGq66B7xRRa3KmDTurjw2QZrcHDx+yXaLKvxWbXBIAl4Ep7++T
+	 4QGtk6eRF9IdQ==
+From: Anonymous <anonymous@anonymous.com>
+To: andy.shevchenko@gmail.com
+Cc: andy@kernel.org,
+	anonymous@anonymous.com,
+	colin.i.king@gmail.com,
+	gregkh@linuxfoundation.org,
+	hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	mchehab@kernel.org,
+	sakari.ailus@linux.intel.com
+Subject: [PATCH v2] media: atomisp: pci: sh_css: Inline single invocation of macro STATS_ENABLED()
+Date: Thu, 19 Jan 2023 09:42:03 -0500
+Message-Id: <20230119144203.17084-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <CAHp75Vc4QS=Gr-DSvf7pzCKktqGPfno4TBDmicj5CKgyHGjSsw@mail.gmail.com>
+References: <CAHp75Vc4QS=Gr-DSvf7pzCKktqGPfno4TBDmicj5CKgyHGjSsw@mail.gmail.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Inline the single invocation of the macro STATS_ENABLED().
+The macro abstraction is not necessary because the logic behind it is only
+used once.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+ drivers/staging/media/atomisp/pci/sh_css.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css.c b/drivers/staging/media/atomisp/pci/sh_css.c
+index 726cb7aa4ecd..93789500416f 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css.c
++++ b/drivers/staging/media/atomisp/pci/sh_css.c
+@@ -97,9 +97,6 @@
+  */
+ #define JPEG_BYTES (16 * 1024 * 1024)
+ 
+-#define STATS_ENABLED(stage) (stage && stage->binary && stage->binary->info && \
+-	(stage->binary->info->sp.enable.s3a || stage->binary->info->sp.enable.dis))
+-
+ struct sh_css my_css;
+ 
+ int  __printf(1, 0) (*sh_css_printf)(const char *fmt, va_list args) = NULL;
+@@ -3743,7 +3740,9 @@ ia_css_pipe_enqueue_buffer(struct ia_css_pipe *pipe,
+ 			 * The SP will read the params after it got
+ 			 * empty 3a and dis
+ 			 */
+-			if (STATS_ENABLED(stage)) {
++			if (stage && stage->binary && stage->binary->info &&
++			    (stage->binary->info->sp.enable.s3a ||
++			     stage->binary->info->sp.enable.dis)) {
+ 				/* there is a stage that needs it */
+ 				return_err = ia_css_bufq_enqueue_buffer(thread_id,
+ 									queue_id,
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCA747485
+	for <linux-staging@lists.linux.dev>; Thu, 19 Jan 2023 14:54:42 +0000 (UTC)
+Received: by mail-wr1-f44.google.com with SMTP id e3so2093647wru.13
+        for <linux-staging@lists.linux.dev>; Thu, 19 Jan 2023 06:54:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=wy5TUZFPF5q8Yt4s63OdjaHjAcmxGBFMCBM3EbZvWiA=;
+        b=RQ/Ocry7XDJLW+Ir5Swv2D4r+NGiJfMvZheDWAMTdVu+GxyjOqvzOOwbiSrjvN4EPE
+         4zxlqYcP95+QFfgTqVIeQDR3eRhAKzFe3blYux+ZH6YdHI7eeX2zVmw9dQL0TsWetY6j
+         N9xog01QXKs0y1e+nIPyfEaNn1HzPy05DbWpZ6vOWP3guLc5DPl7QZVUxKp4M4+PScIw
+         vHNRLWou4Joj5VEgNBPu+zP9xDZR3oRCNzuqoisaq26mXMzGq8XsBbvHR7TzlpM38MkU
+         OohAXk68S5bqNutdw9eszxsLYfkAGPC1HNmEdbH7ITgzhkaqLizXbeiaHvSrDMCX8WdY
+         mUkQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wy5TUZFPF5q8Yt4s63OdjaHjAcmxGBFMCBM3EbZvWiA=;
+        b=u/jQL/9BQBEM4jlqtNTY8ul70anv5AcI2ERYdj+g7TNs0vYLr7yhZ+RWFQtx+r4edr
+         j1ylAwy1DVUQvJhc0/k4x7jLulFplSeDePh12Xsup9Q2gSwSoQBmsbAFgJXpjp4inwd2
+         UT9Sf72mWDsev9nT4/qqTYWlBKx+t5XO+thF9OxdLtOjCU+9RWZGM8ieN4WqvCAteS5l
+         ZP0Foxt7bPX5YpXTgY38cj2sFMVTk0+jljWs0Vuf07yFhYKSyiS1J07hnjQ6M5EGP6+6
+         t8jqgYDso17s4eaYjAAmyrVS4/N2E1FBSY4RSta/dJ2ElKkrshvHu3993Yg4LC9/5t1E
+         f0lw==
+X-Gm-Message-State: AFqh2kpZoPLs0o4F6ek6XGbNT2UtPzx9zvjDfvUfya5RWjb2BXr8APP8
+	KHlyfhUATTJvLDAVfn4cueQ=
+X-Google-Smtp-Source: AMrXdXu2WNrBPsS8qb3Vrho0oFI8358Pv6WvBJb0HPYxPZM3rU4S1uzhuV+Uun42ZoTKQGl4BclE6A==
+X-Received: by 2002:adf:f78d:0:b0:2bd:bed5:9207 with SMTP id q13-20020adff78d000000b002bdbed59207mr9873199wrp.12.1674140081020;
+        Thu, 19 Jan 2023 06:54:41 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id q15-20020adfab0f000000b002bde7999cd6sm16094172wrc.61.2023.01.19.06.54.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 Jan 2023 06:54:40 -0800 (PST)
+Date: Thu, 19 Jan 2023 17:54:37 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: Anonymous <anonymous@anonymous.com>
+Cc: andy.shevchenko@gmail.com, andy@kernel.org, colin.i.king@gmail.com,
+	gregkh@linuxfoundation.org, hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org, linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev, mchehab@kernel.org,
+	sakari.ailus@linux.intel.com
+Subject: Re: [PATCH v2] media: atomisp: pci: sh_css: Inline single invocation
+ of macro STATS_ENABLED()
+Message-ID: <Y8lZreSphK6DIkJg@kadam>
+References: <CAHp75Vc4QS=Gr-DSvf7pzCKktqGPfno4TBDmicj5CKgyHGjSsw@mail.gmail.com>
+ <20230119144203.17084-1-anonymous@anonymous.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230119144203.17084-1-anonymous@anonymous.com>
+
+On Thu, Jan 19, 2023 at 09:42:03AM -0500, Anonymous wrote:
+> Inline the single invocation of the macro STATS_ENABLED().
+> The macro abstraction is not necessary because the logic behind it is only
+> used once.
+> 
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+> ---
+
+Needs a V2: note which says what changed.
+
+>  drivers/staging/media/atomisp/pci/sh_css.c | 7 +++----
+>  1 file changed, 3 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/staging/media/atomisp/pci/sh_css.c b/drivers/staging/media/atomisp/pci/sh_css.c
+> index 726cb7aa4ecd..93789500416f 100644
+> --- a/drivers/staging/media/atomisp/pci/sh_css.c
+> +++ b/drivers/staging/media/atomisp/pci/sh_css.c
+> @@ -97,9 +97,6 @@
+>   */
+>  #define JPEG_BYTES (16 * 1024 * 1024)
+>  
+> -#define STATS_ENABLED(stage) (stage && stage->binary && stage->binary->info && \
+> -	(stage->binary->info->sp.enable.s3a || stage->binary->info->sp.enable.dis))
+> -
+>  struct sh_css my_css;
+>  
+>  int  __printf(1, 0) (*sh_css_printf)(const char *fmt, va_list args) = NULL;
+> @@ -3743,7 +3740,9 @@ ia_css_pipe_enqueue_buffer(struct ia_css_pipe *pipe,
+>  			 * The SP will read the params after it got
+>  			 * empty 3a and dis
+>  			 */
+> -			if (STATS_ENABLED(stage)) {
+> +			if (stage && stage->binary && stage->binary->info &&
+                            ^^^^^^^^
+We know that "stage" must be non-NULL.  You should wait over night
+before resending v2 patches so that we think "This guy spend overnight
+running tests.  He must be very serious."  There is no rush.
+
+regards,
+dan carpenter
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from MTA-05-3.privateemail.com (mta-05-3.privateemail.com [68.65.122.15])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29D5933C8
+	for <linux-staging@lists.linux.dev>; Fri, 20 Jan 2023 17:14:43 +0000 (UTC)
+Received: from mta-05.privateemail.com (localhost [127.0.0.1])
+	by mta-05.privateemail.com (Postfix) with ESMTP id B4AF218000A8;
+	Fri, 20 Jan 2023 12:14:36 -0500 (EST)
+Received: from anonymous-XPS-13-9310.. (rrcs-24-173-168-34.se.biz.rr.com [24.173.168.34])
+	by mta-05.privateemail.com (Postfix) with ESMTPA id 7282A18000A3;
+	Fri, 20 Jan 2023 12:14:23 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1674234876;
+	bh=XhRnErx/eCRnzYjBxFH5JC5AofWxMframtiYYl67Vks=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=BMEAomSdT7IP091Ak8NqDlzZL4cUvOdzcKIrGF1w3PUKxsHahTekoYTWUZztJkj4Y
+	 +1v85fApZ+vUt5OPSDguDw1cZm3w62vwz30tC4jGnyLEnMja/caiVcWQGPVUSHdffi
+	 ByrvcaAT5vbDhZILlNzh3Zr2xAP2l+nCClxB/19IcNycm5svsUzbv7KGkh4e1qzpx+
+	 0vy00Qixx3A+/L52+4oPeUMe70q3c1nbyAwE6Jn83cCUuEDIuFPXcjDdmkYqKchUVm
+	 jjauVWSEnsCA7zbSwjrewdIEv85SYotjpq2kspqVc3a6fvj0DoVCc3hN1dyyY9M8Vu
+	 4et2tH1F9ltJA==
+From: Anonymous <anonymous@anonymous.com>
+To: error27@gmail.com
+Cc: andy.shevchenko@gmail.com,
+	andy@kernel.org,
+	anonymous@anonymous.com,
+	colin.i.king@gmail.com,
+	gregkh@linuxfoundation.org,
+	hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	mchehab@kernel.org,
+	sakari.ailus@linux.intel.com
+Subject: [PATCH v3] media: atomisp: pci: sh_css: Inline single invocation of macro STATS_ENABLED()
+Date: Fri, 20 Jan 2023 12:14:08 -0500
+Message-Id: <20230120171408.16099-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <Y8lZreSphK6DIkJg@kadam>
+References: <Y8lZreSphK6DIkJg@kadam>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Inline the single invocation of the macro STATS_ENABLED().
+The macro abstraction is not necessary because the logic behind it is only
+used once.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+Changelog:
+V1 -> V2: Inline macro instead of replacing it with a function.
+
+V2 -> V3: Remove unnecessary check that stage is non-null.
+
+ drivers/staging/media/atomisp/pci/sh_css.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/staging/media/atomisp/pci/sh_css.c b/drivers/staging/media/atomisp/pci/sh_css.c
+index 726cb7aa4ecd..93789500416f 100644
+--- a/drivers/staging/media/atomisp/pci/sh_css.c
++++ b/drivers/staging/media/atomisp/pci/sh_css.c
+@@ -97,9 +97,6 @@
+  */
+ #define JPEG_BYTES (16 * 1024 * 1024)
+ 
+-#define STATS_ENABLED(stage) (stage && stage->binary && stage->binary->info && \
+-	(stage->binary->info->sp.enable.s3a || stage->binary->info->sp.enable.dis))
+-
+ struct sh_css my_css;
+ 
+ int  __printf(1, 0) (*sh_css_printf)(const char *fmt, va_list args) = NULL;
+@@ -3743,7 +3740,9 @@ ia_css_pipe_enqueue_buffer(struct ia_css_pipe *pipe,
+ 			 * The SP will read the params after it got
+ 			 * empty 3a and dis
+ 			 */
+-			if (STATS_ENABLED(stage)) {
++			if (stage->binary && stage->binary->info &&
++			    (stage->binary->info->sp.enable.s3a ||
++			     stage->binary->info->sp.enable.dis)) {
+ 				/* there is a stage that needs it */
+ 				return_err = ia_css_bufq_enqueue_buffer(thread_id,
+ 									queue_id,
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-qk1-f174.google.com (mail-qk1-f174.google.com [209.85.222.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD09033C8
+	for <linux-staging@lists.linux.dev>; Fri, 20 Jan 2023 17:39:13 +0000 (UTC)
+Received: by mail-qk1-f174.google.com with SMTP id t9so2163820qkm.2
+        for <linux-staging@lists.linux.dev>; Fri, 20 Jan 2023 09:39:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=9g1BEZvZrqodmFDOISLKzRjoO7gt900zQziLNPYxxig=;
+        b=iW5x6FyZ4kRruJuSjFDnWk3ekJ4QnBXu61QLi+LYYLgr3C/dTiEk1S/AjpKOH/cNo+
+         iGXdACuzne7GknNIXvnfUAO6OT1Ssy+qoMhMwFGiQeIj5HHiGGUxPnArgkAPK8ceZQdm
+         6jX5Hl7BNZTO18U4LQqpXHH7O8GvYSDlGa4bX2Jv1gKj/YQaFfcrh7UO47ldtINtb8Y4
+         OvHCH5VrEMi+vsaImGlbd6YJFKqQsjoKEch9yCKE/7pGEfvTg5NKhprOUUTroDH1Rsuu
+         W+xiHucnnbQJU9cwi36Q7uSjt9twwRWoa+XUKrKzPsskwpu/fcJK3P4SB3S1+fzY53VS
+         zNNw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=9g1BEZvZrqodmFDOISLKzRjoO7gt900zQziLNPYxxig=;
+        b=EX6T8CpfkYtSCWA2vMiFssmuCHQth8iKneMGZ+A2Mov5ArDp/2ub8TF3ZPjd8RV8OL
+         UjTRS0kLejXO+PcI6Y7ueFjzXu49MNyhnhVWrhpg7LBqhXzizNXCXZDpYoH8DYZ307WC
+         T8+OmyJLKZYen6+QEVBCvEsdAJGxmiOCbhFTGSKZzGrH5UbMiIgHB2CpeyC+3TQF6+Sl
+         63dyVpQfd7nX2Y1Fz2zigyDQiGPmiKLY8A5Sfvwra3Kl+IZnEoExS3qrHQqlFkXH2kwi
+         UewcA8JySYx+RkfyyiAaX21O74GE9sRWSeMB3D5s/yam9oWSVkOXrM/Qo1eOMrSVsMK2
+         LPcQ==
+X-Gm-Message-State: AFqh2kocam1veH4qwTsXQouM232x1Y3a3L6JAFbRUBzf1V2lKCX/NjEs
+	50HgHvX6Vlacutg/jXN8tFy0Mx9xKkw8JpYsR4g=
+X-Google-Smtp-Source: AMrXdXuh+LNPNSifVpuzE1cBEKvlIsgIpCH851pokA3KW+zv3u8Bf8TXGoBoW+nGOBhzndBUlwTJv+42etN/8riX1U4=
+X-Received: by 2002:a05:620a:1139:b0:705:b8ad:5b36 with SMTP id
+ p25-20020a05620a113900b00705b8ad5b36mr862323qkk.734.1674236352582; Fri, 20
+ Jan 2023 09:39:12 -0800 (PST)
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+References: <Y8lZreSphK6DIkJg@kadam> <20230120171408.16099-1-anonymous@anonymous.com>
+In-Reply-To: <20230120171408.16099-1-anonymous@anonymous.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Date: Fri, 20 Jan 2023 19:38:36 +0200
+Message-ID: <CAHp75VfhWV7ArGZ_S-ik7UxvvOocKWTtAHhKGC4tSV+Y8dgb9w@mail.gmail.com>
+Subject: Re: [PATCH v3] media: atomisp: pci: sh_css: Inline single invocation
+ of macro STATS_ENABLED()
+To: Anonymous <anonymous@anonymous.com>
+Cc: error27@gmail.com, andy@kernel.org, colin.i.king@gmail.com, 
+	gregkh@linuxfoundation.org, hdegoede@redhat.com, linux-kernel@vger.kernel.org, 
+	linux-media@vger.kernel.org, linux-staging@lists.linux.dev, 
+	mchehab@kernel.org, sakari.ailus@linux.intel.com
+Content-Type: text/plain; charset="UTF-8"
+
+On Fri, Jan 20, 2023 at 7:14 PM Anonymous <anonymous@anonymous.com> wrote:
+>
+> Inline the single invocation of the macro STATS_ENABLED().
+> The macro abstraction is not necessary because the logic behind it is only
+> used once.
+
+LGTM,
+Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+> ---
+> Changelog:
+> V1 -> V2: Inline macro instead of replacing it with a function.
+>
+> V2 -> V3: Remove unnecessary check that stage is non-null.
+>
+>  drivers/staging/media/atomisp/pci/sh_css.c | 7 +++----
+>  1 file changed, 3 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/staging/media/atomisp/pci/sh_css.c b/drivers/staging/media/atomisp/pci/sh_css.c
+> index 726cb7aa4ecd..93789500416f 100644
+> --- a/drivers/staging/media/atomisp/pci/sh_css.c
+> +++ b/drivers/staging/media/atomisp/pci/sh_css.c
+> @@ -97,9 +97,6 @@
+>   */
+>  #define JPEG_BYTES (16 * 1024 * 1024)
+>
+> -#define STATS_ENABLED(stage) (stage && stage->binary && stage->binary->info && \
+> -       (stage->binary->info->sp.enable.s3a || stage->binary->info->sp.enable.dis))
+> -
+>  struct sh_css my_css;
+>
+>  int  __printf(1, 0) (*sh_css_printf)(const char *fmt, va_list args) = NULL;
+> @@ -3743,7 +3740,9 @@ ia_css_pipe_enqueue_buffer(struct ia_css_pipe *pipe,
+>                          * The SP will read the params after it got
+>                          * empty 3a and dis
+>                          */
+> -                       if (STATS_ENABLED(stage)) {
+> +                       if (stage->binary && stage->binary->info &&
+> +                           (stage->binary->info->sp.enable.s3a ||
+> +                            stage->binary->info->sp.enable.dis)) {
+>                                 /* there is a stage that needs it */
+>                                 return_err = ia_css_bufq_enqueue_buffer(thread_id,
+>                                                                         queue_id,
+> --
+> 2.34.1
+>
+
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-wr1-f43.google.com (mail-wr1-f43.google.com [209.85.221.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50D747C
+	for <linux-staging@lists.linux.dev>; Mon, 23 Jan 2023 12:04:48 +0000 (UTC)
+Received: by mail-wr1-f43.google.com with SMTP id q5so5915513wrv.0
+        for <linux-staging@lists.linux.dev>; Mon, 23 Jan 2023 04:04:48 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=fISD/Oh7f7rfwyoXhffv2IBzPjVxst2oLjHNZ3zqbvY=;
+        b=bsFNkkE+AmRGZwOFLU6vo4nHH5vaJSggAKfQcACTiS5z2nThSUcvIrBIT1uyFfegFC
+         WPH0TXiUX8QgReBUgV9DiVo82Xz4GyOh9UxFUEIqqXOM1U+dw/yqsrLdsWUJ3D2tlT7P
+         JgU5ITbcs7zgJntXJ1dXmlInsCvq7C1hOOzxmGrUspNtr5IM7enrSCIPpbALknQ9I67n
+         e1IZ68nh/VCpH6N9f6CE9ZCh/VWEX/0W46FxEWy1/a3vGAFJ30sW3Um5AAHx8+FXNsGd
+         03p1Yq2K9fBIJLeLPcs8Mq3Mn/SIPS14UQRQQnTJDEb4/GGEm730ShDYvHNMsEr/Kq5a
+         4xIw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=fISD/Oh7f7rfwyoXhffv2IBzPjVxst2oLjHNZ3zqbvY=;
+        b=1UoX6TPcWGpWsOnWBdD1Dkijsp7YMJtibwTJOkqtMZBTil8TSP0uTeAzPEyox9/n75
+         xrPAZfYUvMw1d35ku2u0VeKuhOy8J0oQAHFVs2Ra3mT69BQU8v3FfFv4onM2UlqPeQOy
+         dJgQAik55cJOfnmbQyKFzg3WM1KoPItr45zt0CdMGiZhUuchrqgjQ3lP5hUwH/JK0r4f
+         a95cFXQitp8XuHY5dm9JoncF2AlA2HNiwP+Lxegrap/ETlhGfnuQKnxiu/QX52h5KM6y
+         7ia6YhbW0A8iIETGxkJIrEw6fthVvM9qrthyiWFfxER3Q6JU5VN7bgk0QhOSp80JK8VI
+         SkBw==
+X-Gm-Message-State: AFqh2kqYzwBDM6IrQryZ9476zncod+kJg89HKsQcW3j3YX4FFt8qaQ5W
+	/DD1adHFPoHE1NDYUkPxkUc=
+X-Google-Smtp-Source: AMrXdXtz9NS77O/I/Wca40ouoJ07XrkjM28zIcnW0OPop/rjoLw++G0AKR7A6dFxTiVx9ZULIg7VbQ==
+X-Received: by 2002:a5d:4528:0:b0:2bd:f155:a8b0 with SMTP id j8-20020a5d4528000000b002bdf155a8b0mr22056318wra.51.1674475486618;
+        Mon, 23 Jan 2023 04:04:46 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id bu3-20020a056000078300b002be505ab59asm8607749wrb.97.2023.01.23.04.04.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Jan 2023 04:04:45 -0800 (PST)
+Date: Mon, 23 Jan 2023 15:04:41 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: Anonymous <anonymous@anonymous.com>
+Cc: andy.shevchenko@gmail.com, andy@kernel.org, colin.i.king@gmail.com,
+	gregkh@linuxfoundation.org, hdegoede@redhat.com,
+	linux-kernel@vger.kernel.org, linux-media@vger.kernel.org,
+	linux-staging@lists.linux.dev, mchehab@kernel.org,
+	sakari.ailus@linux.intel.com
+Subject: Re: [PATCH v3] media: atomisp: pci: sh_css: Inline single invocation
+ of macro STATS_ENABLED()
+Message-ID: <Y8532S313qKhIme8@kadam>
+References: <Y8lZreSphK6DIkJg@kadam>
+ <20230120171408.16099-1-anonymous@anonymous.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230120171408.16099-1-anonymous@anonymous.com>
+
+On Fri, Jan 20, 2023 at 12:14:08PM -0500, Anonymous wrote:
+> Inline the single invocation of the macro STATS_ENABLED().
+> The macro abstraction is not necessary because the logic behind it is only
+> used once.
+> 
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+> ---
+> Changelog:
+> V1 -> V2: Inline macro instead of replacing it with a function.
+> 
+> V2 -> V3: Remove unnecessary check that stage is non-null.
+> 
+
+Thanks!
+
+Reviewed-by: Dan Carpenter <error27@gmail.com>
+
+regards,
+dan carpenter
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8B1B7C
+	for <linux-staging@lists.linux.dev>; Mon, 23 Jan 2023 12:28:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1674476895;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=gwrB5DR4dppCP7zf2C5pSCDKiFcT+mCcVne59nz/EJE=;
+	b=ZuErYm+tY5FfKg0MkORnKlkTn1JlpMMTfxwWaPLIvvZH5gdGrYKaTU28GR80Mk/q1xxCzr
+	OcyQuVZOYuoUbPHWw+dSlmF2mYvBtXALdaL41cd3uAB3G9lbpVyi2tgLVrGdqNf8dizGdR
+	2R6wWep0Bfl7Z9pw7o5Qvjmd3M7XkSQ=
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
+ [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_128_GCM_SHA256) id
+ us-mta-300-xFOVqEfHNTCi9030wYuvtg-1; Mon, 23 Jan 2023 07:28:13 -0500
+X-MC-Unique: xFOVqEfHNTCi9030wYuvtg-1
+Received: by mail-ej1-f72.google.com with SMTP id nb4-20020a1709071c8400b0084d4712780bso7646436ejc.18
+        for <linux-staging@lists.linux.dev>; Mon, 23 Jan 2023 04:28:13 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=gwrB5DR4dppCP7zf2C5pSCDKiFcT+mCcVne59nz/EJE=;
+        b=0BnbSwQuPbpkaROd1jsm2tkYf6WVzKAME9WY0maO6IJbK24tMjKZUMX2H+mx+HFpNI
+         KsAzsKCJmoJ//ATa7DCOpL1jz0HZcJtwYhkmzNeLnpbJ/UL2M5JZqpkq7Vz3Qb7p8M/u
+         GaDS4dgkehR3gpES1h0VayVk7UBCjb4eavFDvNw4jVXiyv247e8WFrQTZaaCVKEWC3E1
+         9GQLtMzLY4mmwQXrMajifdInvLZYG0oB10Nc6aReoG1zL9tJdN267UPTQdve817mdL0t
+         IiIShOtHYXzEH7N1m/Tj9OHiE1rOHtMl+GZisbmA64NBdCp0cWlSAVWt+vuvSo3tdls4
+         pDmw==
+X-Gm-Message-State: AFqh2kqnWC7DQFOfSSoEQ7lk2kmMVp8Rs5aP9HJWtaOgPkeqrNS9xIvt
+	Cu3gLGdnWOIy04XXINNpR9VYwhgz3TSFCJPnHGM8bCfq32zp07y6sFrZr4gPvYsVw9RcO0o3i80
+	3yZGab1OyaMb4uKe9pkdDEe1HqA==
+X-Received: by 2002:a17:906:3399:b0:84d:335e:d136 with SMTP id v25-20020a170906339900b0084d335ed136mr23997575eja.48.1674476892778;
+        Mon, 23 Jan 2023 04:28:12 -0800 (PST)
+X-Google-Smtp-Source: AMrXdXvQIwGSVLqQBoMnlXQtKDLtQ8NDu9qs6GSx+/a/164XlynrR6nfDHixx1XgKfxSkS9HfswF0A==
+X-Received: by 2002:a17:906:3399:b0:84d:335e:d136 with SMTP id v25-20020a170906339900b0084d335ed136mr23997570eja.48.1674476892561;
+        Mon, 23 Jan 2023 04:28:12 -0800 (PST)
+Received: from [10.40.98.142] ([78.108.130.194])
+        by smtp.gmail.com with ESMTPSA id 10-20020a170906218a00b0073d796a1043sm21781931eju.123.2023.01.23.04.28.11
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 23 Jan 2023 04:28:12 -0800 (PST)
+Message-ID: <e72e4f4b-4e07-a57c-2a09-cbc93cfd89dc@redhat.com>
+Date: Mon, 23 Jan 2023 13:28:11 +0100
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.0
+Subject: Re: [PATCH v3] media: atomisp: pci: sh_css: Inline single invocation
+ of macro STATS_ENABLED()
+To: Anonymous <anonymous@anonymous.com>, error27@gmail.com
+Cc: andy.shevchenko@gmail.com, andy@kernel.org, colin.i.king@gmail.com,
+ gregkh@linuxfoundation.org, linux-kernel@vger.kernel.org,
+ linux-media@vger.kernel.org, linux-staging@lists.linux.dev,
+ mchehab@kernel.org, sakari.ailus@linux.intel.com
+References: <Y8lZreSphK6DIkJg@kadam>
+ <20230120171408.16099-1-anonymous@anonymous.com>
+From: Hans de Goede <hdegoede@redhat.com>
+In-Reply-To: <20230120171408.16099-1-anonymous@anonymous.com>
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: redhat.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+Hi,
+
+On 1/20/23 18:14, Anonymous wrote:
+> Inline the single invocation of the macro STATS_ENABLED().
+> The macro abstraction is not necessary because the logic behind it is only
+> used once.
+> 
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+
+
+Thank you.
+
+I have added this to my personal git tree now and I will include
+this in the atomisp driver pull-req which I will send to the
+media-subsystem maintainer in a couple of weeks.
+
+Regards,
+
+Hans
+
+
+
+> ---
+> Changelog:
+> V1 -> V2: Inline macro instead of replacing it with a function.
+> 
+> V2 -> V3: Remove unnecessary check that stage is non-null.
+> 
+>  drivers/staging/media/atomisp/pci/sh_css.c | 7 +++----
+>  1 file changed, 3 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/staging/media/atomisp/pci/sh_css.c b/drivers/staging/media/atomisp/pci/sh_css.c
+> index 726cb7aa4ecd..93789500416f 100644
+> --- a/drivers/staging/media/atomisp/pci/sh_css.c
+> +++ b/drivers/staging/media/atomisp/pci/sh_css.c
+> @@ -97,9 +97,6 @@
+>   */
+>  #define JPEG_BYTES (16 * 1024 * 1024)
+>  
+> -#define STATS_ENABLED(stage) (stage && stage->binary && stage->binary->info && \
+> -	(stage->binary->info->sp.enable.s3a || stage->binary->info->sp.enable.dis))
+> -
+>  struct sh_css my_css;
+>  
+>  int  __printf(1, 0) (*sh_css_printf)(const char *fmt, va_list args) = NULL;
+> @@ -3743,7 +3740,9 @@ ia_css_pipe_enqueue_buffer(struct ia_css_pipe *pipe,
+>  			 * The SP will read the params after it got
+>  			 * empty 3a and dis
+>  			 */
+> -			if (STATS_ENABLED(stage)) {
+> +			if (stage->binary && stage->binary->info &&
+> +			    (stage->binary->info->sp.enable.s3a ||
+> +			     stage->binary->info->sp.enable.dis)) {
+>  				/* there is a stage that needs it */
+>  				return_err = ia_css_bufq_enqueue_buffer(thread_id,
+>  									queue_id,
+
+

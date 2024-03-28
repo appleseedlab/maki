@@ -1,0 +1,267 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from h7.fbrelay.privateemail.com (h7.fbrelay.privateemail.com [162.0.218.230])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 294C02F22
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 15:03:29 +0000 (UTC)
+Received: from MTA-05-3.privateemail.com (unknown [68.65.122.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits))
+	(No client certificate requested)
+	by h7.fbrelay.privateemail.com (Postfix) with ESMTPS id 61E9760484
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 10:03:27 -0500 (EST)
+Received: from mta-05.privateemail.com (localhost [127.0.0.1])
+	by mta-05.privateemail.com (Postfix) with ESMTP id AFEC318000A6;
+	Wed, 18 Jan 2023 10:03:19 -0500 (EST)
+Received: from anonymous-XPS-13-9310.ucf.edu (050-088-208-136.res.spectrum.com [50.88.208.136])
+	by mta-05.privateemail.com (Postfix) with ESMTPA id 2CBC718000B8;
+	Wed, 18 Jan 2023 10:03:11 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=anonymous.com;
+	s=default; t=1674054199;
+	bh=yeQJ1cmPcm9jEM9x0mAr4yr+O8czbMvMc2TBJNkOxLE=;
+	h=From:To:Cc:Subject:Date:From;
+	b=BtEdw46To5nWS/BlkIgpenoTX1dwxmlu9pY/usU4Gir3aclWtf8dntr1W4G4Goeg0
+	 QtCS4yiTop3vqxhEhi0MHkyTNuf39KdyHpEtoDXA5b7zWp8UJuVE6V3yEE70lmFG7g
+	 Z5LoJd5uBlDqrlzPXWcqNP/PMzhGhZszGkWRuLJzufjyN8wqbco06IJQRsuPfD2PGb
+	 gmxxlCNsuWigUaEwzkwKp9nXXsGkduOkGd6Q1TClgMx/v3JvLM2liwhS6rwiFFfjih
+	 86goiBdWjkP3j86oSFyUOZMFU+ipmkdzhlBAUpkVNUytKsX6q/HfyhbZzg1zqiXAwv
+	 OzPtW1DfWNkyA==
+From: Anonymous <anonymous@anonymous.com>
+To: lars@metafoo.de
+Cc: Michael.Hennerich@analog.com,
+	jic23@kernel.org,
+	gregkh@linuxfoundation.org,
+	linux-iio@vger.kernel.org,
+	linux-staging@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	Anonymous <anonymous@anonymous.com>
+Subject: [PATCH] staging: iio: frequency: ad9832: Replace macro AD9832_PHASE() with function
+Date: Wed, 18 Jan 2023 10:03:06 -0500
+Message-Id: <20230118150306.16448-1-anonymous@anonymous.com>
+X-Mailer: git-send-email 2.34.1
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Replace the macro AD9832_PHASE() with a static function to comply with
+Linux coding style standards.
+
+Signed-off-by: Anonymous <anonymous@anonymous.com>
+---
+ drivers/staging/iio/frequency/ad9832.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/staging/iio/frequency/ad9832.c b/drivers/staging/iio/frequency/ad9832.c
+index 6f9eebd6c7ee..537825534a28 100644
+--- a/drivers/staging/iio/frequency/ad9832.c
++++ b/drivers/staging/iio/frequency/ad9832.c
+@@ -59,7 +59,9 @@
+ #define AD9832_CMD_SLEEPRESCLR	0xC
+ 
+ #define AD9832_FREQ		BIT(11)
+-#define AD9832_PHASE(x)		(((x) & 3) << 9)
++
++static unsigned short ad9832_phase(int x) { return (x & 3) << 9; }
++
+ #define AD9832_SYNC		BIT(13)
+ #define AD9832_SELSRC		BIT(12)
+ #define AD9832_SLEEP		BIT(13)
+@@ -221,8 +223,8 @@ static ssize_t ad9832_write(struct device *dev, struct device_attribute *attr,
+ 			break;
+ 		}
+ 
+-		st->ctrl_fp &= ~AD9832_PHASE(3);
+-		st->ctrl_fp |= AD9832_PHASE(val);
++		st->ctrl_fp &= ~ad9832_phase(3);
++		st->ctrl_fp |= ad9832_phase(val);
+ 
+ 		st->data = cpu_to_be16((AD9832_CMD_FPSELECT << CMD_SHIFT) |
+ 					st->ctrl_fp);
+-- 
+2.34.1
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD4A82F22
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 15:10:15 +0000 (UTC)
+Received: by mail-wr1-f52.google.com with SMTP id b7so8262794wrt.3
+        for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 07:10:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=I7lrvTAlA/3t43ULdgygOD2DvyJWRLH9rn+t5O59C4Y=;
+        b=TlXrrR3oLwQF0H1oQ8zO7QxSERWmDmVaeW5jHGErLAPhlCd466aElVeI12xdp3SR6X
+         lZ+xkj6WkFnkDAOV2QLRxuLeQRBVEH3mGF2hJprYhQGnuEZtKgPucXfL7dahyku4dM92
+         eyO6lzaoggWF1VqfV52FQprhhON0Tzew3P2ni0BZepGWZZnAtJ15kCViAKDfN+zSsbUf
+         LMlKM5guK4dXJ6Y66UiiVIKigLXznwsf/FCxvfa5fOuNHx6wP3bG/d4LiXAgy30izivP
+         aGWLMvzIjMbjnTo42+6pZsO0Zj6IFeG5vD+QOFrei0QrnPBWKM9i7NOvoa+MOh6JREUb
+         vQew==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=I7lrvTAlA/3t43ULdgygOD2DvyJWRLH9rn+t5O59C4Y=;
+        b=8G/m+G2/ZFZmv0XM7PTzxKeAh7HXXbIMFDQE/rtXtsRb3wFlc8+CMZ5AOVqPesSuWa
+         lKkQ+c5UviR2LxxFGKofKWFsVOyReRAQefrXQ93nno1U/nt+uLa0KEqoAXSrV8DuvSj6
+         K05rm6WEXj1uA8nVXzvEwe3ZR8re7o8qAxu5km4i6LeosT0jtgpAA5oRdxpIr0GN6oXk
+         HiQ9rred1lSzGv9CbGWr3xdiQCO9gPUkrOHCeDrjl1DtwHjVWxrid0Ij2Yv94hW17za7
+         ZeNVuxcldsG+KkZUQ5lrOfQ99q+b6b2zVVoPQST0flcMhvNsYSfbWw5QtUEeP/89mTst
+         /MsQ==
+X-Gm-Message-State: AFqh2kpiL/xbP+N1CKB2IQpiMjZFGftFd/6uFxjEgfIpNtV3applHg4m
+	i61j6NPraEsPKvXiSUwJryc=
+X-Google-Smtp-Source: AMrXdXud9Vgud1/nkgt+2pvzn+6PugO5Q1FOSENUGO2/6oCi+JrBipRvnA9IQQX9M4Ijt4HqaUHTrw==
+X-Received: by 2002:adf:edd1:0:b0:2bc:7d12:e736 with SMTP id v17-20020adfedd1000000b002bc7d12e736mr6296609wro.1.1674054613965;
+        Wed, 18 Jan 2023 07:10:13 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id i15-20020a05600011cf00b00294176c2c01sm31123998wrx.86.2023.01.18.07.10.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Jan 2023 07:10:13 -0800 (PST)
+Date: Wed, 18 Jan 2023 18:10:09 +0300
+From: Dan Carpenter <error27@gmail.com>
+To: Anonymous <anonymous@anonymous.com>
+Cc: lars@metafoo.de, Michael.Hennerich@analog.com, jic23@kernel.org,
+	gregkh@linuxfoundation.org, linux-iio@vger.kernel.org,
+	linux-staging@lists.linux.dev, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] staging: iio: frequency: ad9832: Replace macro
+ AD9832_PHASE() with function
+Message-ID: <Y8gL0XNYw5qbK82B@kadam>
+References: <20230118150306.16448-1-anonymous@anonymous.com>
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230118150306.16448-1-anonymous@anonymous.com>
+
+On Wed, Jan 18, 2023 at 10:03:06AM -0500, Anonymous wrote:
+> Replace the macro AD9832_PHASE() with a static function to comply with
+> Linux coding style standards.
+> 
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+> ---
+>  drivers/staging/iio/frequency/ad9832.c | 8 +++++---
+>  1 file changed, 5 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/staging/iio/frequency/ad9832.c b/drivers/staging/iio/frequency/ad9832.c
+> index 6f9eebd6c7ee..537825534a28 100644
+> --- a/drivers/staging/iio/frequency/ad9832.c
+> +++ b/drivers/staging/iio/frequency/ad9832.c
+> @@ -59,7 +59,9 @@
+>  #define AD9832_CMD_SLEEPRESCLR	0xC
+>  
+>  #define AD9832_FREQ		BIT(11)
+> -#define AD9832_PHASE(x)		(((x) & 3) << 9)
+> +
+> +static unsigned short ad9832_phase(int x) { return (x & 3) << 9; }
+
+The original is fine here.  Just leave it as-is.
+
+regards,
+dan carpenter
+
+
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Received: from frasgout.his.huawei.com (frasgout.his.huawei.com [185.176.79.56])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAE393205
+	for <linux-staging@lists.linux.dev>; Wed, 18 Jan 2023 15:30:28 +0000 (UTC)
+Received: from lhrpeml500005.china.huawei.com (unknown [172.18.147.201])
+	by frasgout.his.huawei.com (SkyGuard) with ESMTP id 4Nxq4g0XTrz6J9W6;
+	Wed, 18 Jan 2023 23:12:35 +0800 (CST)
+Received: from localhost (10.202.227.76) by lhrpeml500005.china.huawei.com
+ (7.191.163.240) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Wed, 18 Jan
+ 2023 15:12:58 +0000
+Date: Wed, 18 Jan 2023 15:12:57 +0000
+From: Jonathan Cameron <Jonathan.Cameron@Huawei.com>
+To: Anonymous <anonymous@anonymous.com>
+CC: <lars@metafoo.de>, <Michael.Hennerich@analog.com>, <jic23@kernel.org>,
+	<gregkh@linuxfoundation.org>, <linux-iio@vger.kernel.org>,
+	<linux-staging@lists.linux.dev>, <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] staging: iio: frequency: ad9832: Replace macro
+ AD9832_PHASE() with function
+Message-ID: <20230118151257.0000663a@Huawei.com>
+In-Reply-To: <20230118150306.16448-1-anonymous@anonymous.com>
+References: <20230118150306.16448-1-anonymous@anonymous.com>
+Organization: Huawei Technologies Research and Development (UK) Ltd.
+X-Mailer: Claws Mail 4.1.0 (GTK 3.24.33; x86_64-w64-mingw32)
+Precedence: bulk
+X-Mailing-List: linux-staging@lists.linux.dev
+List-Id: <linux-staging.lists.linux.dev>
+List-Subscribe: <mailto:linux-staging+subscribe@lists.linux.dev>
+List-Unsubscribe: <mailto:linux-staging+unsubscribe@lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.202.227.76]
+X-ClientProxiedBy: lhrpeml100001.china.huawei.com (7.191.160.183) To
+ lhrpeml500005.china.huawei.com (7.191.163.240)
+X-CFilter-Loop: Reflected
+
+On Wed, 18 Jan 2023 10:03:06 -0500
+Anonymous <anonymous@anonymous.com> wrote:
+
+> Replace the macro AD9832_PHASE() with a static function to comply with
+> Linux coding style standards.
+> 
+> Signed-off-by: Anonymous <anonymous@anonymous.com>
+
+Hi Anonymous,
+
+I'd rather see this changed to FIELD_GET() / FIELD_PREP() along
+with all other similar cases in this driver.
+
+That would mean defining just the field masks then using those
+to mask relevant bits out and put in the new value.
+
+Thanks
+
+Jonathan
+
+
+> ---
+>  drivers/staging/iio/frequency/ad9832.c | 8 +++++---
+>  1 file changed, 5 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/staging/iio/frequency/ad9832.c b/drivers/staging/iio/frequency/ad9832.c
+> index 6f9eebd6c7ee..537825534a28 100644
+> --- a/drivers/staging/iio/frequency/ad9832.c
+> +++ b/drivers/staging/iio/frequency/ad9832.c
+> @@ -59,7 +59,9 @@
+>  #define AD9832_CMD_SLEEPRESCLR	0xC
+>  
+>  #define AD9832_FREQ		BIT(11)
+> -#define AD9832_PHASE(x)		(((x) & 3) << 9)
+> +
+> +static unsigned short ad9832_phase(int x) { return (x & 3) << 9; }
+> +
+>  #define AD9832_SYNC		BIT(13)
+>  #define AD9832_SELSRC		BIT(12)
+>  #define AD9832_SLEEP		BIT(13)
+> @@ -221,8 +223,8 @@ static ssize_t ad9832_write(struct device *dev, struct device_attribute *attr,
+>  			break;
+>  		}
+>  
+> -		st->ctrl_fp &= ~AD9832_PHASE(3);
+> -		st->ctrl_fp |= AD9832_PHASE(val);
+> +		st->ctrl_fp &= ~ad9832_phase(3);
+> +		st->ctrl_fp |= ad9832_phase(val);
+>  
+>  		st->data = cpu_to_be16((AD9832_CMD_FPSELECT << CMD_SHIFT) |
+>  					st->ctrl_fp);
+
+
