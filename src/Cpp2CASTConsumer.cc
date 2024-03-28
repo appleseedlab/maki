@@ -270,19 +270,19 @@ namespace cpp2c
     std::pair<bool, llvm::StringRef> isGlobalInclude(
         clang::SourceManager &SM,
         const clang::LangOptions &LO,
-        std::pair<clang::OptionalFileEntryRef, clang::SourceLocation> &IEL,
+        std::pair<const clang::FileEntry *, clang::SourceLocation> &IEL,
         std::set<llvm::StringRef> &LocalIncludes,
         std::vector<const clang::Decl *> &Decls)
     {
         auto FE = IEL.first;
         auto HashLoc = IEL.second;
 
-        // Check that the included file has a value
-        if (!FE.has_value())
+        // Check that the included file is not null
+        if (!FE)
             return {false, "<null>"};
 
         // Check that the included file actually has a name
-        auto IncludedFileRealpath = FE->getFileEntry().tryGetRealPathName();
+        auto IncludedFileRealpath = FE->tryGetRealPathName();
         if (IncludedFileRealpath.empty())
             return {false, IncludedFileRealpath};
 
@@ -334,8 +334,8 @@ namespace cpp2c
                     // that's fine since it would be a non-global
                     // location anyway
                     if (auto Tok = clang::Lexer::findNextToken(E, SM, LO))
-                        if (Tok.has_value())
-                            E = SM.getFileLoc(Tok.value().getEndLoc());
+                        if (Tok.hasValue())
+                            E = SM.getFileLoc(Tok.getValue().getEndLoc());
 
                     if (E.isInvalid())
                         return false;

@@ -8,7 +8,7 @@ namespace cpp2c
         llvm::StringRef FileName,
         bool IsAngled,
         clang::CharSourceRange FilenameRange,
-        clang::OptionalFileEntryRef File,
+        const clang::FileEntry *File,
         llvm::StringRef SearchPath,
         llvm::StringRef RelativePath,
         const clang::Module *Imported,
