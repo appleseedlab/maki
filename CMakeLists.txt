@@ -11,13 +11,13 @@ enable_testing()
 set(CT_LLVM_INSTALL_DIR "/usr")
 
 # A bit of a sanity checking
-set(CT_LLVM_INCLUDE_DIR "${CT_LLVM_INSTALL_DIR}/include/llvm-17")
+set(CT_LLVM_INCLUDE_DIR "${CT_LLVM_INSTALL_DIR}/include/llvm-14")
 if(NOT EXISTS "${CT_LLVM_INCLUDE_DIR}")
 message(FATAL_ERROR
   " CT_LLVM_INSTALL_DIR (${CT_LLVM_INCLUDE_DIR}) is invalid.")
 endif()
 
-set(CT_LLVM_CMAKE_FILE "${CT_LLVM_INSTALL_DIR}/lib/cmake/clang-17/ClangConfig.cmake")
+set(CT_LLVM_CMAKE_FILE "${CT_LLVM_INSTALL_DIR}/lib/cmake/clang-14/ClangConfig.cmake")
 if(NOT EXISTS "${CT_LLVM_CMAKE_FILE}")
 message(FATAL_ERROR
   " CT_LLVM_CMAKE_FILE (${CT_LLVM_CMAKE_FILE}) is invalid.")
@@ -27,7 +27,7 @@ endif()
 # 2. LOAD CLANG CONFIGURATION
 #    For more: http://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
 #===============================================================================
-set(CLANG_VERSION 17)
+set(CLANG_VERSION 14)
 list(APPEND CMAKE_PREFIX_PATH "${CT_LLVM_INSTALL_DIR}/lib/cmake/llvm-${CLANG_VERSION}/")
 list(APPEND CMAKE_PREFIX_PATH "${CT_LLVM_INSTALL_DIR}/lib/cmake/clang-${CLANG_VERSION}/")
 
@@ -57,7 +57,7 @@ include_directories(SYSTEM "${LLVM_INCLUDE_DIRS};${CLANG_INCLUDE_DIRS}")
 # 3. cpp2c BUILD CONFIGURATION
 #===============================================================================
 # Use the same C++ standard as LLVM does
-set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "")
 
 # Build type
 if (NOT CMAKE_BUILD_TYPE)
