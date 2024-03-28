@@ -18,7 +18,6 @@ from predicates.metaprogramming import mp_invocation
 from predicates.thunkizing import thunkizing_invocation
 from predicates.property_categories import *
 
-ANALYSES_DIR = r'ANALYSES'
 DELIM = '\t'
 
 
@@ -167,7 +166,6 @@ def main():
     #         if i.ASTKind == 'Decl':
     #             pprint(i)
     # return
-
 
     # ie_pd only records preprocessor data about interface-equivalent
     # macros

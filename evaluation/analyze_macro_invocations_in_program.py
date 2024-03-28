@@ -109,7 +109,7 @@ def cpp2c(cpp2c_so_path: str,
     # use clang-14
     args[0] = 'clang-14'
     # pass cpp2c plugin shared library file
-    args.insert(1, f'-fplugin={cpp2c_so_path}')
+    args.insert(1, f'-fplugin="{cpp2c_so_path}"')
     # at the very end, specify that we are only doing syntactic analysis
     # so as to not waste time compiling
     args.append('-fsyntax-only')
@@ -131,7 +131,7 @@ def cpp2c(cpp2c_so_path: str,
         print(f'Src{DELIM}{src_dir}', file=ofp)
         ofp.flush()
         # change to the directory, then run cpp2c
-        cmd = f"cd {cc.directory} && {' '.join(args)}"
+        cmd = f"cd \"{cc.directory}\" && {' '.join(args)}"
         print(cmd)
         p = subprocess.run(cmd, shell=True, text=True, stdout=ofp)
         if p.stderr:
@@ -139,7 +139,7 @@ def cpp2c(cpp2c_so_path: str,
         p.check_returncode()
 
     i[0] += 1
-    print(f'{i[0]} / {n} files analyzed', file=sys.stderr)
+    print(f'macro invocations in {i[0]} / {n} files analyzed', file=sys.stderr)
 
 
 def main():

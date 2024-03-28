@@ -16,7 +16,6 @@ USAGE_STRING = './setup_programs.py (all)|(PROGRAM_NAME+)'
 
 
 def main():
-
     given_programs: Set[str] = set()
     # Check if the user wants to set up all programs or only a given set
     # of programs
@@ -25,7 +24,7 @@ def main():
         print(USAGE_STRING, file=sys.stderr)
         exit(1)
     else:
-        if sys.argv == 2 and sys.argv[1] == 'all':
+        if len(sys.argv) == 2 and sys.argv[1] == 'all':
             # Set up all programs
             pass
         else:

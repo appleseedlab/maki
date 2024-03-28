@@ -5,7 +5,7 @@ import json
 import os
 from math import inf
 
-ANALYSES_DIR = r'analyses/'
+DEFINITION_ANALYSES_DIR = r'macro_definition_analyses/'
 DELIM = ','
 
 DENOMINATOR_FIELDS = {
@@ -41,7 +41,7 @@ def write_table(ofp, macro_type: str) -> None:
 
     totals = None
 
-    for path in sorted(os.listdir(ANALYSES_DIR)):
+    for path in sorted(os.listdir(DEFINITION_ANALYSES_DIR)):
         name = os.path.basename(path)
         if '-' in name:
             name = name[:name.find('-')]
@@ -50,7 +50,7 @@ def write_table(ofp, macro_type: str) -> None:
         if name == 'ncsa':
             name = 'mosaic'
 
-        fullpath = os.path.join(ANALYSES_DIR, path)
+        fullpath = os.path.join(DEFINITION_ANALYSES_DIR, path)
         a = load_analysis_file(fullpath)
         row_data = {key: a[key][macro_type] for key in a.keys()}
         row_data['program'] = name 
