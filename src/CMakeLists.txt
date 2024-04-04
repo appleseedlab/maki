@@ -32,6 +32,7 @@ add_library(cpp2c SHARED
   MacroExpansionArgument.cc
   MacroExpansionNode.cc
   StmtCollectorMatchHandler.cc
+  JSONPrinter.cc
 )
 
 # Allow undefined symbols in shared objects on Darwin (this is the default
