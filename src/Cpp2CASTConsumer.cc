@@ -472,7 +472,6 @@ namespace cpp2c
                         {"IncludeName", IncludeName}
                     }
                 );
-                print("Include", Valid, IncludeName);
             }
         }
         debug("Finished checking includes");
