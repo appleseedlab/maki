@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <llvm/Support/raw_ostream.h>
 
 namespace cpp2c
 {

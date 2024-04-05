@@ -7,6 +7,7 @@
 #include "IncludeCollector.hh"
 #include "Logging.hh"
 #include "StmtCollectorMatchHandler.hh"
+#include "JSONPrinter.hh"
 
 #include "clang/Lex/Lexer.h"
 #include "clang/Lex/Preprocessor.h"
@@ -367,6 +368,9 @@ namespace cpp2c
         auto &SM = Ctx.getSourceManager();
         auto &LO = Ctx.getLangOpts();
 
+        // JSON printer for each invocation, definition, etc.
+        std::vector<JSONPrinter> printers;
+
         // Print definition information
         for (auto &&Entry : DC->MacroNamesDefinitions)
         {
@@ -386,8 +390,41 @@ namespace cpp2c
 
             auto MI = MD->getMacroInfo();
             assert(MI);
+            
+            std::string Body;
 
-            print("Definition", Name, MI->isObjectLike(), Valid, DefLocOrError);
+            /*
+            We could use 
+
+            Body = clang::Lexer::getSourceText(clang::CharSourceRange::getCharRange(Exp->DefinitionRange.getBegin(), Exp->DefinitionRange.getEnd().getLocWithOffset(1)), SM, LO).str();
+
+            to get the body of the macro expansion without a loop, but this lacks info for each token, we also don't need to preserve whitespace.
+            */
+
+            // If macro is a function, must have return statement
+            if (MI->isFunctionLike())
+                Body += "return ";
+
+            // Append the token to the body
+            for (auto& token : MI->tokens() ) {
+                Body += MF->PP.getSpelling(token);
+            } 
+
+            // End of body statement needs semicolon
+            Body += ";";
+
+            JSONPrinter printer{"Definition"};
+            printer.add(
+                {
+                    {"Name", Name},
+                    {"IsObjectLike", MI->isObjectLike()},
+                    {"IsValid", Valid},
+                    {"DefinitionLocationOrError", DefLocOrError},
+                    {"Body", Body}
+                }
+            );
+
+            printers.push_back(std::move(printer));
         }
 
         // Collect declaration ranges
@@ -405,8 +442,11 @@ namespace cpp2c
             });
 
         // Print names of macros inspected by the preprocessor
-        for (auto &&Name : DC->InspectedMacroNames)
-            print("InspectedByCPP", Name);
+        for (auto &&Name : DC->InspectedMacroNames) {
+            JSONPrinter printer{"InspectedByCPP"};
+            printer.add({{"Name", Name}});
+            printers.push_back(std::move(printer));
+        }
         // Print include-directive information
         {
             std::set<llvm::StringRef> LocalIncludes;
@@ -425,7 +465,13 @@ namespace cpp2c
                 Valid = Res.first;
                 IncludeName = Res.second.empty() ? "" : Res.second.str();
 
-                print("Include", Valid, IncludeName);
+                JSONPrinter printer{"Include"};
+                printer.add(
+                    {
+                        {"IsValid", Valid},
+                        {"IncludeName", IncludeName}
+                    }
+                );
             }
         }
         debug("Finished checking includes");
@@ -1097,6 +1143,7 @@ namespace cpp2c
                         TypeSignature += ")";
                 }
 
+
                 // Set of all Stmts expanded from macro
                 std::set<const clang::Stmt *> AllStmtsExpandedFromMacro =
                     StmtsExpandedFromBody;
@@ -1115,22 +1162,9 @@ namespace cpp2c
                     });
             }
 
-            auto entryString = [](std::string k, std::string v) -> std::string
-            {
-                return "    \"" + k + "\" : \"" + v + "\"";
-            };
+            JSONPrinter printer{"Invocation"};
 
-            auto entryInt = [](std::string k, int v) -> std::string
-            {
-                return "    \"" + k + "\" : " + std::to_string(v);
-            };
-
-            auto entryBool = [](std::string k, bool v) -> std::string
-            {
-                return "    \"" + k + "\" : " + (v ? "true" : "false");
-            };
-
-            std::vector<std::pair<std::string, std::string>> stringEntries =
+            printer.add(
                 {
                     {"Name", Name},
                     {"DefinitionLocation", DefinitionLocation},
@@ -1138,16 +1172,18 @@ namespace cpp2c
                     {"InvocationLocation", InvocationLocation},
                     {"ASTKind", ASTKind},
                     {"TypeSignature", TypeSignature},
-                };
+                }
+            );
 
-            std::vector<std::pair<std::string, int>> intEntries =
+            printer.add(
                 {
                     {"InvocationDepth", InvocationDepth},
                     {"NumASTRoots", NumASTRoots},
                     {"NumArguments", NumArguments},
-                };
+                }
+            );
 
-            std::vector<std::pair<std::string, bool>> boolEntries =
+            printer.add(
                 {
                     {"HasStringification", HasStringification},
                     {"HasTokenPasting", HasTokenPasting},
@@ -1193,26 +1229,15 @@ namespace cpp2c
                     {"IsAnyArgumentExpandedWhereAddressableValueRequired", IsAnyArgumentExpandedWhereAddressableValueRequired},
                     {"IsAnyArgumentConditionallyEvaluated", IsAnyArgumentConditionallyEvaluated},
                     {"IsAnyArgumentNeverExpanded", IsAnyArgumentNeverExpanded},
-                    {"IsAnyArgumentNotAnExpression", IsAnyArgumentNotAnExpression},
-                };
+                    {"IsAnyArgumentNotAnExpression", IsAnyArgumentNotAnExpression}
+                }
+            );
 
-            // Only pretty print JSON if debug is on
-            const char sep = Debug ? '\n' : ' ';
 
-            llvm::outs() << "Invocation" << delim << '{' << sep;
-            for (auto &&e : stringEntries)
-                llvm::outs() << entryString(e.first, e.second) << "," << sep;
-            for (auto &&e : intEntries)
-                llvm::outs() << entryInt(e.first, e.second) << "," << sep;
-            for (size_t i = 0; i < boolEntries.size(); i++)
-            {
-                auto e = boolEntries[i];
-                llvm::outs() << entryBool(e.first, e.second)
-                             << (i == (boolEntries.size() - 1) ? "" : ",")
-                             << sep;
-            }
-            llvm::outs() << " }\n";
+            printers.push_back(std::move(printer));
         }
+        
+        cpp2c::JSONPrinter::printJSONArray(printers);
 
         // Only delete top level expansions since deconstructor deletes
         // nested expansions
