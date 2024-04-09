@@ -34,7 +34,7 @@ def main():
             print(f"info: skipping {p.name}, already evaluated")
             continue
 
-        cmd = ' '.join(["./analyze_macros_in_program.py ",
+        cmd = ' '.join(["python3 analyze_macros_in_program.py ",
                        args.cpp2c_so_path,
                        p_extracted_path,
                        src_dir,
