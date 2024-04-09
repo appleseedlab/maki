@@ -108,28 +108,29 @@ def main():
             continue
         if not line.strip() or line.strip() in ("[", "]"):
             continue
-        entry = json.loads(line.lstrip(","))
-        if entry["PropertiesOf"] == "Define":
-            m = Macro(entry["Name"], entry["IsObjectLike"],
-                      entry["IsDefinitionLocationValid"], entry["DefinitionLocation"])
-            if m not in pd.mm:
-                pd.mm[m] = set()
-        elif entry["PropertiesOf"] == 'InspectedByCPP':
-            pd.inspected_macro_names.add(entry["Name"])
-        elif entry["PropertiesOf"] == "Include":
-            if entry["IsIncludeLocationValid"]:
-                pd.local_includes.add(entry["IncludeName"])
-        elif entry["PropertiesOf"] == 'Invocation':
-            del entry["PropertiesOf"]
-            i = Invocation(**entry)
-            m = Macro(i.Name,
-                      i.IsObjectLike,
-                      i.IsDefinitionLocationValid,
-                      i.DefinitionLocation)
-            # Only record unique invocations - two invocations may have the same
-            # location if they are the same nested invocation
-            if all([j.InvocationLocation != i.InvocationLocation for j in pd.mm[m]]):
-                pd.mm[m].add(i)
+        entries = json.loads(line)
+        for entry in entries:
+            if entry["Kind"] == "Define":
+                m = Macro(entry["Name"], entry["IsObjectLike"],
+                        entry["IsDefinitionLocationValid"], entry["DefinitionLocation"])
+                if m not in pd.mm:
+                    pd.mm[m] = set()
+            elif entry["Kind"] == 'InspectedByCPP':
+                pd.inspected_macro_names.add(entry["Name"])
+            elif entry["Kind"] == "Include":
+                if entry["IsIncludeLocationValid"]:
+                    pd.local_includes.add(entry["IncludeName"])
+            elif entry["Kind"] == 'Invocation':
+                del entry["Kind"]
+                i = Invocation(**entry)
+                m = Macro(i.Name,
+                        i.IsObjectLike,
+                        i.IsDefinitionLocationValid,
+                        i.DefinitionLocation)
+                # Only record unique invocations - two invocations may have the same
+                # location if they are the same nested invocation
+                if all([j.InvocationLocation != i.InvocationLocation for j in pd.mm[m]]):
+                    pd.mm[m].add(i)
 
     # src_pd only records preprocessor data about source macros
     src_pd = PreprocessorData(
