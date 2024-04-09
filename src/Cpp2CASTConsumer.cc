@@ -1129,6 +1129,12 @@ namespace cpp2c
                             auto CT = QT.getDesugaredType(Ctx)
                                           .getUnqualifiedType()
                                           .getCanonicalType();
+
+                            // If the argument is an array, decay to pointer
+                            if(CT->isArrayType()) {
+                                CT = Ctx.getArrayDecayedType(CT);
+                            }
+
                             ArgTypeStr = CT.getAsString();
                         }
                         IsAnyArgumentTypeDefinedAfterMacro |=
