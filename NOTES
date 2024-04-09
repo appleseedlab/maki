@@ -1,6 +1,0 @@
-We don't gather typeloc information anymore because it causes Clang to crash when running the macro analyzer on Linux.
-
-We used 8 cores to analyze macros in every program but Linux. We used 32 cores for Linux.
-
-time format string for evaluation/analysis runtime results %H:%M:%S.%f
-regex for time format: \d\d?:\d\d:\d\d\.\d\d\d\d\d\d
