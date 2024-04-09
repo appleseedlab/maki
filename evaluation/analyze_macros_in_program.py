@@ -106,8 +106,8 @@ def cpp2c(cpp2c_so_path: str,
             del args[j]
             break
 
-    # use clang-14
-    args[0] = 'clang-14'
+    # use clang-17
+    args[0] = 'clang-17'
     # pass cpp2c plugin shared library file
     args.insert(1, f'-fplugin={cpp2c_so_path}')
     # at the very end, specify that we are only doing syntactic analysis
