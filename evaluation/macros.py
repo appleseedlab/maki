@@ -23,6 +23,7 @@ class Macro:
 class Invocation:
     Name: str
     DefinitionLocation: str
+    EndDefinitionLocation: str
     InvocationLocation: str
     ASTKind: Literal['Decl', 'Stmt', 'TypeLoc', 'Expr']
     TypeSignature: str

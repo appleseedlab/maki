@@ -28,7 +28,7 @@ def main():
         output_file = os.path.join(ANALYSES_DIR, f'{dir_name}.json')
         # TODO: Add an option to overwrite analyses if they already exist
         if not os.path.isfile(output_file):
-            cmd = f'./analyze_transformations_in_program.py {result_fn} -o={output_file}'
+            cmd = f'python3 analyze_transformations_in_program.py {result_fn} -o={output_file}'
             print(cmd)
             t0 = datetime.now()
             run(cmd, shell=True)
