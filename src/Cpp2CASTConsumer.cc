@@ -18,6 +18,7 @@
 #include <functional>
 #include <set>
 #include <queue>
+#include <tuple>
 
 #include "assert.h"
 
@@ -374,19 +375,9 @@ namespace cpp2c
         // Print definition information
         for (auto &&Entry : DC->MacroNamesDefinitions)
         {
-            std::string Name = Entry.first,
-                        DefLocOrError;
-            bool Valid;
+            std::string Name = Entry.first;
 
             auto MD = Entry.second;
-            auto DefLoc = MD ? SM.getFileLoc(MD->getDefinition().getLocation())
-                             : clang::SourceLocation();
-            Valid = DefLoc.isValid();
-
-            // Try to get the full path to the DefLoc
-            auto Res = tryGetFullSourceLoc(SM, DefLoc);
-            Valid &= Res.first;
-            DefLocOrError = Res.second;
 
             auto MI = MD->getMacroInfo();
             assert(MI);
@@ -413,14 +404,18 @@ namespace cpp2c
             // End of body statement needs semicolon
             Body += ";";
 
+            auto [IsDefinitionLocationValid, DefinitionLocation] = tryGetFullSourceLoc(SM, MI->getDefinitionLoc());
+            auto [IsEndDefinitonLocationValid, EndDefinitionLocation] = tryGetFullSourceLoc(SM, MI->getDefinitionEndLoc());
+
             JSONPrinter printer{"Definition"};
             printer.add(
                 {
                     {"Name", Name},
                     {"IsObjectLike", MI->isObjectLike()},
-                    {"IsValid", Valid},
-                    {"DefinitionLocationOrError", DefLocOrError},
-                    {"Body", Body}
+                    {"IsDefinitionLocationValid", IsDefinitionLocationValid},
+                    {"Body", Body},
+                    {"DefinitionLocation", DefinitionLocation},
+                    {"EndDefinitionLocation", EndDefinitionLocation},
                 }
             );
 
@@ -626,7 +621,6 @@ namespace cpp2c
             std::string
                 Name,
                 DefinitionLocation,
-                EndDefinitionLocation,
                 InvocationLocation,
                 ASTKind,
                 TypeSignature;
@@ -740,20 +734,10 @@ namespace cpp2c
                 DC->InspectedMacroNames.end();
 
             // Definition location
-            auto Res = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionLoc());
-            IsDefinitionLocationValid = Res.first;
-            if (IsDefinitionLocationValid)
-                DefinitionLocation = Res.second;
-            auto [IsEndDefinitonLocationValid, EndLoc] = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionEndLoc());
-            if(IsEndDefinitonLocationValid)
-                EndDefinitionLocation = EndLoc;
-                
+            std::tie(IsDefinitionLocationValid, DefinitionLocation) = tryGetFullSourceLoc(SM, Exp->MI->getDefinitionLoc());
 
             // Invocation location
-            Res = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
-            IsInvocationLocationValid = Res.first;
-            if (IsInvocationLocationValid)
-                InvocationLocation = Res.second;
+            std::tie(IsInvocationLocationValid, InvocationLocation) = tryGetFullSourceLoc(SM, Exp->SpellingRange.getBegin());
 
             auto DefLoc = SM.getFileLoc(Exp->MI->getDefinitionLoc());
 
@@ -1168,7 +1152,6 @@ namespace cpp2c
                 {
                     {"Name", Name},
                     {"DefinitionLocation", DefinitionLocation},
-                    {"EndDefinitionLocation", EndDefinitionLocation},
                     {"InvocationLocation", InvocationLocation},
                     {"ASTKind", ASTKind},
                     {"TypeSignature", TypeSignature},
