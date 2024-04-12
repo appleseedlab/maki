@@ -2,7 +2,7 @@
 
 #include "assert.h"
 
-namespace cpp2c {
+namespace maki {
 DeclStmtTypeLoc::DeclStmtTypeLoc(const clang::Decl *D)
     : D(D) {
 }
@@ -44,4 +44,4 @@ clang::SourceRange DeclStmtTypeLoc::getSourceRange() {
     else
         assert(!"No node to dump");
 }
-} // namespace cpp2c
+} // namespace maki

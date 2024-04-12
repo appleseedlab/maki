@@ -6,7 +6,7 @@
 
 #include <queue>
 
-namespace cpp2c {
+namespace maki {
 
 MacroExpansionNode::~MacroExpansionNode() {
     for (auto &&Child : Children)
@@ -78,4 +78,4 @@ std::set<MacroExpansionNode *> MacroExpansionNode::getDescendants() {
     return Desc;
 }
 
-} // namespace cpp2c
+} // namespace maki

@@ -2,8 +2,8 @@
 
 #include <clang/Frontend/FrontendPluginRegistry.h>
 
-namespace cpp2c {
-class Cpp2CAction : public clang::PluginASTAction {
+namespace maki {
+class MakiAction : public clang::PluginASTAction {
 protected:
     std::unique_ptr<clang::ASTConsumer>
     CreateASTConsumer(clang::CompilerInstance &CI,
@@ -15,4 +15,4 @@ protected:
     clang::PluginASTAction::ActionType getActionType() override;
 };
 
-} // namespace cpp2c
+} // namespace maki

@@ -1,9 +1,9 @@
 #include "AlignmentMatchers.hh"
 #include "ExpansionMatchHandler.hh"
 
-namespace cpp2c {
+namespace maki {
 
-void storeChildren(cpp2c::DeclStmtTypeLoc DSTL,
+void storeChildren(maki::DeclStmtTypeLoc DSTL,
                    std::set<const clang::Stmt *> &MatchedStmts,
                    std::set<const clang::Decl *> &MatchedDecls,
                    std::set<const clang::TypeLoc *> &MatchedTypeLocs) {
@@ -44,7 +44,7 @@ void storeChildren(cpp2c::DeclStmtTypeLoc DSTL,
     // }
 }
 
-void findAlignedASTNodesForExpansion(cpp2c::MacroExpansionNode *Exp,
+void findAlignedASTNodesForExpansion(maki::MacroExpansionNode *Exp,
                                      clang::ASTContext &Ctx) {
     using namespace clang::ast_matchers;
     // Find AST nodes aligned with the entire invocation
@@ -132,4 +132,4 @@ void findAlignedASTNodesForExpansion(cpp2c::MacroExpansionNode *Exp,
         }
     }
 }
-} // namespace cpp2c
+} // namespace maki

@@ -2,7 +2,7 @@
 #include <llvm/Support/raw_ostream.h>
 #include <string>
 
-namespace cpp2c {
+namespace maki {
 static const constexpr bool Debug = false;
 static const constexpr char *delim = "\t";
 inline std::string fmt(std::string s) {
@@ -37,4 +37,4 @@ template <typename... Ts> inline void debug(Ts... ts) {
         print(ts...);
 }
 
-} // namespace cpp2c
+} // namespace maki

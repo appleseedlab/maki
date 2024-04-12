@@ -9,7 +9,7 @@
 
 #include <vector>
 
-namespace cpp2c {
+namespace maki {
 class MacroExpansionArgument {
 public:
     // The name of the parameter this argument expands
@@ -17,7 +17,7 @@ public:
     // The raw tokens comprising this argument
     std::vector<clang::Token> Tokens;
     // The AST roots this argument aligns with, if any
-    std::vector<cpp2c::DeclStmtTypeLoc> AlignedRoots;
+    std::vector<maki::DeclStmtTypeLoc> AlignedRoots;
     // The number of times this argument is expanded in the body
     // of its corresponding macro definition.
     // If this argument is expanded properly, then this number
@@ -29,4 +29,4 @@ public:
     void dumpASTInfo(llvm::raw_fd_ostream &OS, clang::SourceManager &SM,
                      const clang::LangOptions &LO);
 };
-} // namespace cpp2c
+} // namespace maki

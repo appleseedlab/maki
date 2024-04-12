@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-namespace cpp2c {
+namespace maki {
 class IncludeCollector : public clang::PPCallbacks {
 public:
     std::vector<std::pair<clang::OptionalFileEntryRef, clang::SourceLocation> >
@@ -27,4 +27,4 @@ public:
                        const clang::Module *Imported,
                        clang::SrcMgr::CharacteristicKind FileType) override;
 };
-} // namespace cpp2c
+} // namespace maki

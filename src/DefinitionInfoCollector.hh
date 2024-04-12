@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-namespace cpp2c {
+namespace maki {
 class DefinitionInfoCollector : public clang::PPCallbacks {
 private:
     clang::SourceManager &SM;
@@ -42,4 +42,4 @@ public:
     void Ifndef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
                 const clang::MacroDefinition &MD) override;
 };
-} // namespace cpp2c
+} // namespace maki

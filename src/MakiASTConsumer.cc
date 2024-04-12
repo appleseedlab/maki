@@ -1,4 +1,4 @@
-#include "Cpp2CASTConsumer.hh"
+#include "MakiASTConsumer.hh"
 #include "ASTUtils.hh"
 #include "AlignmentMatchers.hh"
 #include "DeclCollectorMatchHandler.hh"
@@ -25,7 +25,7 @@
 // NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
 //          paren exprs
 
-namespace cpp2c {
+namespace maki {
 using namespace clang::ast_matchers;
 
 // Collect all subtrees of the given stmt using BFS
@@ -305,20 +305,20 @@ std::pair<bool, llvm::StringRef> isGlobalInclude(
     return { true, IncludedFileRealpath };
 }
 
-Cpp2CASTConsumer::Cpp2CASTConsumer(clang::CompilerInstance &CI) {
+MakiASTConsumer::MakiASTConsumer(clang::CompilerInstance &CI) {
     clang::Preprocessor &PP = CI.getPreprocessor();
     clang::ASTContext &Ctx = CI.getASTContext();
 
-    MF = new cpp2c::MacroForest(PP, Ctx);
-    IC = new cpp2c::IncludeCollector();
-    DC = new cpp2c::DefinitionInfoCollector(Ctx);
+    MF = new maki::MacroForest(PP, Ctx);
+    IC = new maki::IncludeCollector();
+    DC = new maki::DefinitionInfoCollector(Ctx);
 
-    PP.addPPCallbacks(std::unique_ptr<cpp2c::MacroForest>(MF));
-    PP.addPPCallbacks(std::unique_ptr<cpp2c::IncludeCollector>(IC));
-    PP.addPPCallbacks(std::unique_ptr<cpp2c::DefinitionInfoCollector>(DC));
+    PP.addPPCallbacks(std::unique_ptr<maki::MacroForest>(MF));
+    PP.addPPCallbacks(std::unique_ptr<maki::IncludeCollector>(IC));
+    PP.addPPCallbacks(std::unique_ptr<maki::DefinitionInfoCollector>(DC));
 }
 
-void Cpp2CASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
+void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     auto &SM = Ctx.getSourceManager();
     auto &LO = Ctx.getLangOpts();
 
@@ -641,7 +641,7 @@ void Cpp2CASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         // Next get AST information for top level invocations
         if (Exp->Depth == 0 && !Exp->InMacroArg) {
             debug("Top level invocation: ", Exp->Name.str());
-            cpp2c::findAlignedASTNodesForExpansion(Exp, Ctx);
+            maki::findAlignedASTNodesForExpansion(Exp, Ctx);
 
             //// Print macro info
 
@@ -1083,7 +1083,7 @@ void Cpp2CASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         printers.push_back(std::move(printer));
     }
 
-    cpp2c::JSONPrinter::printJSONArray(printers);
+    maki::JSONPrinter::printJSONArray(printers);
 
     // Only delete top level expansions since deconstructor deletes
     // nested expansions
@@ -1091,4 +1091,4 @@ void Cpp2CASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         if (Exp->Depth == 0)
             delete Exp;
 }
-} // namespace cpp2c
+} // namespace maki

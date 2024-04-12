@@ -1,6 +1,6 @@
 #include "DeclCollectorMatchHandler.hh"
 
-namespace cpp2c {
+namespace maki {
 void DeclCollectorMatchHandler::run(
     const clang::ast_matchers::MatchFinder::MatchResult &Result) {
     if (auto ST = Result.Nodes.getNodeAs<clang::Decl>("root"))
@@ -8,4 +8,4 @@ void DeclCollectorMatchHandler::run(
     else
         assert(!"Matched a non-Decl node");
 }
-} // namespace cpp2c
+} // namespace maki

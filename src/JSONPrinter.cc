@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace cpp2c {
+namespace maki {
 JSONPrinter::JSONPrinter(std::string k)
     : kind(std::move(k)) {
 }

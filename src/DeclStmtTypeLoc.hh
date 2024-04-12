@@ -4,7 +4,7 @@
 #include "clang/AST/Stmt.h"
 #include "clang/AST/TypeLoc.h"
 
-namespace cpp2c {
+namespace maki {
 class DeclStmtTypeLoc {
 private:
     inline void assertOneNonNull();
@@ -22,4 +22,4 @@ public:
 
     clang::SourceRange getSourceRange();
 };
-} // namespace cpp2c
+} // namespace maki

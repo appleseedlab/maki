@@ -1,6 +1,6 @@
 #include "ASTUtils.hh"
 
-namespace cpp2c {
+namespace maki {
 bool isInTree(const clang::Stmt *ST,
               std::function<bool(const clang::Stmt *)> pred) {
     if (!ST)
@@ -15,4 +15,4 @@ bool isInTree(const clang::Stmt *ST,
 
     return false;
 }
-} // namespace cpp2c
+} // namespace maki

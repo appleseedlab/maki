@@ -9,10 +9,10 @@
 
 #include <algorithm>
 
-namespace cpp2c {
+namespace maki {
 using namespace clang::ast_matchers;
 
-void storeChildren(cpp2c::DeclStmtTypeLoc DSTL,
+void storeChildren(maki::DeclStmtTypeLoc DSTL,
                    std::set<const clang::Stmt *> &MatchedStmts,
                    std::set<const clang::Decl *> &MatchedDecls,
                    std::set<const clang::TypeLoc *> &MatchedTypeLocs);
@@ -23,7 +23,7 @@ void storeChildren(cpp2c::DeclStmtTypeLoc DSTL,
 AST_POLYMORPHIC_MATCHER_P2(
     alignsWithExpansion,
     AST_POLYMORPHIC_SUPPORTED_TYPES(clang::Decl, clang::Stmt, clang::TypeLoc),
-    clang::ASTContext *, Ctx, cpp2c::MacroExpansionNode *, Expansion) {
+    clang::ASTContext *, Ctx, maki::MacroExpansionNode *, Expansion) {
     // Can't match an expansion with no tokens
     if (Expansion->DefinitionTokens.empty())
         return false;
@@ -512,6 +512,6 @@ AST_POLYMORPHIC_MATCHER_P2(
     return true;
 }
 
-void findAlignedASTNodesForExpansion(cpp2c::MacroExpansionNode *Exp,
+void findAlignedASTNodesForExpansion(maki::MacroExpansionNode *Exp,
                                      clang::ASTContext &Ctx);
 }

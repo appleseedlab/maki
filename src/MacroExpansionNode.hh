@@ -13,7 +13,7 @@
 #include <set>
 #include <vector>
 
-namespace cpp2c {
+namespace maki {
 class MacroExpansionNode {
 public:
     // Info about the macro this is an expansion of
@@ -79,4 +79,4 @@ public:
     std::set<MacroExpansionNode *> getDescendants();
 };
 
-} // namespace cpp2c
+} // namespace maki

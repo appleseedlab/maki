@@ -6,7 +6,7 @@
 #include <variant>
 #include <vector>
 
-namespace cpp2c {
+namespace maki {
 class JSONPrinter {
     using VariantType = std::variant<int, bool, std::string>;
     using KeyValuePair = std::pair<std::string, VariantType>;

@@ -1,6 +1,6 @@
 #include "StmtCollectorMatchHandler.hh"
 
-namespace cpp2c {
+namespace maki {
 void StmtCollectorMatchHandler::run(
     const clang::ast_matchers::MatchFinder::MatchResult &Result) {
     if (auto ST = Result.Nodes.getNodeAs<clang::Stmt>("root"))
@@ -8,4 +8,4 @@ void StmtCollectorMatchHandler::run(
     else
         assert(!"Matched a non-Stmt node");
 }
-} // namespace cpp2c
+} // namespace maki

@@ -18,11 +18,11 @@ include_directories(SYSTEM "${LLVM_INCLUDE_DIRS};${CLANG_INCLUDE_DIRS}")
 #===============================================================================
 # ADD THE TARGET
 #===============================================================================
-add_library(cpp2c SHARED
+add_library(maki SHARED
   ASTUtils.cc
   AlignmentMatchers.cc
-  Cpp2CAction.cc
-  Cpp2CASTConsumer.cc
+  MakiAction.cc
+  MakiASTConsumer.cc
   DefinitionInfoCollector.cc
   DeclStmtTypeLoc.cc
   DeclCollectorMatchHandler.cc
@@ -37,5 +37,5 @@ add_library(cpp2c SHARED
 
 # Allow undefined symbols in shared objects on Darwin (this is the default
 # behaviour on Linux)
-target_link_libraries(cpp2c
+target_link_libraries(maki
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")

@@ -1,6 +1,6 @@
 #include "IncludeCollector.hh"
 
-namespace cpp2c {
+namespace maki {
 void IncludeCollector::InclusionDirective(
     clang::SourceLocation HashLoc, const clang::Token &IncludeTok,
     llvm::StringRef FileName, bool IsAngled,
@@ -10,4 +10,4 @@ void IncludeCollector::InclusionDirective(
     IncludeEntriesLocs.emplace_back(File, HashLoc);
 }
 
-} // namespace cpp2c
+} // namespace maki

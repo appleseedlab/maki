@@ -1,0 +1,3 @@
+exec @CLANG_C_COMPILER@ -fplugin=@PROJECT_BINARY_DIR@/lib/libmaki.so \
+     -fsyntax-only \
+     "$@"

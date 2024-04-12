@@ -1,6 +1,6 @@
 #include "DefinitionInfoCollector.hh"
 
-namespace cpp2c {
+namespace maki {
 
 DefinitionInfoCollector::DefinitionInfoCollector(clang::ASTContext &Ctx)
     : SM(Ctx.getSourceManager())
@@ -41,4 +41,4 @@ void DefinitionInfoCollector::Ifndef(clang::SourceLocation Loc,
     InspectedMacroNames.insert(Name);
 }
 
-} // namespace cpp2c
+} // namespace maki

@@ -4,7 +4,7 @@
 
 #include <assert.h>
 
-namespace cpp2c {
+namespace maki {
 void ExpansionMatchHandler::run(
     const clang::ast_matchers::MatchFinder::MatchResult &Result) {
     if (const auto D = Result.Nodes.getNodeAs<clang::Decl>("root"))
@@ -16,4 +16,4 @@ void ExpansionMatchHandler::run(
     else
         assert(!"Matched a node that was node a Decl/Stmt/TypeLoc");
 }
-} // namespace cpp2c
+} // namespace maki

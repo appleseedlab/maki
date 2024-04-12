@@ -3,7 +3,7 @@
 #include "clang/Basic/SourceManager.h"
 #include "clang/Lex/Lexer.h"
 
-namespace cpp2c {
+namespace maki {
 void MacroExpansionArgument::dumpASTInfo(llvm::raw_fd_ostream &OS,
                                          clang::SourceManager &SM,
                                          const clang::LangOptions &LO) {
@@ -23,4 +23,4 @@ void MacroExpansionArgument::dumpASTInfo(llvm::raw_fd_ostream &OS,
         llvm::errs() << "None\n";
 }
 
-} // namespace cpp2c
+} // namespace maki

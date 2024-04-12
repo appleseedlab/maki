@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace cpp2c {
+namespace maki {
 class ExpansionMatchHandler
     : public clang::ast_matchers::MatchFinder::MatchCallback {
 public:
@@ -16,4 +16,4 @@ public:
     virtual void
     run(const clang::ast_matchers::MatchFinder::MatchResult &Result) override;
 };
-} // namespace cpp2c
+} // namespace maki

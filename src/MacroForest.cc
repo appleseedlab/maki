@@ -12,7 +12,7 @@
 // TODO:    Check if we should treat expansions written in scratch space
 //          differently from other expansions
 
-namespace cpp2c {
+namespace maki {
 
 inline clang::SourceRange getSpellingRange(clang::ASTContext &Ctx,
                                            clang::SourceLocation B,
@@ -155,4 +155,4 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
     }
 }
 
-} // namespace cpp2c
+} // namespace maki

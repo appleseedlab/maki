@@ -8,12 +8,12 @@
 #include <stack>
 #include <vector>
 
-namespace cpp2c {
+namespace maki {
 class MacroForest : public clang::PPCallbacks {
 public:
     clang::Preprocessor &PP;
     clang::ASTContext &Ctx;
-    std::vector<cpp2c::MacroExpansionNode *> Expansions;
+    std::vector<maki::MacroExpansionNode *> Expansions;
 
     // Whether or not the current expansion is within a macro argument
     bool InMacroArg = false;
@@ -22,7 +22,7 @@ public:
     // The invocations in this stack should only ever be previous
     // siblings of the current invocation, or the parent invocation
     // of the current invocation.
-    std::stack<cpp2c::MacroExpansionNode *> InvocationStack;
+    std::stack<maki::MacroExpansionNode *> InvocationStack;
 
     MacroForest(clang::Preprocessor &PP, clang::ASTContext &Ctx);
 
@@ -31,4 +31,4 @@ public:
                       clang::SourceRange Range,
                       const clang::MacroArgs *Args) override;
 };
-} // namespace cpp2c
+} // namespace maki
