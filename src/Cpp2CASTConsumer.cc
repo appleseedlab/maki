@@ -392,17 +392,10 @@ namespace cpp2c
             to get the body of the macro expansion without a loop, but this lacks info for each token, we also don't need to preserve whitespace.
             */
 
-            // If macro is a function, must have return statement
-            if (MI->isFunctionLike())
-                Body += "return ";
-
             // Append the token to the body
             for (auto& token : MI->tokens() ) {
                 Body += MF->PP.getSpelling(token);
             } 
-
-            // End of body statement needs semicolon
-            Body += ";";
 
             auto [IsDefinitionLocationValid, DefinitionLocation] = tryGetFullSourceLoc(SM, MI->getDefinitionLoc());
             auto [IsEndDefinitonLocationValid, EndDefinitionLocation] = tryGetFullSourceLoc(SM, MI->getDefinitionEndLoc());
