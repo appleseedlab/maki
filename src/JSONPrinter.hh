@@ -20,7 +20,7 @@ private:
 public:
     JSONPrinter(std::string kind);
 
-    void add(std::initializer_list<std::pair<std::string, VariantType> > pairs);
+    void add(std::initializer_list<std::pair<std::string, VariantType>> pairs);
     void printJSONObject() const;
     std::string generateJSONproperty(const std::string &key,
                                      const int &value) const;

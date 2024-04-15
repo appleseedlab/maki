@@ -15,7 +15,7 @@
 namespace maki {
 class IncludeCollector : public clang::PPCallbacks {
 public:
-    std::vector<std::pair<clang::OptionalFileEntryRef, clang::SourceLocation> >
+    std::vector<std::pair<clang::OptionalFileEntryRef, clang::SourceLocation>>
         IncludeEntriesLocs;
 
     void

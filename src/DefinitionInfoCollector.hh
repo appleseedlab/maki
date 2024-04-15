@@ -19,7 +19,7 @@ private:
     const clang::LangOptions &LO;
 
 public:
-    std::vector<std::pair<std::string, const clang::MacroDirective *> >
+    std::vector<std::pair<std::string, const clang::MacroDirective *>>
         MacroNamesDefinitions;
     std::set<std::string> InspectedMacroNames;
 

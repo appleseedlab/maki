@@ -8,7 +8,7 @@ JSONPrinter::JSONPrinter(std::string k)
 }
 
 void JSONPrinter::add(
-    std::initializer_list<std::pair<std::string, VariantType> > pairs) {
+    std::initializer_list<std::pair<std::string, VariantType>> pairs) {
     for (const auto &pair : pairs) {
         data.emplace_back(pair);
     }
