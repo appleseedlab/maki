@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.4)
-project(cpp2c)
+project(maki)
 enable_testing()
 
 
@@ -54,7 +54,7 @@ message("CLANG STATUS:
 include_directories(SYSTEM "${LLVM_INCLUDE_DIRS};${CLANG_INCLUDE_DIRS}")
 
 #===============================================================================
-# 3. cpp2c BUILD CONFIGURATION
+# 3. maki BUILD CONFIGURATION
 #===============================================================================
 # Use the same C++ standard as LLVM does
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
