@@ -531,44 +531,55 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         assert(Exp->MI);
 
         // String properties
-        std::string Name, DefinitionLocation, InvocationLocation, ASTKind,
-            TypeSignature;
+        std::string ASTKind;
+        std::string DefinitionLocation;
+        std::string InvocationLocation;
+        std::string Name;
+        std::string TypeSignature;
 
         // Integer properties
-        int InvocationDepth, NumASTRoots, NumArguments;
+        int InvocationDepth = 0;
+        int NumArguments = 0;
+        int NumASTRoots = 0;
 
         // Boolean properties
-        bool HasStringification, HasTokenPasting, HasAlignedArguments,
-            HasSameNameAsOtherDeclaration,
-
-            IsExpansionControlFlowStmt,
-
-            DoesBodyReferenceMacroDefinedAfterMacro,
-            DoesBodyReferenceDeclDeclaredAfterMacro, DoesBodyContainDeclRefExpr,
-            DoesSubexpressionExpandedFromBodyHaveLocalType,
-            DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro,
-
-            DoesAnyArgumentHaveSideEffects, DoesAnyArgumentContainDeclRefExpr,
-
-            IsHygienic, IsDefinitionLocationValid, IsInvocationLocationValid,
-            IsObjectLike, IsInvokedInMacroArgument,
-            IsNamePresentInCPPConditional, IsExpansionICE,
-
-            IsExpansionTypeNull, IsExpansionTypeAnonymous,
-            IsExpansionTypeLocalType, IsExpansionTypeDefinedAfterMacro,
-            IsExpansionTypeVoid,
-
-            IsAnyArgumentTypeNull, IsAnyArgumentTypeAnonymous,
-            IsAnyArgumentTypeLocalType, IsAnyArgumentTypeDefinedAfterMacro,
-            IsAnyArgumentTypeVoid,
-
-            IsInvokedWhereModifiableValueRequired,
-            IsInvokedWhereAddressableValueRequired, IsInvokedWhereICERequired,
-
-            IsAnyArgumentExpandedWhereModifiableValueRequired,
-            IsAnyArgumentExpandedWhereAddressableValueRequired,
-            IsAnyArgumentConditionallyEvaluated, IsAnyArgumentNeverExpanded,
-            IsAnyArgumentNotAnExpression;
+        bool DoesAnyArgumentContainDeclRefExpr = false;
+        bool DoesAnyArgumentHaveSideEffects = false;
+        bool DoesBodyContainDeclRefExpr = false;
+        bool DoesBodyReferenceDeclDeclaredAfterMacro = false;
+        bool DoesBodyReferenceMacroDefinedAfterMacro = false;
+        bool DoesSubexpressionExpandedFromBodyHaveLocalType = false;
+        bool DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro = false;
+        bool HasAlignedArguments = false;
+        bool HasSameNameAsOtherDeclaration = false;
+        bool HasStringification = false;
+        bool HasTokenPasting = false;
+        bool IsAnyArgumentConditionallyEvaluated = false;
+        bool IsAnyArgumentExpandedWhereAddressableValueRequired = false;
+        bool IsAnyArgumentExpandedWhereModifiableValueRequired = false;
+        bool IsAnyArgumentNeverExpanded = false;
+        bool IsAnyArgumentNotAnExpression = false;
+        bool IsAnyArgumentTypeAnonymous = false;
+        bool IsAnyArgumentTypeDefinedAfterMacro = false;
+        bool IsAnyArgumentTypeLocalType = false;
+        bool IsAnyArgumentTypeNull = false;
+        bool IsAnyArgumentTypeVoid = false;
+        bool IsDefinitionLocationValid = false;
+        bool IsExpansionControlFlowStmt = false;
+        bool IsExpansionICE = false;
+        bool IsExpansionTypeAnonymous = false;
+        bool IsExpansionTypeDefinedAfterMacro = false;
+        bool IsExpansionTypeLocalType = false;
+        bool IsExpansionTypeNull = false;
+        bool IsExpansionTypeVoid = false;
+        bool IsHygienic = false;
+        bool IsInvocationLocationValid = false;
+        bool IsInvokedInMacroArgument = false;
+        bool IsInvokedWhereAddressableValueRequired = false;
+        bool IsInvokedWhereICERequired = false;
+        bool IsInvokedWhereModifiableValueRequired = false;
+        bool IsNamePresentInCPPConditional = false;
+        bool IsObjectLike = false;
 
         Name = Exp->Name.str();
         InvocationDepth = Exp->Depth;
