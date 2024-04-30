@@ -39,6 +39,48 @@ To easily run the Clang plugin, run its wrapper script like so:
 where `filename` is the name of the C file whose macro usage you would like to
 analyze.
 
+## Testing
+
+Maki's test suite is located in the `tests/Tests` directory and automated with
+[LLVM LIT](https://llvm.org/docs/CommandGuide/lit.html) and
+[`FileCheck`](https://llvm.org/docs/CommandGuide/FileCheck.html).
+
+### Testing dependencies
+
+- The Python `lit` script from [PyPi](https://pypi.org/project/lit/):
+
+  ```bash
+  python3 -m pip install lit
+  ```
+
+- `FileCheck` as one of LLVM's dev dependencies:
+
+  ```bash
+  sudo apt install llvm-dev
+  ```
+
+- `jq` from your package manager, e.g.,
+
+  ```bash
+  sudo apt install jq
+  ```
+
+### Running the test suite
+
+From the project root, run the following command to configure Maki with testing
+enabled and to run its test suite:
+
+```bash
+cmake -S . -B build/ \
+    -DMAKI_ENABLE_TESTING=ON \
+    -DLLVM_EXTERNAL_LIT=<lit_path> \
+    -DFILECHECK_PATH=<filecheck_path>
+cmake --build build/ -t check-maki --parallel
+```
+
+Where `<lit_path>` and `<filecheck_path>` are the paths to your `lit` Python
+script and `FileCheck` binary, respectively.
+
 ## Contributing
 
 Developers must format their code using
