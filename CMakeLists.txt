@@ -94,3 +94,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 #===============================================================================
 add_subdirectory(src)
 add_subdirectory(wrappers)
+
+option(MAKI_ENABLE_TESTING "Controls whether to build Maki's test suite" OFF)
+if (${MAKI_ENABLE_TESTING})
+  enable_testing()
+  include(AddLLVM)          # For LLVM lit test suite.
+  add_subdirectory(test)
+endif()
