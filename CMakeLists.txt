@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.13.4)
 project(maki)
-enable_testing()
-
 
 #===============================================================================
 # 1. VERIFY CLANG INSTALLATION DIR
