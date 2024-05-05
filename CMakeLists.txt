@@ -5,20 +5,20 @@ project(maki)
 # 1. VERIFY CLANG INSTALLATION DIR
 #===============================================================================
 # Set this to a valid Clang installation dir
-#set(CT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
-set(CT_LLVM_INSTALL_DIR "/usr")
+#set(MAKI_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
+set(MAKI_LLVM_INSTALL_DIR "/usr")
 
 # A bit of a sanity checking
-set(CT_LLVM_INCLUDE_DIR "${CT_LLVM_INSTALL_DIR}/include/llvm-17")
-if(NOT EXISTS "${CT_LLVM_INCLUDE_DIR}")
+set(MAKI_LLVM_INCLUDE_DIR "${MAKI_LLVM_INSTALL_DIR}/include/llvm-17")
+if(NOT EXISTS "${MAKI_LLVM_INCLUDE_DIR}")
 message(FATAL_ERROR
-  " CT_LLVM_INSTALL_DIR (${CT_LLVM_INCLUDE_DIR}) is invalid.")
+  " MAKI_LLVM_INSTALL_DIR (${MAKI_LLVM_INCLUDE_DIR}) is invalid.")
 endif()
 
-set(CT_LLVM_CMAKE_FILE "${CT_LLVM_INSTALL_DIR}/lib/cmake/clang-17/ClangConfig.cmake")
-if(NOT EXISTS "${CT_LLVM_CMAKE_FILE}")
+set(MAKI_LLVM_CMAKE_FILE "${MAKI_LLVM_INSTALL_DIR}/lib/cmake/clang-17/ClangConfig.cmake")
+if(NOT EXISTS "${MAKI_LLVM_CMAKE_FILE}")
 message(FATAL_ERROR
-  " CT_LLVM_CMAKE_FILE (${CT_LLVM_CMAKE_FILE}) is invalid.")
+  " MAKI_LLVM_CMAKE_FILE (${MAKI_LLVM_CMAKE_FILE}) is invalid.")
 endif()
 
 #===============================================================================
@@ -26,8 +26,8 @@ endif()
 #    For more: http://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
 #===============================================================================
 set(CLANG_VERSION 17)
-list(APPEND CMAKE_PREFIX_PATH "${CT_LLVM_INSTALL_DIR}/lib/cmake/llvm-${CLANG_VERSION}/")
-list(APPEND CMAKE_PREFIX_PATH "${CT_LLVM_INSTALL_DIR}/lib/cmake/clang-${CLANG_VERSION}/")
+list(APPEND CMAKE_PREFIX_PATH "${MAKI_LLVM_INSTALL_DIR}/lib/cmake/llvm-${CLANG_VERSION}/")
+list(APPEND CMAKE_PREFIX_PATH "${MAKI_LLVM_INSTALL_DIR}/lib/cmake/clang-${CLANG_VERSION}/")
 
 find_package(Clang REQUIRED CONFIG)
 
@@ -40,7 +40,7 @@ endif()
 
 set(CLANG_C_COMPILER "clang-${CLANG_VERSION}")
 message(STATUS "Found Clang ${LLVM_PACKAGE_VERSION}")
-message(STATUS "Using ClangConfig.cmake in: ${CT_LLVM_INSTALL_DIR}")
+message(STATUS "Using ClangConfig.cmake in: ${MAKI_LLVM_INSTALL_DIR}")
 
 
 message("CLANG STATUS:
@@ -82,8 +82,8 @@ if (${SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG} EQUAL "1")
 endif()
 
 # Set the build directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIREMAKIORY "${PROJEMAKI_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIREMAKIORY "${PROJEMAKI_BINARY_DIR}/lib")
 
 #===============================================================================
 # 4. ADD SUB-TARGETS
