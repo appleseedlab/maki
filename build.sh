@@ -1,4 +1,2 @@
-mkdir -p build
-cd build
-cmake ..
-make
+cmake -S . -B build -G Ninja
+cmake --build build --parallel

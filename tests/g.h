@@ -1,1 +1,0 @@
-static const int g = 0;
