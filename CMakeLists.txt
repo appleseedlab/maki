@@ -67,17 +67,13 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   endif()
 endif()
 
-# TODO(Brent): Instead of specifying  the library output directory directly, we
-# should just rename the "src" dir to "lib"
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
-
 #===============================================================================
 # 4. ADD SUB-TARGETS
 # Doing this at the end so that all definitions and link/include paths are
 # available for the sub-projects.
 #===============================================================================
 
-add_subdirectory(src)
+add_subdirectory(lib)
 add_subdirectory(wrappers)
 
 # Add test suite.
