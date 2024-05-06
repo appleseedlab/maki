@@ -9,6 +9,9 @@ if(FILECHECK_PATH STREQUAL "FILECHECK_PATH-NOTFOUND")
   message(FATAL_ERROR "Could not find FileCheck")
 endif()
 
+# Set this variable for configuring the test suite.
+set(CLANG_C_COMPILER "clang-${MAKI_CLANG_VERSION}")
+
 configure_lit_site_cfg(
   ${CMAKE_CURRENT_SOURCE_DIR}/lit.site.cfg.py.in
   ${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg.py
