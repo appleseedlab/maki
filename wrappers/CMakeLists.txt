@@ -1,1 +1,1 @@
-configure_file(maki.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/maki @ONLY)
+configure_file(maki.in ${PROJECT_BINARY_DIR}/bin/maki @ONLY)
