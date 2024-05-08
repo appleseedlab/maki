@@ -52,6 +52,9 @@ message(STATUS "Includes (clang)    ${CLANG_INCLUDE_DIRS}")
 message(STATUS "Includes (llvm)     ${LLVM_INCLUDE_DIRS}")
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
+# Set this variable for configuring the test suite and wrapper script.
+set(CLANG_C_COMPILER "clang-${MAKI_CLANG_VERSION}")
+
 #===============================================================================
 # 3. maki BUILD CONFIGURATION
 #===============================================================================
