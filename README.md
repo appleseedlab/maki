@@ -113,9 +113,9 @@ Note: If you are on an AMD64 architecture, please follow these steps:
 ```#!/bin/bash```
 
 2. Change the now second line of the docker file from:
-```FROM: ubuntu:22.04```
+```FROM ubuntu:22.04```
 to:
-```FROM: --platform=linux/amd64 ubuntu:22.04.```
+```FROM --platform=linux/amd64 ubuntu:22.04```
 
 3. Build the Docker image with the following command:
 ```docker build --platform linux/amd64  -t maki:1.0 .```
