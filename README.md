@@ -81,6 +81,48 @@ cmake --build build/ -t check-maki --parallel
 Where `<lit_path>` and `<filecheck_path>` are the paths to your `lit` Python
 script and `FileCheck` binary, respectively.
 
+### Using the provided Docker image to test
+
+Build the Docker image with the following command in the project root:
+```bash
+docker build -t maki:1.0 .
+```
+
+Run the Docker image:
+```bash
+docker run -it maki:1.0
+```
+
+Build the plugin:
+```bash
+bash build.sh
+```
+
+Run the test suite:
+```bash
+cmake -S . -B build/ \
+    -DMAKI_ENABLE_TESTING=ON \
+    -DLLVM_EXTERNAL_LIT=/usr/local/bin/lit \
+    -DFILECHECK_PATH=/lib/llvm-17/bin/FileCheck
+cmake --build build/ -t check-maki --parallel
+```
+
+Note: If you are on an AMD64 architecture, please follow these steps:
+
+1. Add the following line to the beginning of the Dockerfile:
+```#!/bin/bash```
+
+2. Change the now second line of the docker file from:
+```FROM: ubuntu:22.04```
+to:
+```FROM: --platform=linux/amd64 ubuntu:22.04.```
+
+3. Build the Docker image with the following command:
+```docker build --platform linux/amd64  -t maki:1.0 .```
+
+4. Run the Docker image:
+```docker run --platform linux/amd64 --name maki-container -it maki:1.0```
+
 ## Contributing
 
 Developers must format their code using
