@@ -27,7 +27,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_arguments.c:2:9",
 // CHECK:     "InvocationLocation": "{{.*}}/Tests/local_type_arguments.c:10:5",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "struct local_t[5] ID(struct local_t * x)",
+// CHECK:     "TypeSignature": "struct local_t * ID(struct local_t * x)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
