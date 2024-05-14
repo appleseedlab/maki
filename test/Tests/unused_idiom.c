@@ -1,33 +1,33 @@
 // RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
-#define ID(x) x
-int main(int argc, char const *argv[]) {
-    struct local_t {
-        int x;
-    };
-    struct local_t l, *l_ptr, l_arr[5];
-    ID(l);
-    ID(l_ptr);
-    ID(l_arr);
+
+#define UNUSED(A) ((void)A)
+
+int main(void) {
+    int a = 0;
+    char c = 'a';
+    UNUSED(a);
+    UNUSED(c);
+    UNUSED("a");
     return 0;
 }
 
 // CHECK: [
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ID",
+// CHECK:     "Name": "UNUSED",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_arguments.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_arguments.c:2:15"
+// CHECK:     "Body": "((void)A)",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/unused_idiom.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unused_idiom.c:3:27"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "ID",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_arguments.c:2:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/local_type_arguments.c:10:5",
+// CHECK:     "Name": "UNUSED",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/unused_idiom.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/unused_idiom.c:10:5",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "struct local_t * ID(struct local_t * x)",
+// CHECK:     "TypeSignature": "void UNUSED(char * A)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
@@ -42,7 +42,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
 // CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
-// CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
+// CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -52,13 +52,13 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsExpansionICE": false,
 // CHECK:     "IsExpansionTypeNull": false,
 // CHECK:     "IsExpansionTypeAnonymous": false,
-// CHECK:     "IsExpansionTypeLocalType": true,
-// CHECK:     "IsExpansionTypeDefinedAfterMacro": true,
-// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": true,
 // CHECK:     "IsAnyArgumentTypeNull": false,
 // CHECK:     "IsAnyArgumentTypeAnonymous": false,
-// CHECK:     "IsAnyArgumentTypeLocalType": true,
-// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": true,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
 // CHECK:     "IsAnyArgumentTypeVoid": false,
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
@@ -71,11 +71,11 @@ int main(int argc, char const *argv[]) {
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "ID",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_arguments.c:2:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/local_type_arguments.c:8:5",
+// CHECK:     "Name": "UNUSED",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/unused_idiom.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/unused_idiom.c:8:5",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "struct local_t ID(struct local_t x)",
+// CHECK:     "TypeSignature": "void UNUSED(int A)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
@@ -100,13 +100,13 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsExpansionICE": false,
 // CHECK:     "IsExpansionTypeNull": false,
 // CHECK:     "IsExpansionTypeAnonymous": false,
-// CHECK:     "IsExpansionTypeLocalType": true,
-// CHECK:     "IsExpansionTypeDefinedAfterMacro": true,
-// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": true,
 // CHECK:     "IsAnyArgumentTypeNull": false,
 // CHECK:     "IsAnyArgumentTypeAnonymous": false,
-// CHECK:     "IsAnyArgumentTypeLocalType": true,
-// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": true,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
 // CHECK:     "IsAnyArgumentTypeVoid": false,
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
@@ -119,11 +119,11 @@ int main(int argc, char const *argv[]) {
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "ID",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_arguments.c:2:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/local_type_arguments.c:9:5",
+// CHECK:     "Name": "UNUSED",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/unused_idiom.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/unused_idiom.c:9:5",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "struct local_t * ID(struct local_t * x)",
+// CHECK:     "TypeSignature": "void UNUSED(char A)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
@@ -148,13 +148,13 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsExpansionICE": false,
 // CHECK:     "IsExpansionTypeNull": false,
 // CHECK:     "IsExpansionTypeAnonymous": false,
-// CHECK:     "IsExpansionTypeLocalType": true,
-// CHECK:     "IsExpansionTypeDefinedAfterMacro": true,
-// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": true,
 // CHECK:     "IsAnyArgumentTypeNull": false,
 // CHECK:     "IsAnyArgumentTypeAnonymous": false,
-// CHECK:     "IsAnyArgumentTypeLocalType": true,
-// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": true,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
 // CHECK:     "IsAnyArgumentTypeVoid": false,
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
