@@ -19,6 +19,10 @@ RUN apt-add-repository 'deb https://apt.kitware.com/ubuntu/ jammy main'
 RUN apt update
 RUN apt install -y cmake
 
+# Get Python for LIT
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt install -y python3.10 python3-pip
+RUN python3 -m pip install lit
 
 RUN apt install -y ninja-build
 RUN apt install -y jq
