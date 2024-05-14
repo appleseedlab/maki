@@ -22,11 +22,6 @@ RUN apt install -y cmake
 
 RUN apt install -y ninja-build
 RUN apt install -y jq
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt install -y python3.10 python3-pip
-RUN python3 -m pip install -U numpy
-RUN python3 -m pip install -U scan-build
-RUN python3 -m pip install lit
 
 RUN apt install -y lsb-release
 RUN wget https://apt.llvm.org/llvm.sh
@@ -57,7 +52,6 @@ RUN apt install -y xaw3dg-dev
 
 # Cleanup
 RUN rm llvm.sh
-# RUN git clone https://github.com/appleseedlab/maki.git
 
 # Copy maki files into docker
 COPY . .
