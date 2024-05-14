@@ -920,7 +920,14 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         auto CT = QT.getDesugaredType(Ctx)
                                       .getUnqualifiedType()
                                       .getCanonicalType();
+
+                        // If the expansion is an array, decay to pointer
+                        if (CT->isArrayType()) {
+                            CT = Ctx.getArrayDecayedType(CT);
+                        }
+
                         TypeSignature = CT.getAsString();
+
                     }
                     IsExpansionTypeDefinedAfterMacro =
                         hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
