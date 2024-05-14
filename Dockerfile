@@ -29,26 +29,10 @@ RUN chmod +x llvm.sh
 RUN ./llvm.sh 17 all
 RUN apt install -y llvm-dev
 
-# Install dependencies for evaluation programs
+# Install dependencies
 RUN apt install -y libcurl4-gnutls-dev
 RUN apt install -y libzstd-dev
 RUN apt install -y libedit-dev
-RUN apt install -y autoconf
-RUN apt install -y ed
-RUN apt install -y gnutls-bin
-RUN apt install -y help2man
-RUN apt install -y libgif-dev
-RUN apt install -y libjpeg-dev
-RUN apt install -y libmotif-dev
-RUN apt install -y libpng-dev
-RUN apt install -y libtiff-dev
-RUN apt install -y libx11-dev
-RUN apt install -y libxmu-dev
-RUN apt install -y libxmu-headers
-RUN apt install -y libxpm-dev
-RUN apt install -y texinfo
-RUN apt install -y unzip
-RUN apt install -y xaw3dg-dev
 
 # Cleanup
 RUN rm llvm.sh
