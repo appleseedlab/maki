@@ -927,7 +927,6 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         }
 
                         TypeSignature = CT.getAsString();
-
                     }
                     IsExpansionTypeDefinedAfterMacro =
                         hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
@@ -954,7 +953,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         TypeSignature += ", ";
                     ArgNum += 1;
 
-                    IsAnyArgumentNeverExpanded = Arg.AlignedRoots.empty();
+                    IsAnyArgumentNeverExpanded |= Arg.AlignedRoots.empty();
 
                     if (Arg.AlignedRoots.empty())
                         continue;
