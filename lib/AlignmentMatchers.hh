@@ -6,8 +6,9 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Lex/Lexer.h"
-
-#include <algorithm>
+#include <clang/AST/DeclBase.h>
+#include <clang/AST/Stmt.h>
+#include <clang/AST/TypeLoc.h>
 
 namespace maki {
 using namespace clang::ast_matchers;
@@ -25,17 +26,20 @@ AST_POLYMORPHIC_MATCHER_P2(
     AST_POLYMORPHIC_SUPPORTED_TYPES(clang::Decl, clang::Stmt, clang::TypeLoc),
     clang::ASTContext *, Ctx, maki::MacroExpansionNode *, Expansion) {
     // Can't match an expansion with no tokens
-    if (Expansion->DefinitionTokens.empty())
+    if (Expansion->DefinitionTokens.empty()) {
         return false;
+    }
 
     // Can't match an expansion with an invalid location
-    if (Node.getBeginLoc().isInvalid() || Node.getEndLoc().isInvalid())
+    if (Node.getBeginLoc().isInvalid() || Node.getEndLoc().isInvalid()) {
         return false;
+    }
 
-    auto DefB = Expansion->DefinitionTokens.front().getLocation();
-    auto DefE = Expansion->DefinitionTokens.back().getLocation();
-    if (DefB.isInvalid() || DefE.isInvalid())
+    auto DefinitionBegin = Expansion->DefinitionTokens.front().getLocation();
+    auto DefinitionEnd = Expansion->DefinitionTokens.back().getLocation();
+    if (DefinitionBegin.isInvalid() || DefinitionEnd.isInvalid()) {
         return false;
+    }
 
     // These sets keep track of nodes we have already matched,
     // so that we do not match their subtrees as well
@@ -48,17 +52,17 @@ AST_POLYMORPHIC_MATCHER_P2(
 
     auto &SM = Ctx->getSourceManager();
 
-    auto NodeSpB = SM.getSpellingLoc(Node.getBeginLoc());
-    auto NodeSpE = SM.getSpellingLoc(Node.getEndLoc());
-    auto NodeExB = SM.getExpansionLoc(Node.getBeginLoc());
-    auto NodeExE = SM.getExpansionLoc(Node.getEndLoc());
-    auto ImmMacroCallerLocSpB =
+    auto NodeSpellingBegin = SM.getSpellingLoc(Node.getBeginLoc());
+    auto NodeSpellingEnd = SM.getSpellingLoc(Node.getEndLoc());
+    auto NodeExpansionBegin = SM.getExpansionLoc(Node.getBeginLoc());
+    auto NodeExpansionEnd = SM.getExpansionLoc(Node.getEndLoc());
+    auto ImmediateMacroCallerSpellingBegin =
         SM.getSpellingLoc(SM.getImmediateMacroCallerLoc(Node.getBeginLoc()));
-    auto ImmMacroCallerLocSpE =
+    auto ImmediateMacroCallerSpellingEnd =
         SM.getSpellingLoc(SM.getImmediateMacroCallerLoc(Node.getEndLoc()));
-    auto ImmMacroCallerLocExB =
+    auto ImmediateMacroCallerExpansionBegin =
         SM.getExpansionLoc(SM.getImmediateMacroCallerLoc(Node.getBeginLoc()));
-    auto ImmMacroCallerLocExE =
+    auto ImmediateMacroCallerExpansionEnd =
         SM.getExpansionLoc(SM.getImmediateMacroCallerLoc(Node.getEndLoc()));
     DeclStmtTypeLoc DSTL(&Node);
 
@@ -67,29 +71,30 @@ AST_POLYMORPHIC_MATCHER_P2(
     // Preliminary check to ensure that the spelling range of the top
     // level expansion includes the expansion range of the given node
     // NOTE: We may not need this check, but I should doublecheck
-    if (!Expansion->SpellingRange.fullyContains(NodeExE)) {
+    if (!Expansion->SpellingRange.fullyContains(NodeExpansionEnd)) {
         if (debug) {
             llvm::errs() << "Node mismatch <exp end not in expansion "
                             "spelling range>\n";
-            if (DSTL.ST)
+            if (DSTL.ST) {
                 DSTL.ST->dumpColor();
-            else if (DSTL.D)
+            } else if (DSTL.D) {
                 DSTL.D->dumpColor();
-            else if (DSTL.TL) {
+            } else if (DSTL.TL) {
                 auto QT = DSTL.TL->getType();
-                if (!QT.isNull())
+                if (!QT.isNull()) {
                     QT.dump();
-                else
+                } else {
                     llvm::errs() << "<Null type>\n";
+                }
             }
             llvm::errs() << "Expansion spelling range: ";
             Expansion->SpellingRange.dump(SM);
-            llvm::errs() << "NodeSpB: ";
-            NodeSpB.dump(SM);
-            llvm::errs() << "NodeSpE: ";
-            NodeSpE.dump(SM);
+            llvm::errs() << "NodeSpellingBegin: ";
+            NodeSpellingBegin.dump(SM);
+            llvm::errs() << "NodeSpellingEnd: ";
+            NodeSpellingEnd.dump(SM);
             llvm::errs() << "Expansion end: ";
-            NodeExE.dump(SM);
+            NodeExpansionEnd.dump(SM);
             llvm::errs() << "Imm macro caller loc: ";
             SM.getImmediateMacroCallerLoc(Node.getBeginLoc()).dump(SM);
             llvm::errs() << "Imm macro caller loc end: ";
@@ -109,51 +114,55 @@ AST_POLYMORPHIC_MATCHER_P2(
     //    nested macro invocation in the body of the macro's definition
 
     // Set up case 2
-    clang::SourceLocation ArgB;
+    clang::SourceLocation ArgBegin;
     if (auto Arg = Expansion->ArgDefBeginsWith) {
         if (!Arg->Tokens.empty()) {
             auto L = Arg->Tokens.front().getLocation();
-            if (L.isValid())
-                ArgB = SM.getSpellingLoc(L);
+            if (L.isValid()) {
+                ArgBegin = SM.getSpellingLoc(L);
+            }
         }
     }
-    clang::SourceLocation ArgE;
+    clang::SourceLocation ArgEnd;
     if (auto Arg = Expansion->ArgDefEndsWith) {
         if (!Arg->Tokens.empty()) {
             auto L = Arg->Tokens.back().getLocation();
-            if (L.isValid())
-                ArgE = SM.getSpellingLoc(L);
+            if (L.isValid()) {
+                ArgEnd = SM.getSpellingLoc(L);
+            }
         }
     }
 
     // Set up case 3
-    clang::SourceLocation B = Node.getBeginLoc();
-    while (SM.getImmediateMacroCallerLoc(B).isMacroID() &&
-           SM.getImmediateMacroCallerLoc(B).isValid())
-        B = SM.getImmediateMacroCallerLoc(B);
-    B = SM.getSpellingLoc(B);
+    clang::SourceLocation Begin = Node.getBeginLoc();
+    while (SM.getImmediateMacroCallerLoc(Begin).isMacroID() &&
+           SM.getImmediateMacroCallerLoc(Begin).isValid()) {
+        Begin = SM.getImmediateMacroCallerLoc(Begin);
+    }
+    Begin = SM.getSpellingLoc(Begin);
 
-    clang::SourceLocation E = Node.getEndLoc();
-    while (SM.getImmediateMacroCallerLoc(E).isMacroID() &&
-           SM.getImmediateMacroCallerLoc(E).isValid())
-        E = SM.getImmediateMacroCallerLoc(E);
-    E = SM.getSpellingLoc(E);
+    clang::SourceLocation End = Node.getEndLoc();
+    while (SM.getImmediateMacroCallerLoc(End).isMacroID() &&
+           SM.getImmediateMacroCallerLoc(End).isValid()) {
+        End = SM.getImmediateMacroCallerLoc(End);
+    }
+    End = SM.getSpellingLoc(End);
 
     bool frontAligned =
         // Case 1
-        (DefB == NodeSpB) ||
+        (DefinitionBegin == NodeSpellingBegin) ||
         // Case 2
-        (ArgB.isValid() && ArgB == NodeSpB) ||
+        (ArgBegin.isValid() && ArgBegin == NodeSpellingBegin) ||
         // Case 3
-        (DefB == B);
+        (DefinitionBegin == Begin);
 
     bool backAligned =
         // Case 1
-        (NodeSpE == DefE) ||
+        (NodeSpellingEnd == DefinitionEnd) ||
         // Case 2
-        (ArgE.isValid() && ArgE == NodeSpE) ||
+        (ArgEnd.isValid() && ArgEnd == NodeSpellingEnd) ||
         // Case 3
-        (DefE == E);
+        (DefinitionEnd == End);
 
     // Either the node aligns with the macro itself,
     // or one of its arguments.
@@ -177,10 +186,10 @@ AST_POLYMORPHIC_MATCHER_P2(
 
             llvm::errs() << "Node begin loc: ";
             Node.getBeginLoc().dump(SM);
-            llvm::errs() << "NodeExB: ";
-            NodeExB.dump(SM);
-            llvm::errs() << "NodeSpB: ";
-            NodeSpB.dump(SM);
+            llvm::errs() << "NodeExpansionBegin: ";
+            NodeExpansionBegin.dump(SM);
+            llvm::errs() << "NodeSpellingBegin: ";
+            NodeSpellingBegin.dump(SM);
             auto L1 = SM.getImmediateMacroCallerLoc(Node.getBeginLoc());
             auto L2 = SM.getImmediateMacroCallerLoc(L1);
             auto L3 = SM.getImmediateMacroCallerLoc(L2);
@@ -204,13 +213,13 @@ AST_POLYMORPHIC_MATCHER_P2(
             llvm::errs() << "Top macro caller loc: ";
             SM.getTopMacroCallerLoc(Node.getBeginLoc()).dump(SM);
             llvm::errs() << "Imm macro caller expansion loc: ";
-            ImmMacroCallerLocExB.dump(SM);
+            ImmediateMacroCallerExpansionBegin.dump(SM);
             llvm::errs() << "Imm macro caller spelling loc: ";
-            ImmMacroCallerLocSpB.dump(SM);
+            ImmediateMacroCallerSpellingBegin.dump(SM);
             llvm::errs() << "Immediate spelling loc: ";
             ImmSpellingLoc.dump(SM);
-            llvm::errs() << "DefB: ";
-            DefB.dump(SM);
+            llvm::errs() << "DefinitionBegin: ";
+            DefinitionBegin.dump(SM);
             if (Expansion->ArgDefBeginsWith &&
                 !(Expansion->ArgDefBeginsWith->Tokens.empty())) {
                 llvm::errs() << "ArgDefBeginsWith front token loc: ";
@@ -240,20 +249,20 @@ AST_POLYMORPHIC_MATCHER_P2(
 
             llvm::errs() << "Node end loc: ";
             Node.getEndLoc().dump(SM);
-            llvm::errs() << "NodeExE: ";
-            NodeExE.dump(SM);
-            llvm::errs() << "NodeSpE: ";
-            NodeSpE.dump(SM);
+            llvm::errs() << "NodeExpansionEnd: ";
+            NodeExpansionEnd.dump(SM);
+            llvm::errs() << "NodeSpellingEnd: ";
+            NodeSpellingEnd.dump(SM);
             llvm::errs() << "Imm macro caller end loc: ";
             SM.getImmediateMacroCallerLoc(Node.getEndLoc()).dump(SM);
             llvm::errs() << "Imm macro caller expansion end loc: ";
-            ImmMacroCallerLocExE.dump(SM);
+            ImmediateMacroCallerExpansionEnd.dump(SM);
             llvm::errs() << "Imm macro caller spelling end loc: ";
-            ImmMacroCallerLocSpE.dump(SM);
+            ImmediateMacroCallerSpellingEnd.dump(SM);
             llvm::errs() << "Immediate spelling end loc: ";
             ImmSpellingEndLoc.dump(SM);
-            llvm::errs() << "DefE: ";
-            DefE.dump(SM);
+            llvm::errs() << "DefinitionEnd: ";
+            DefinitionEnd.dump(SM);
             if (Expansion->ArgDefEndsWith &&
                 !(Expansion->ArgDefEndsWith->Tokens.empty())) {
                 llvm::errs() << "ArgDefEndsWith back token loc: ";
@@ -265,25 +274,28 @@ AST_POLYMORPHIC_MATCHER_P2(
 
     // Check that this node has not been matched before
     bool foundNodeBefore = false;
-    if (DSTL.ST && MatchedStmts.find(DSTL.ST) != MatchedStmts.end())
+    if (DSTL.ST && MatchedStmts.find(DSTL.ST) != MatchedStmts.end()) {
         foundNodeBefore = true;
-    else if (DSTL.D && MatchedDecls.find(DSTL.D) != MatchedDecls.end())
+    } else if (DSTL.D && MatchedDecls.find(DSTL.D) != MatchedDecls.end()) {
         foundNodeBefore = true;
-    else if (DSTL.TL && MatchedTypeLocs.find(DSTL.TL) != MatchedTypeLocs.end())
+    } else if (DSTL.TL &&
+               MatchedTypeLocs.find(DSTL.TL) != MatchedTypeLocs.end()) {
         foundNodeBefore = true;
+    }
     if (foundNodeBefore) {
         if (debug) {
             llvm::errs() << "Found node before\n";
-            if (DSTL.ST)
+            if (DSTL.ST) {
                 DSTL.ST->dumpColor();
-            else if (DSTL.D)
+            } else if (DSTL.D) {
                 DSTL.D->dumpColor();
-            else if (DSTL.TL) {
+            } else if (DSTL.TL) {
                 auto QT = DSTL.TL->getType();
-                if (!QT.isNull())
+                if (!QT.isNull()) {
                     QT.dump();
-                else
+                } else {
                     llvm::errs() << "<Null type>\n";
+                }
             }
         }
         return false;
@@ -294,14 +306,17 @@ AST_POLYMORPHIC_MATCHER_P2(
     bool foundParentBefore = false;
     for (auto P : Ctx->getParents(Node)) {
         if (auto PST = P.template get<clang::Stmt>()) {
-            if (MatchedStmts.find(PST) != MatchedStmts.end())
+            if (MatchedStmts.find(PST) != MatchedStmts.end()) {
                 foundParentBefore = true;
+            }
         } else if (auto DP = P.template get<clang::Decl>()) {
-            if (MatchedDecls.find(DP) != MatchedDecls.end())
+            if (MatchedDecls.find(DP) != MatchedDecls.end()) {
                 foundParentBefore = true;
+            }
         } else if (auto DTL = P.template get<clang::TypeLoc>()) {
-            if (MatchedTypeLocs.find(DTL) != MatchedTypeLocs.end())
+            if (MatchedTypeLocs.find(DTL) != MatchedTypeLocs.end()) {
                 foundParentBefore = true;
+            }
         }
     }
     if (foundParentBefore) {
@@ -317,16 +332,17 @@ AST_POLYMORPHIC_MATCHER_P2(
 
     if (debug) {
         llvm::errs() << "Matched " << Expansion->Name << " with:\n";
-        if (DSTL.ST)
+        if (DSTL.ST) {
             DSTL.ST->dumpColor();
-        else if (DSTL.D)
+        } else if (DSTL.D) {
             DSTL.D->dumpColor();
-        else if (DSTL.TL) {
+        } else if (DSTL.TL) {
             auto QT = DSTL.TL->getType();
-            if (!QT.isNull())
+            if (!QT.isNull()) {
                 QT.dump();
-            else
+            } else {
                 llvm::errs() << "<Null type>\n";
+            }
         }
     }
     return true;
@@ -342,27 +358,34 @@ AST_POLYMORPHIC_MATCHER_P2(
     // First ensure that the token list is not empty, because if it is,
     // then of course it is impossible for a node to be spelled from an
     // empty token list.
-    if (Tokens.empty())
+    if (Tokens.empty()) {
         return false;
+    }
 
     auto &SM = Ctx->getSourceManager();
 
-    auto NodeB = SM.getFileLoc(Node.getBeginLoc());
-    auto NodeE = SM.getFileLoc(Node.getEndLoc());
-    if (NodeB.isInvalid() || NodeE.isInvalid())
+    auto NodeBegin = SM.getFileLoc(Node.getBeginLoc());
+    auto NodeEnd = SM.getFileLoc(Node.getEndLoc());
+    if (NodeBegin.isInvalid() || NodeEnd.isInvalid()) {
         return false;
+    }
 
-    auto TokB = SM.getFileLoc(Tokens.front().getLocation());
+    auto TokenBegin = SM.getFileLoc(Tokens.front().getLocation());
     // Note: We do NOT use getEndLoc for the last token!
     auto TokE = SM.getFileLoc(Tokens.back().getLocation());
-    if (TokB.isInvalid() || TokE.isInvalid())
+    if (TokenBegin.isInvalid() || TokE.isInvalid()) {
         return false;
+    }
 
-    auto NodeImmMCB = SM.getImmediateMacroCallerLoc(Node.getBeginLoc());
-    auto NodeImmMCE = SM.getImmediateMacroCallerLoc(Node.getEndLoc());
+    auto NodeImmediateMacroCallerBegin =
+        SM.getImmediateMacroCallerLoc(Node.getBeginLoc());
+    auto NodeImmediateMacroCallerEnd =
+        SM.getImmediateMacroCallerLoc(Node.getEndLoc());
 
-    if (NodeImmMCB.isInvalid() || NodeImmMCE.isInvalid())
+    if (NodeImmediateMacroCallerBegin.isInvalid() ||
+        NodeImmediateMacroCallerEnd.isInvalid()) {
         return false;
+    }
 
     // These sets keep track of nodes we have already matched,
     // so that we do not match their subtrees as well
@@ -372,28 +395,31 @@ AST_POLYMORPHIC_MATCHER_P2(
 
     static const constexpr bool debug = false;
 
-    clang::SourceRange SpellingRange(NodeB, NodeE);
-    clang::SourceRange TokFileRange(TokB, TokE);
-    clang::SourceRange TokExpRange(SM.getExpansionLoc(TokB),
-                                   SM.getExpansionLoc(TokE));
-    clang::SourceRange ExpImmMacroCallerRange(SM.getExpansionLoc(NodeImmMCB),
-                                              SM.getExpansionLoc(NodeImmMCE));
+    clang::SourceRange SpellingRange(NodeBegin, NodeEnd);
+    clang::SourceRange TokenFileRange(TokenBegin, TokE);
+    clang::SourceRange TokenExpansionRange(SM.getExpansionLoc(TokenBegin),
+                                           SM.getExpansionLoc(TokE));
+    clang::SourceRange ExpansionImmediateMacroCallerRange(
+        SM.getExpansionLoc(NodeImmediateMacroCallerBegin),
+        SM.getExpansionLoc(NodeImmediateMacroCallerEnd));
 
     // Check that this node has not been matched before
     DeclStmtTypeLoc DSTL(&Node);
-    if (DSTL.ST && MatchedStmts.find(DSTL.ST) != MatchedStmts.end())
+    if (DSTL.ST && MatchedStmts.find(DSTL.ST) != MatchedStmts.end()) {
         return false;
-    else if (DSTL.D && MatchedDecls.find(DSTL.D) != MatchedDecls.end())
+    } else if (DSTL.D && MatchedDecls.find(DSTL.D) != MatchedDecls.end()) {
         return false;
-    else if (DSTL.TL && MatchedTypeLocs.find(DSTL.TL) != MatchedTypeLocs.end())
+    } else if (DSTL.TL &&
+               MatchedTypeLocs.find(DSTL.TL) != MatchedTypeLocs.end()) {
         return false;
+    }
 
     // Ensure that every token in the list is included
     // in the range spanned by this AST node
-    for (auto Tok : Tokens)
+    for (auto Tok : Tokens) {
         if (!(SpellingRange.fullyContains(
                   SM.getExpansionLoc(Tok.getLocation())) ||
-              ExpImmMacroCallerRange.fullyContains(
+              ExpansionImmediateMacroCallerRange.fullyContains(
                   SM.getExpansionLoc(Tok.getLocation())))) {
             if (DSTL.ST && debug) {
                 llvm::errs() << "Node mismatch <token not in range>\n";
@@ -402,26 +428,27 @@ AST_POLYMORPHIC_MATCHER_P2(
                 SpellingRange.dump(SM);
                 llvm::errs() << "Token loc: ";
                 Tok.getLocation().dump(SM);
-                llvm::errs() << "TokExpRange: ";
-                TokExpRange.dump(SM);
+                llvm::errs() << "TokenExpansionRange: ";
+                TokenExpansionRange.dump(SM);
                 llvm::errs() << "ExImmMacroCallerRange: ";
-                ExpImmMacroCallerRange.dump(SM);
+                ExpansionImmediateMacroCallerRange.dump(SM);
             }
             return false;
         }
+    }
 
     // Ensure that this node spans the same range
     // as the given token list
-    if (NodeB != TokB || NodeE != TokE) {
+    if (NodeBegin != TokenBegin || NodeEnd != TokE) {
         if (DSTL.ST && debug) {
             llvm::errs() << "Node mismatch <range mismatch>:\n";
             DSTL.ST->dumpColor();
-            llvm::errs() << "NodeB: ";
-            NodeB.dump(SM);
-            llvm::errs() << "NodeE: ";
-            NodeE.dump(SM);
-            llvm::errs() << "TokB: ";
-            TokB.dump(SM);
+            llvm::errs() << "NodeBegin: ";
+            NodeBegin.dump(SM);
+            llvm::errs() << "NodeEnd: ";
+            NodeEnd.dump(SM);
+            llvm::errs() << "TokenBegin: ";
+            TokenBegin.dump(SM);
             llvm::errs() << "TokE: ";
             TokE.dump(SM);
         }
@@ -432,48 +459,63 @@ AST_POLYMORPHIC_MATCHER_P2(
     // to other macros
     if (DSTL.ST) {
         std::vector<const clang::Stmt *> descendants;
-        for (auto &&child : DSTL.ST->children())
-            if (child)
-                descendants.push_back(child);
+        for (auto &&child : DSTL.ST->children()) {
+            // if (child) /* child should not be null */
+            descendants.push_back(child);
+        }
         while (!descendants.empty()) {
             auto cur = descendants.back();
             descendants.pop_back();
 
             // TODO: Might want to return false instead of continuing here
 
-            if (!cur)
+            if (!cur) {
                 continue;
+            }
 
-            auto CurB = cur->getEndLoc();
+            auto CurBegin = cur->getEndLoc();
             auto CurE = cur->getEndLoc();
 
-            if (CurB.isInvalid() || CurE.isInvalid())
+            if (CurBegin.isInvalid() || CurE.isInvalid()) {
                 continue;
+            }
 
-            auto CurFB = SM.getFileLoc(CurB);
-            auto CurFE = SM.getFileLoc(CurE);
+            auto CurFileLocBegin = SM.getFileLoc(CurBegin);
+            auto CurFileLocEnd = SM.getFileLoc(CurE);
 
-            if (CurFB.isInvalid() || CurFE.isInvalid())
+            if (CurFileLocBegin.isInvalid() || CurFileLocEnd.isInvalid()) {
                 continue;
+            }
 
-            clang::SourceRange FileRange(CurFB, CurFE);
+            clang::SourceRange FileRange(CurFileLocBegin, CurFileLocEnd);
 
-            auto CurImmMCB = SM.getImmediateMacroCallerLoc(CurB);
-            auto CurImmMCE = SM.getImmediateMacroCallerLoc(CurE);
+            auto CurrentImmedeiateMacroCallerBegin =
+                SM.getImmediateMacroCallerLoc(CurBegin);
+            auto CurrentImmediateMacroCallerEnd =
+                SM.getImmediateMacroCallerLoc(CurE);
 
-            if (CurImmMCB.isInvalid() || CurImmMCE.isInvalid())
+            if (CurrentImmedeiateMacroCallerBegin.isInvalid() ||
+                CurrentImmediateMacroCallerEnd.isInvalid()) {
                 continue;
+            }
 
-            auto CurImmMCExB = SM.getExpansionLoc(CurImmMCB);
-            auto CurImmMCExE = SM.getExpansionLoc(CurImmMCE);
+            auto CurrentImmedeiateMacroCallerExpansionBegin =
+                SM.getExpansionLoc(CurrentImmedeiateMacroCallerBegin);
+            auto CurrentImmedeiateMacroCallerExpansionEnd =
+                SM.getExpansionLoc(CurrentImmediateMacroCallerEnd);
 
-            if (CurImmMCExB.isInvalid() || CurImmMCExE.isInvalid())
+            if (CurrentImmedeiateMacroCallerExpansionBegin.isInvalid() ||
+                CurrentImmedeiateMacroCallerExpansionEnd.isInvalid()) {
                 continue;
+            }
 
-            clang::SourceRange ExpImmMCRange(CurImmMCExB, CurImmMCExE);
+            clang::SourceRange CurrentImmediateMacroCallerExpansionRange(
+                CurrentImmedeiateMacroCallerExpansionBegin,
+                CurrentImmedeiateMacroCallerExpansionEnd);
 
-            if (!(TokFileRange.fullyContains(FileRange) ||
-                  TokExpRange == ExpImmMCRange)) {
+            if (!(TokenFileRange.fullyContains(FileRange) ||
+                  TokenExpansionRange ==
+                      CurrentImmediateMacroCallerExpansionRange)) {
                 if (debug) {
                     llvm::errs() << "Node mismatch <descendant>:\n";
                     DSTL.ST->dumpColor();
@@ -500,8 +542,8 @@ AST_POLYMORPHIC_MATCHER_P2(
             }
 
             for (auto &&child : cur->children())
-                if (child)
-                    descendants.push_back(child);
+                // if (child) /* child should not be null */
+                descendants.push_back(child);
         }
     }
 
