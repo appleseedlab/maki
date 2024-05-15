@@ -11,7 +11,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "A_AND_B",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((A)&&(B))",
+// CHECK:     "Body": "( ( A ) && ( B ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/logical_and.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/logical_and.c:2:34"
 // CHECK:   },

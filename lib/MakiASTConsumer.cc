@@ -15,9 +15,12 @@
 #include "clang/Lex/Preprocessor.h"
 
 #include <algorithm>
+#include <clang/Basic/SourceLocation.h>
+#include <clang/Lex/Token.h>
 #include <functional>
 #include <queue>
 #include <set>
+#include <string>
 #include <tuple>
 
 #include "assert.h"
@@ -334,22 +337,21 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         auto MI = MD->getMacroInfo();
         assert(MI);
 
+        // Append each token to the body, separated by spaces. We separate
+        // tokens by spaces to avoid accidentally concatenating tokens in the
+        // output (e.g. 1 and 2 becoming 12). We get the spelling of each
+        // individual token, and not the spelling of the whole source range
+        // using the Lexer, so as to avoid including backslashes and newlines in
+        // our emitted definition (which would be annoying for downstream tools
+        // to have to escape).
         std::string Body;
-
-        /*
-        We could use
-
-        Body =
-        clang::Lexer::getSourceText(clang::CharSourceRange::getCharRange(Exp->DefinitionRange.getBegin(),
-        Exp->DefinitionRange.getEnd().getLocWithOffset(1)), SM, LO).str();
-
-        to get the body of the macro expansion without a loop, but this lacks
-        info for each token, we also don't need to preserve whitespace.
-        */
-
-        // Append the token to the body
+        bool first = true;
         for (auto &token : MI->tokens()) {
+            if (!first) {
+                Body += " ";
+            }
             Body += MF->PP.getSpelling(token);
+            first = false;
         }
 
         auto [IsDefinitionLocationValid, DefinitionLocation] =

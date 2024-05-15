@@ -33,7 +33,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "M",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1+((structA){.x=1}.x)",
+// CHECK:     "Body": "1 + ( ( struct A ) { . x = 1 } . x )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:14:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:14:38"
 // CHECK:   },
@@ -90,7 +90,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "F",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1+a.x",
+// CHECK:     "Body": "1 + a . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:15:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:15:20"
 // CHECK:   },
@@ -147,7 +147,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "M",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1+((structA){.x=1}.x)",
+// CHECK:     "Body": "1 + ( ( struct A ) { . x = 1 } . x )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:2:38"
 // CHECK:   },
@@ -204,7 +204,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "F",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1+a.x",
+// CHECK:     "Body": "1 + a . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:3:20"
 // CHECK:   },
@@ -213,7 +213,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)+(b))",
+// CHECK:     "Body": "( ( a ) + ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:4:29"
 // CHECK:   },

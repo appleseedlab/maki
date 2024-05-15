@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "STRINGIFY",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "#x",
+// CHECK:     "Body": "# x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stringification.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:2:23"
 // CHECK:   },
@@ -120,7 +120,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "h1",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "\"<h1>\"#t\"</h1>\"",
+// CHECK:     "Body": "\"<h1>\" # t \"</h1>\"",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stringification.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:3:25"
 // CHECK:   },
@@ -177,7 +177,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "p",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "\"<p>\"STRINGIFY(t)\"</p>\"",
+// CHECK:     "Body": "\"<p>\" STRINGIFY ( t ) \"</p>\"",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stringification.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:4:33"
 // CHECK:   },

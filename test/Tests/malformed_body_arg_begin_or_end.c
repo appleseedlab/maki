@@ -19,7 +19,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "x+y",
+// CHECK:     "Body": "x + y",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_body_arg_begin_or_end.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_body_arg_begin_or_end.c:2:23"
 // CHECK:   },

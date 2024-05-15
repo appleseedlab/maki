@@ -11,7 +11,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "A_OR_B",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((A)||(B))",
+// CHECK:     "Body": "( ( A ) || ( B ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/logical_or.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/logical_or.c:2:33"
 // CHECK:   },

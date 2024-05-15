@@ -24,7 +24,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "DO_NOTHING",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "docontinue;while(0)",
+// CHECK:     "Body": "do continue ; while ( 0 )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/continue_inside_do_while.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/continue_inside_do_while.c:6:13"
 // CHECK:   },

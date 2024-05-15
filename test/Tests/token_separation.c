@@ -1,39 +1,59 @@
 // RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 
-// COM: Redefine strcpy to avoid including <string.h>
-char *strcpy(char *d, const char *s) {
-    return (char *)0;
-}
-
-// COM: This is the real test
-#define bc_strcpy(d, l, s) strcpy(d, s)
+// COM: We don't want to keep backslashes and newlines
+#define MULTI_LINE a \
+b \
+            c
+// COM: If we don't separate these tokens correctly, then we'd break this
+// typecast
+#define CAST(c) ((unsigned int)(unsigned char)(c))
+// COM: Empty bodies shouldn't cause problems
+#define EMPTY
 
 int main(void) {
-    char *s = (char *)0;
-    bc_strcpy(s, 0, "abc");
+    int c = 0;
+    CAST(c);
     return 0;
 }
 
 // CHECK: [
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "bc_strcpy",
+// CHECK:     "Name": "EMPTY",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:11:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:11:9"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "MULTI_LINE",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a b c",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:6:13"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "CAST",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "strcpy ( d , s )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/bc_strcpy.c:9:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bc_strcpy.c:9:39"
+// CHECK:     "Body": "( ( unsigned int ) ( unsigned char ) ( c ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:9:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:9:50"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "bc_strcpy",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/bc_strcpy.c:9:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/bc_strcpy.c:13:5",
+// CHECK:     "Name": "CAST",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:9:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/token_separation.c:15:5",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "char * bc_strcpy(char * d, , char * s)",
+// CHECK:     "TypeSignature": "unsigned int CAST(int c)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
-// CHECK:     "NumArguments": 3,
+// CHECK:     "NumArguments": 1,
 // CHECK:     "HasStringification": false,
 // CHECK:     "HasTokenPasting": false,
 // CHECK:     "HasAlignedArguments": true,
@@ -41,7 +61,7 @@ int main(void) {
 // CHECK:     "IsExpansionControlFlowStmt": false,
 // CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
 // CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
-// CHECK:     "DoesBodyContainDeclRefExpr": true,
+// CHECK:     "DoesBodyContainDeclRefExpr": false,
 // CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
 // CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
@@ -69,7 +89,7 @@ int main(void) {
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
-// CHECK:     "IsAnyArgumentNeverExpanded": true,
+// CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   }
 // CHECK: ]

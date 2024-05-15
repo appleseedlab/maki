@@ -11,7 +11,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "INT_X",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "intx",
+// CHECK:     "Body": "int x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_decl.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_decl.c:2:19"
 // CHECK:   },

@@ -178,7 +178,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "UINT",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "unsignedint",
+// CHECK:     "Body": "unsigned int",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:3:23"
 // CHECK:   },
@@ -283,7 +283,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "LL",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "longlong",
+// CHECK:     "Body": "long long",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:4:17"
 // CHECK:   },
@@ -388,7 +388,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ULL",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "unsignedlonglong",
+// CHECK:     "Body": "unsigned long long",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:5:27"
 // CHECK:   },

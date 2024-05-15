@@ -145,7 +145,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "THREE_X",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(ADD(ONE+ONE,TWO))",
+// CHECK:     "Body": "( ADD ( ONE + ONE , TWO ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:12:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:12:37"
 // CHECK:   },
@@ -202,7 +202,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "FOUR_X",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(ADD((ADD(ONE,ONE)),TWO))",
+// CHECK:     "Body": "( ADD ( ( ADD ( ONE , ONE ) ) , TWO ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:13:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:13:42"
 // CHECK:   },
@@ -259,7 +259,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "FIVE_X",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(ONE+(ADD((ADD(ONE,ONE)),ONE+ONE)))",
+// CHECK:     "Body": "( ONE + ( ADD ( ( ADD ( ONE , ONE ) ) , ONE + ONE ) ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:14:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:14:56"
 // CHECK:   },
@@ -316,7 +316,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)+(b))",
+// CHECK:     "Body": "( ( a ) + ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:2:29"
 // CHECK:   },
@@ -2590,7 +2590,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "TWO",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(ADD(ONE,ONE))",
+// CHECK:     "Body": "( ADD ( ONE , ONE ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:4:27"
 // CHECK:   },
@@ -3031,7 +3031,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "THREE",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(ADD(ONE,TWO))",
+// CHECK:     "Body": "( ADD ( ONE , TWO ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:5:29"
 // CHECK:   },
@@ -3088,7 +3088,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "FOUR",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(ADD(TWO,TWO))",
+// CHECK:     "Body": "( ADD ( TWO , TWO ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:6:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:6:28"
 // CHECK:   },
@@ -3193,7 +3193,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "FIVE",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(ADD(TWO,FOUR))",
+// CHECK:     "Body": "( ADD ( TWO , FOUR ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:7:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:7:29"
 // CHECK:   },

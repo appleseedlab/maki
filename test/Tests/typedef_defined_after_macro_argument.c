@@ -52,7 +52,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "F",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(a).x",
+// CHECK:     "Body": "( a ) . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:22:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:22:18"
 // CHECK:   },
@@ -109,7 +109,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "G",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(*(a)).x",
+// CHECK:     "Body": "( * ( a ) ) . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:23:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:23:21"
 // CHECK:   },
@@ -166,7 +166,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "H",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(a[0]).x",
+// CHECK:     "Body": "( a [ 0 ] ) . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:24:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:24:21"
 // CHECK:   },
@@ -223,7 +223,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "I",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((Int)i)",
+// CHECK:     "Body": "( ( Int ) i )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:25:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:25:21"
 // CHECK:   },
@@ -280,7 +280,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "F",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(a).x",
+// CHECK:     "Body": "( a ) . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:2:18"
 // CHECK:   },
@@ -337,7 +337,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "G",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(*(a)).x",
+// CHECK:     "Body": "( * ( a ) ) . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:3:21"
 // CHECK:   },
@@ -394,7 +394,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "H",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(a[0]).x",
+// CHECK:     "Body": "( a [ 0 ] ) . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:4:21"
 // CHECK:   },
@@ -451,7 +451,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "I",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(i)",
+// CHECK:     "Body": "( i )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:5:16"
 // CHECK:   },

@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "STATIC",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((structlocal_t){.x=1})",
+// CHECK:     "Body": "( ( struct local_t ) { . x = 1 } )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_body.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_body.c:2:43"
 // CHECK:   },
@@ -73,7 +73,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "PTR",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "&((structlocal_t){.x=1})",
+// CHECK:     "Body": "& ( ( struct local_t ) { . x = 1 } )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_body.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_body.c:3:41"
 // CHECK:   },

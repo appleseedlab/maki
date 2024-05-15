@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "MAX",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)>(b)?(a):(b))",
+// CHECK:     "Body": "( ( a ) > ( b ) ? ( a ) : ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/argument_side_effects.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/argument_side_effects.c:2:41"
 // CHECK:   },

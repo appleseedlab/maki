@@ -14,7 +14,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "APPEND_0",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "x##0",
+// CHECK:     "Body": "x ## 0",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_pasting.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_pasting.c:2:24"
 // CHECK:   },
@@ -167,7 +167,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD_10",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "x+APPEND_0(1)",
+// CHECK:     "Body": "x + APPEND_0 ( 1 )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_pasting.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_pasting.c:3:33"
 // CHECK:   },

@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADDR_OF_G",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(&(g))",
+// CHECK:     "Body": "( & ( g ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/unaddressed_arguments.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unaddressed_arguments.c:2:24"
 // CHECK:   },
@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "DEREF",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(*(x))",
+// CHECK:     "Body": "( * ( x ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/unaddressed_arguments.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unaddressed_arguments.c:3:23"
 // CHECK:   },

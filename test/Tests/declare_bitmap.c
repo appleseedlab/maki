@@ -128,7 +128,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "Name": "__KERNEL_DIV_ROUND_UP",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(((n)+(d)-1)/(d))",
+// CHECK:     "Body": "( ( ( n ) + ( d ) - 1 ) / ( d ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:4:57"
 // CHECK:   },
@@ -242,7 +242,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "Name": "BITS_PER_TYPE",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(sizeof(type)*BITS_PER_BYTE)",
+// CHECK:     "Body": "( sizeof ( type ) * BITS_PER_BYTE )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:6:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:6:58"
 // CHECK:   },
@@ -299,7 +299,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "Name": "BITS_TO_LONGS",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "__KERNEL_DIV_ROUND_UP(nr,BITS_PER_TYPE(long))",
+// CHECK:     "Body": "__KERNEL_DIV_ROUND_UP ( nr , BITS_PER_TYPE ( long ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:7:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:7:72"
 // CHECK:   },
@@ -356,7 +356,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "Name": "DECLARE_BITMAP",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "unsignedlongname[BITS_TO_LONGS(bits)]",
+// CHECK:     "Body": "unsigned long name [ BITS_TO_LONGS ( bits ) ]",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:8:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:8:74"
 // CHECK:   },

@@ -10,7 +10,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "SUCCESS",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "return0",
+// CHECK:     "Body": "return 0",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/return.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/return.c:2:24"
 // CHECK:   },

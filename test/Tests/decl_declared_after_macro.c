@@ -152,7 +152,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "F",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(f())",
+// CHECK:     "Body": "( f ( ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:21:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:21:17"
 // CHECK:   },
@@ -209,7 +209,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "X",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(x)",
+// CHECK:     "Body": "( x )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:22:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:22:13"
 // CHECK:   },
@@ -371,7 +371,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "F",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(f())",
+// CHECK:     "Body": "( f ( ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:2:17"
 // CHECK:   },
@@ -428,7 +428,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "G",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(g)",
+// CHECK:     "Body": "( g )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:5:13"
 // CHECK:   },
@@ -638,7 +638,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "X",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(x)",
+// CHECK:     "Body": "( x )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:9:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_declared_after_macro.c:9:13"
 // CHECK:   },
