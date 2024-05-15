@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "BYTE",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "4+4",
+// CHECK:     "Body": "4 + 4",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/bit_field.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bit_field.c:3:18"
 // CHECK:   },

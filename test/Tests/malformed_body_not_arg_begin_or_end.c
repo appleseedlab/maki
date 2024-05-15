@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ONE_PLUS_X_PLUS_2",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1+x+2",
+// CHECK:     "Body": "1 + x + 2",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:2:38"
 // CHECK:   },
@@ -171,7 +171,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "TWICE_X_PLUS_3",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1+x+1+x+1",
+// CHECK:     "Body": "1 + x + 1 + x + 1",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:3:43"
 // CHECK:   },

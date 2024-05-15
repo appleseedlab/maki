@@ -74,7 +74,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "x+y",
+// CHECK:     "Body": "x + y",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wellformed_body_arg_begin_or_end.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wellformed_body_arg_begin_or_end.c:3:23"
 // CHECK:   },
@@ -179,7 +179,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "FOO",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "x+y+x+y",
+// CHECK:     "Body": "x + y + x + y",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wellformed_body_arg_begin_or_end.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wellformed_body_arg_begin_or_end.c:4:31"
 // CHECK:   },

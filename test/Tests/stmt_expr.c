@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "PLUS_2",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "({inty=2;X+2;})",
+// CHECK:     "Body": "( { int y = 2 ; X + 2 ; } )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stmt_expr.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stmt_expr.c:6:6"
 // CHECK:   },

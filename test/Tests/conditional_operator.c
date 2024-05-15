@@ -11,7 +11,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "IF_A_THEN_B_ELSE_C",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)?(b):(c))",
+// CHECK:     "Body": "( ( a ) ? ( b ) : ( c ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_operator.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_operator.c:2:53"
 // CHECK:   },

@@ -90,7 +90,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "MULT",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)*(b))",
+// CHECK:     "Body": "( ( a ) * ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/invokes_later_defined_macro.c:10:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/invokes_later_defined_macro.c:10:30"
 // CHECK:   },
@@ -195,7 +195,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "TAU",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(MULT(PI,TWO))",
+// CHECK:     "Body": "( MULT ( PI , TWO ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/invokes_later_defined_macro.c:11:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/invokes_later_defined_macro.c:11:27"
 // CHECK:   },

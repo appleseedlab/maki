@@ -41,7 +41,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "GET_X_STATIC",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a.x",
+// CHECK:     "Body": "a . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:17:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:17:27"
 // CHECK:   },
@@ -98,7 +98,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "GET_X_PTR",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a->x",
+// CHECK:     "Body": "a -> x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:18:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:18:25"
 // CHECK:   },
@@ -155,7 +155,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "GET_X_0",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a[0].x",
+// CHECK:     "Body": "a [ 0 ] . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:19:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:19:25"
 // CHECK:   },
@@ -212,7 +212,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "GET_X_STATIC",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a.x",
+// CHECK:     "Body": "a . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:2:27"
 // CHECK:   },
@@ -269,7 +269,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "GET_X_PTR",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a->x",
+// CHECK:     "Body": "a -> x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:3:25"
 // CHECK:   },
@@ -326,7 +326,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "GET_X_0",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a[0].x",
+// CHECK:     "Body": "a [ 0 ] . x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:4:25"
 // CHECK:   },

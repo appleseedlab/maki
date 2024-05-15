@@ -17,7 +17,7 @@ int main(void) {
 // CHECK:     "Name": "UNUSED",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((void)A)",
+// CHECK:     "Body": "( ( void ) A )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/unused_idiom.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unused_idiom.c:3:27"
 // CHECK:   },

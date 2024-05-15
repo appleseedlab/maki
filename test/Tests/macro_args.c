@@ -28,7 +28,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "FOO",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a+b+a+b",
+// CHECK:     "Body": "a + b + a + b",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:2:31"
 // CHECK:   },
@@ -238,7 +238,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "PAREN",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(a)",
+// CHECK:     "Body": "( a )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:4:20"
 // CHECK:   },
@@ -343,7 +343,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)+(b))",
+// CHECK:     "Body": "( ( a ) + ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:5:29"
 // CHECK:   },
@@ -1072,7 +1072,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "SUB",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)-(b))",
+// CHECK:     "Body": "( ( a ) - ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:6:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:6:29"
 // CHECK:   },
@@ -1321,7 +1321,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "MULT_MALFORMED",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a*b",
+// CHECK:     "Body": "a * b",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:7:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:7:33"
 // CHECK:   },
@@ -1378,7 +1378,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD_MALFORMED",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a+b",
+// CHECK:     "Body": "a + b",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:8:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:8:33"
 // CHECK:   },

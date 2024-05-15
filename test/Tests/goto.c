@@ -13,7 +13,7 @@ end:
 // CHECK:     "Name": "GOTO_END",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "gotoend",
+// CHECK:     "Body": "goto end",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/goto.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/goto.c:2:23"
 // CHECK:   },

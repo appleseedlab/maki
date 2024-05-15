@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "WRAP",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "do{CALL_TO_F;}while(0)",
+// CHECK:     "Body": "do { CALL_TO_F ; } while ( 0 )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/void_arg.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/void_arg.c:5:15"
 // CHECK:   },

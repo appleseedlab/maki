@@ -73,7 +73,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "GT_X",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((z)>x)",
+// CHECK:     "Body": "( ( z ) > x )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/unhygienic.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unhygienic.c:3:25"
 // CHECK:   },

@@ -20,7 +20,7 @@ int main(void) {
 // CHECK:     "Name": "bc_strcpy",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "strcpy(d,s)",
+// CHECK:     "Body": "strcpy ( d , s )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/bc_strcpy.c:9:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bc_strcpy.c:9:39"
 // CHECK:   },

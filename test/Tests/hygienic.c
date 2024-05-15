@@ -22,7 +22,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "MAX",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)>(b)?(a):(b))",
+// CHECK:     "Body": "( ( a ) > ( b ) ? ( a ) : ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/hygienic.c:2:41"
 // CHECK:   },
@@ -127,7 +127,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "GT_g",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((x)>(g))",
+// CHECK:     "Body": "( ( x ) > ( g ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/hygienic.c:4:27"
 // CHECK:   },
@@ -184,7 +184,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "DO_NOTHING",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "do{intx=0;x++;}while(0)",
+// CHECK:     "Body": "do { int x = 0 ; x ++ ; } while ( 0 )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/hygienic.c:9:15"
 // CHECK:   },

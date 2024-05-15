@@ -19,7 +19,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "TWO",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(1+((structlocal_t){.x=1}).x)",
+// CHECK:     "Body": "( 1 + ( ( struct local_t ) { . x = 1 } ) . x )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_subexpr.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_subexpr.c:2:48"
 // CHECK:   },
@@ -76,7 +76,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ONE_PLUS_X",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(1+(l).x)",
+// CHECK:     "Body": "( 1 + ( l ) . x )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_subexpr.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_subexpr.c:3:33"
 // CHECK:   },
@@ -133,7 +133,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)+(b))",
+// CHECK:     "Body": "( ( a ) + ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_subexpr.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_subexpr.c:4:29"
 // CHECK:   },

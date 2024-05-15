@@ -74,7 +74,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a+b",
+// CHECK:     "Body": "a + b",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wellformed_arguments.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wellformed_arguments.c:3:23"
 // CHECK:   },
@@ -131,7 +131,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "MUL",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a*b",
+// CHECK:     "Body": "a * b",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wellformed_arguments.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wellformed_arguments.c:4:22"
 // CHECK:   },
@@ -188,7 +188,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "AND",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a&&b",
+// CHECK:     "Body": "a && b",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wellformed_arguments.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wellformed_arguments.c:5:23"
 // CHECK:   },

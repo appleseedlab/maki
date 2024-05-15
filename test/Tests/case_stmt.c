@@ -127,7 +127,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADD",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((a)+(b))",
+// CHECK:     "Body": "( ( a ) + ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:29"
 // CHECK:   },
@@ -184,7 +184,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "TWO",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(ADD(1,1))",
+// CHECK:     "Body": "( ADD ( 1 , 1 ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:4:23"
 // CHECK:   },

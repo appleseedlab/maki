@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ONE_AND_A",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((1)&&(A))",
+// CHECK:     "Body": "( ( 1 ) && ( A ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:2:33"
 // CHECK:   },
@@ -73,7 +73,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "A_AND_ONE",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((A)&&(1))",
+// CHECK:     "Body": "( ( A ) && ( 1 ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:3:33"
 // CHECK:   },
@@ -130,7 +130,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ZERO",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(1?(0):(A))",
+// CHECK:     "Body": "( 1 ? ( 0 ) : ( A ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:4:31"
 // CHECK:   },

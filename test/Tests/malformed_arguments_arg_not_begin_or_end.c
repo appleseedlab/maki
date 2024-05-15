@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "X_PLUS_Y_PLUS_2",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1+x+y+1",
+// CHECK:     "Body": "1 + x + y + 1",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:2:43"
 // CHECK:   },
@@ -120,7 +120,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "SUM__ONE_X_Y_X_Y_ONE",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1+x+y+x+y+1",
+// CHECK:     "Body": "1 + x + y + x + y + 1",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:3:56"
 // CHECK:   },

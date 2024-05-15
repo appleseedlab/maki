@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "CALL_F",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "f()",
+// CHECK:     "Body": "f ( )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/void_body.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/void_body.c:4:18"
 // CHECK:   },
@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "CALL",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "fun()",
+// CHECK:     "Body": "fun ( )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/void_body.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/void_body.c:5:23"
 // CHECK:   },

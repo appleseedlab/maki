@@ -30,7 +30,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "M",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((structX){.x=1})",
+// CHECK:     "Body": "( ( struct X ) { . x = 1 } )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_body.c:12:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_body.c:12:32"
 // CHECK:   },
@@ -87,7 +87,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "P",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(&((structX){.x=1}))",
+// CHECK:     "Body": "( & ( ( struct X ) { . x = 1 } ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_body.c:13:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_body.c:13:35"
 // CHECK:   },
@@ -144,7 +144,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "M",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((structX){.x=1})",
+// CHECK:     "Body": "( ( struct X ) { . x = 1 } )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_body.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_body.c:2:32"
 // CHECK:   },
@@ -201,7 +201,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "P",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(&((structX){.x=1}))",
+// CHECK:     "Body": "( & ( ( struct X ) { . x = 1 } ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_body.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_body.c:3:35"
 // CHECK:   },

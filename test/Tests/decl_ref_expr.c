@@ -130,7 +130,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADDR_OF",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(&(v))",
+// CHECK:     "Body": "( & ( v ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:4:25"
 // CHECK:   },

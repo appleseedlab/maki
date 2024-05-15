@@ -42,7 +42,7 @@ int main(void) {
 // CHECK:     "Name": "FIXED_WIDE_INT",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "generic_wide_int<fixed_wide_int_storage<N>>",
+// CHECK:     "Body": "generic_wide_int < fixed_wide_int_storage < N >>",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wide-int.cc:11:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wide-int.cc:11:68"
 // CHECK:   },
@@ -453,7 +453,7 @@ int main(void) {
 // CHECK:     "Name": "BITS_PER_UNIT",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(8)",
+// CHECK:     "Body": "( 8 )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wide-int.cc:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wide-int.cc:2:25"
 // CHECK:   },
@@ -510,7 +510,7 @@ int main(void) {
 // CHECK:     "Name": "MAX_BITSIZE_MODE_ANY_INT",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(64*BITS_PER_UNIT)",
+// CHECK:     "Body": "( 64 * BITS_PER_UNIT )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wide-int.cc:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wide-int.cc:3:53"
 // CHECK:   },
@@ -816,7 +816,7 @@ int main(void) {
 // CHECK:     "Name": "WIDE_INT_MAX_ELTS",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((MAX_BITSIZE_MODE_ANY_INT+HOST_BITS_PER_WIDE_INT)/HOST_BITS_PER_WIDE_INT)",
+// CHECK:     "Body": "( ( MAX_BITSIZE_MODE_ANY_INT + HOST_BITS_PER_WIDE_INT ) / HOST_BITS_PER_WIDE_INT )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wide-int.cc:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wide-int.cc:7:28"
 // CHECK:   },
@@ -873,7 +873,7 @@ int main(void) {
 // CHECK:     "Name": "WIDE_INT_MAX_PRECISION",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(WIDE_INT_MAX_ELTS*HOST_BITS_PER_WIDE_INT)",
+// CHECK:     "Body": "( WIDE_INT_MAX_ELTS * HOST_BITS_PER_WIDE_INT )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/wide-int.cc:8:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/wide-int.cc:8:75"
 // CHECK:   },

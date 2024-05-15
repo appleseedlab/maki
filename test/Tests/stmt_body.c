@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "EMPTY_STMT",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "{}",
+// CHECK:     "Body": "{ }",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stmt_body.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stmt_body.c:3:6"
 // CHECK:   },
@@ -75,7 +75,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "COMPOUND",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "{a;c;}",
+// CHECK:     "Body": "{ a ; c ; }",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stmt_body.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stmt_body.c:8:5"
 // CHECK:   },

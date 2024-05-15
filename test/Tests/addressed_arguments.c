@@ -13,7 +13,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ADDR_OF",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "(&(x))",
+// CHECK:     "Body": "( & ( x ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_arguments.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/addressed_arguments.c:2:25"
 // CHECK:   },

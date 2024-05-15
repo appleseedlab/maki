@@ -40,7 +40,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "RGB_GET_R",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((rgb).r)",
+// CHECK:     "Body": "( ( rgb ) . r )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:20:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:20:32"
 // CHECK:   },
@@ -50,7 +50,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:20:9",
 // CHECK:     "InvocationLocation": "{{.*}}/Tests/anonymous_type_arguments.c:32:5",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "unsigned int RGB_GET_R(struct color_t::(unnamed at {{.*}}/anonymous_type_arguments.c:12:9) rgb)",
+// CHECK:     "TypeSignature": "unsigned int RGB_GET_R(struct color_t::(unnamed at {{.*}}/Tests/anonymous_type_arguments.c:12:9) rgb)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
@@ -97,7 +97,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "RGB_PTR_GET_R",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((rgb)->r)",
+// CHECK:     "Body": "( ( rgb ) -> r )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:21:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:21:37"
 // CHECK:   },
@@ -107,7 +107,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:21:9",
 // CHECK:     "InvocationLocation": "{{.*}}/Tests/anonymous_type_arguments.c:33:5",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "unsigned int RGB_PTR_GET_R(struct color_t::(unnamed at {{.*}}/anonymous_type_arguments.c:12:9) * rgb)",
+// CHECK:     "TypeSignature": "unsigned int RGB_PTR_GET_R(struct color_t::(unnamed at {{.*}}/Tests/anonymous_type_arguments.c:12:9) * rgb)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
@@ -154,7 +154,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "PARENT_GET_AGE",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((P).age)",
+// CHECK:     "Body": "( ( P ) . age )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:6:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:6:35"
 // CHECK:   },
@@ -211,7 +211,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "PARENT_PTR_GET_AGE",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "((P)->age)",
+// CHECK:     "Body": "( ( P ) -> age )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:7:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:7:40"
 // CHECK:   },

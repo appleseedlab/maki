@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "DO_NOTHING",
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "doBREAK;while(1)",
+// CHECK:     "Body": "do BREAK ; while ( 1 )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/break_inside_do_while.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/break_inside_do_while.c:6:13"
 // CHECK:   },
