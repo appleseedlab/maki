@@ -356,7 +356,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
         auto [IsDefinitionLocationValid, DefinitionLocation] =
             tryGetFullSourceLoc(SM, MI->getDefinitionLoc());
-        auto [IsEndDefinitonLocationValid, EndDefinitionLocation] =
+        auto [IsEndDefinitionLocationValid, EndDefinitionLocation] =
             tryGetFullSourceLoc(SM, MI->getDefinitionEndLoc());
 
         JSONPrinter printer{ "Definition" };
