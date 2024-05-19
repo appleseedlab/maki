@@ -84,21 +84,25 @@ script and `FileCheck` binary, respectively.
 ### Using the provided Docker image to test
 
 Build the Docker image with the following command in the project root:
+
 ```bash
 docker build -t maki:1.0 .
 ```
 
 Run the Docker image:
+
 ```bash
 docker run -it maki:1.0
 ```
 
 Build the plugin:
+
 ```bash
 bash build.sh
 ```
 
 Run the test suite:
+
 ```bash
 cmake -S . -B build/ \
     -DMAKI_ENABLE_TESTING=ON \
