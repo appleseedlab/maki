@@ -1,7 +1,9 @@
 #include "MacroExpansionArgument.hh"
-
-#include "clang/Basic/SourceManager.h"
-#include "clang/Lex/Lexer.h"
+#include <clang/Basic/LangOptions.h>
+#include <clang/Basic/SourceManager.h>
+#include <clang/Basic/TokenKinds.h>
+#include <clang/Lex/Lexer.h>
+#include <llvm-17/llvm/Support/raw_ostream.h>
 
 namespace maki {
 void MacroExpansionArgument::dumpASTInfo(llvm::raw_fd_ostream &OS,
@@ -16,11 +18,13 @@ void MacroExpansionArgument::dumpASTInfo(llvm::raw_fd_ostream &OS,
     }
 
     llvm::errs() << "Aligned roots for argument " << Name << ":\n";
-    if (!AlignedRoots.empty())
-        for (auto R : AlignedRoots)
+    if (!AlignedRoots.empty()) {
+        for (auto R : AlignedRoots) {
             R.dump();
-    else
+        }
+    } else {
         llvm::errs() << "None\n";
+    }
 }
 
 } // namespace maki

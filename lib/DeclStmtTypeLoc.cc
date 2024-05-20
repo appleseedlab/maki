@@ -1,6 +1,9 @@
 #include "DeclStmtTypeLoc.hh"
-
 #include "assert.h"
+#include <clang/AST/DeclBase.h>
+#include <clang/AST/Stmt.h>
+#include <clang/AST/TypeLoc.h>
+#include <clang/Basic/SourceLocation.h>
 
 namespace maki {
 DeclStmtTypeLoc::DeclStmtTypeLoc(const clang::Decl *D)
@@ -19,29 +22,32 @@ inline void DeclStmtTypeLoc::assertOneNonNull() {
 
 void DeclStmtTypeLoc::dump() {
     assertOneNonNull();
-    if (D)
+    if (D) {
         D->dump();
-    else if (ST)
+    } else if (ST) {
         ST->dump();
-    else if (TL) {
+    } else if (TL) {
         auto QT = TL->getType();
-        if (!QT.isNull())
+        if (!QT.isNull()) {
             QT.dump();
-        else
+        } else {
             llvm::errs() << "<Null type>\n";
-    } else
+        }
+    } else {
         assert(!"No node to dump");
+    }
 }
 
 clang::SourceRange DeclStmtTypeLoc::getSourceRange() {
     assertOneNonNull();
-    if (D)
+    if (D) {
         return D->getSourceRange();
-    else if (ST)
+    } else if (ST) {
         return ST->getSourceRange();
-    else if (TL)
+    } else if (TL) {
         return TL->getSourceRange();
-    else
+    } else {
         assert(!"No node to dump");
+    }
 }
 } // namespace maki

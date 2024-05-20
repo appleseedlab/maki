@@ -1,10 +1,7 @@
 #pragma once
 
 #include "DeclStmtTypeLoc.hh"
-#include "MacroExpansionNode.hh"
-
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-
+#include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <vector>
 
 namespace maki {

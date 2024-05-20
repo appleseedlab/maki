@@ -1,6 +1,12 @@
 #pragma once
 
-#include <clang/Frontend/FrontendPluginRegistry.h>
+#include <clang/AST/ASTConsumer.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <llvm-17/llvm/ADT/StringRef.h>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace maki {
 class MakiAction : public clang::PluginASTAction {

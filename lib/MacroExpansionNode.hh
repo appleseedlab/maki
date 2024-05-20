@@ -2,15 +2,12 @@
 
 #include "DeclStmtTypeLoc.hh"
 #include "MacroExpansionArgument.hh"
-
-#include "clang/AST/Stmt.h"
-#include "clang/Basic/SourceLocation.h"
-#include "clang/Lex/MacroInfo.h"
-
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/raw_ostream.h"
-
+#include <clang/Basic/SourceLocation.h>
+#include <clang/Lex/MacroInfo.h>
+#include <clang/Lex/Token.h>
+#include <llvm-17/llvm/ADT/StringRef.h>
 #include <set>
+#include <string>
 #include <vector>
 
 namespace maki {

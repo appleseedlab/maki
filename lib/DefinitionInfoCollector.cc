@@ -1,4 +1,9 @@
 #include "DefinitionInfoCollector.hh"
+#include <clang/AST/ASTContext.h>
+#include <clang/Basic/SourceLocation.h>
+#include <clang/Lex/Lexer.h>
+#include <clang/Lex/MacroInfo.h>
+#include <clang/Lex/Token.h>
 
 namespace maki {
 

@@ -1,14 +1,12 @@
 #pragma once
 
-#include "clang/Basic/FileEntry.h"
-#include "clang/Basic/Module.h"
-#include "clang/Basic/SourceLocation.h"
-#include "clang/Basic/SourceManager.h"
-#include "clang/Lex/PPCallbacks.h"
-#include "clang/Lex/Token.h"
-
-#include "llvm/ADT/StringRef.h"
-
+#include <clang/Basic/FileEntry.h>
+#include <clang/Basic/Module.h>
+#include <clang/Basic/SourceLocation.h>
+#include <clang/Basic/SourceManager.h>
+#include <clang/Lex/PPCallbacks.h>
+#include <clang/Lex/Token.h>
+#include <llvm-17/llvm/ADT/StringRef.h>
 #include <utility>
 #include <vector>
 

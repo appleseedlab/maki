@@ -1,8 +1,9 @@
 #pragma once
 
-#include "clang/AST/Decl.h"
-#include "clang/AST/Stmt.h"
-#include "clang/AST/TypeLoc.h"
+#include <clang/AST/DeclBase.h>
+#include <clang/AST/Stmt.h>
+#include <clang/AST/TypeLoc.h>
+#include <clang/Basic/SourceLocation.h>
 
 namespace maki {
 class DeclStmtTypeLoc {

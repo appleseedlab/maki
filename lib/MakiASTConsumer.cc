@@ -1,32 +1,41 @@
+// NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
+//          paren exprs
+
 #include "MakiASTConsumer.hh"
-#include "ASTUtils.hh"
 #include "AlignmentMatchers.hh"
 #include "DeclCollectorMatchHandler.hh"
-#include "DeclStmtTypeLoc.hh"
-#include "ExpansionMatchHandler.hh"
+#include "DefinitionInfoCollector.hh"
 #include "IncludeCollector.hh"
 #include "JSONPrinter.hh"
 #include "Logging.hh"
+#include "MacroExpansionNode.hh"
+#include "MacroForest.hh"
 #include "StmtCollectorMatchHandler.hh"
-
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/Lex/Lexer.h"
-#include "clang/Lex/Preprocessor.h"
-
 #include <algorithm>
+#include <cassert>
+#include <clang/AST/ASTContext.h>
+#include <clang/AST/Decl.h>
+#include <clang/AST/DeclBase.h>
+#include <clang/AST/Expr.h>
+#include <clang/AST/Stmt.h>
+#include <clang/AST/Type.h>
+#include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/ASTMatchers/ASTMatchers.h>
+#include <clang/Basic/FileEntry.h>
+#include <clang/Basic/LLVM.h>
 #include <clang/Basic/SourceLocation.h>
-#include <clang/Lex/Token.h>
+#include <clang/Basic/SourceManager.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Lex/Lexer.h>
+#include <clang/Lex/Preprocessor.h>
 #include <functional>
+#include <llvm-17/llvm/ADT/StringRef.h>
+#include <llvm-17/llvm/Support/Casting.h>
 #include <queue>
 #include <set>
 #include <string>
-#include <tuple>
-
-#include "assert.h"
-
-// NOTE:    We can't use TK_IgnoreUnlessSpelledInSource because it ignores
-//          paren exprs
+#include <utility>
+#include <vector>
 
 namespace maki {
 using namespace clang::ast_matchers;
@@ -34,8 +43,9 @@ using namespace clang::ast_matchers;
 // Collect all subtrees of the given stmt using BFS
 std::set<const clang::Stmt *> subtrees(const clang::Stmt *ST) {
     std::set<const clang::Stmt *> Subtrees;
-    if (!ST)
+    if (!ST) {
         return Subtrees;
+    }
 
     std::queue<const clang::Stmt *> Q({ ST });
     while (!Q.empty()) {
@@ -43,8 +53,9 @@ std::set<const clang::Stmt *> subtrees(const clang::Stmt *ST) {
         Q.pop();
         if (Cur) {
             Subtrees.insert(Cur);
-            for (auto &&Child : Cur->children())
+            for (auto &&Child : Cur->children()) {
                 Q.push(Child);
+            }
         }
     }
     return Subtrees;
@@ -52,11 +63,13 @@ std::set<const clang::Stmt *> subtrees(const clang::Stmt *ST) {
 
 clang::Expr *skipImplicitAndParens(clang::Expr *E) {
     while (E && (llvm::isa_and_nonnull<clang::ParenExpr>(E) ||
-                 llvm::isa_and_nonnull<clang::ImplicitCastExpr>(E)))
-        if (auto P = clang::dyn_cast<clang::ParenExpr>(E))
+                 llvm::isa_and_nonnull<clang::ImplicitCastExpr>(E))) {
+        if (auto P = clang::dyn_cast<clang::ParenExpr>(E)) {
             E = P->getSubExpr();
-        else if (auto I = clang::dyn_cast<clang::ImplicitCastExpr>(E))
+        } else if (auto I = clang::dyn_cast<clang::ImplicitCastExpr>(E)) {
             E = I->getSubExpr();
+        }
+    }
     return E;
 }
 
@@ -66,11 +79,14 @@ bool inTree(const clang::Stmt *LHS, const clang::Stmt *RHS) {
     while (!Q.empty()) {
         auto Cur = Q.front();
         Q.pop();
-        if (LHS == Cur)
+        if (LHS == Cur) {
             return true;
-        if (Cur)
-            for (auto &&Child : Cur->children())
+        }
+        if (Cur) {
+            for (auto &&Child : Cur->children()) {
                 Q.push(Child);
+            }
+        }
     }
     return false;
 }
@@ -80,27 +96,31 @@ bool inTree(const clang::Stmt *LHS, const clang::Stmt *RHS) {
 bool isInType(const clang::Type *T, clang::ASTContext &Ctx,
               std::function<bool(const clang::Type *)> pred) {
     debug("Checking if T is a pointer type");
-    while (T && (T->isAnyPointerType() || T->isArrayType()))
-        if (T->isAnyPointerType())
+    while (T && (T->isAnyPointerType() || T->isArrayType())) {
+        if (T->isAnyPointerType()) {
             T = T->getPointeeType().getTypePtrOrNull();
-        else if (T->isArrayType())
+        } else if (T->isArrayType()) {
             T = T->getBaseElementTypeUnsafe();
+        }
+    }
 
     return pred(T);
 }
 
 clang::Decl *getTypeDeclOrNull(const clang::Type *T) {
-    if (!T)
+    if (!T) {
         return nullptr;
+    }
 
-    if (auto TD = clang::dyn_cast<clang::TypedefType>(T))
+    if (auto TD = clang::dyn_cast<clang::TypedefType>(T)) {
         return TD->getDecl();
-    else if (auto TD = clang::dyn_cast<clang::TagType>(T))
+    } else if (auto TD = clang::dyn_cast<clang::TagType>(T)) {
         return TD->getDecl();
-    else if (auto ET = clang::dyn_cast<clang::ElaboratedType>(T))
+    } else if (auto ET = clang::dyn_cast<clang::ElaboratedType>(T)) {
         return getTypeDeclOrNull(ET->desugar().getTypePtrOrNull());
-    else
+    } else {
         return nullptr;
+    }
 }
 
 // Returns true if any type in T was defined after L
@@ -108,21 +128,25 @@ bool hasTypeDefinedAfter(const clang::Type *T, clang::ASTContext &Ctx,
                          clang::SourceLocation L) {
     auto &SM = Ctx.getSourceManager();
     return isInType(T, Ctx, [&SM, L](const clang::Type *T) {
-        if (!T)
+        if (!T) {
             return false;
+        }
 
         auto *D = getTypeDeclOrNull(T);
 
-        if (!D)
+        if (!D) {
             return false;
+        }
 
         auto DLoc = D->getLocation();
-        if (DLoc.isInvalid())
+        if (DLoc.isInvalid()) {
             return false;
+        }
 
         auto DFLoc = SM.getFileLoc(DLoc);
-        if (DFLoc.isInvalid())
+        if (DFLoc.isInvalid()) {
             return false;
+        }
 
         return SM.isBeforeInTranslationUnit(L, DFLoc);
     });
@@ -131,16 +155,19 @@ bool hasTypeDefinedAfter(const clang::Type *T, clang::ASTContext &Ctx,
 // Returns true if any type in T is an anonymous type
 bool hasAnonymousType(const clang::Type *T, clang::ASTContext &Ctx) {
     return isInType(T, Ctx, [](const clang::Type *T) {
-        if (!T)
+        if (!T) {
             return false;
+        }
 
         auto D = getTypeDeclOrNull(T);
-        if (!D)
+        if (!D) {
             return false;
+        }
 
         auto ND = clang::dyn_cast<clang::NamedDecl>(D);
-        if (!ND)
+        if (!ND) {
             return false;
+        }
 
         return ND->getIdentifier() == nullptr || ND->getName().empty();
     });
@@ -149,12 +176,14 @@ bool hasAnonymousType(const clang::Type *T, clang::ASTContext &Ctx) {
 // Returns true if any type in T is a local type
 bool hasLocalType(const clang::Type *T, clang::ASTContext &Ctx) {
     return isInType(T, Ctx, [](const clang::Type *T) {
-        if (!T)
+        if (!T) {
             return false;
+        }
 
         auto D = getTypeDeclOrNull(T);
-        if (!D)
+        if (!D) {
             return false;
+        }
 
         auto DCtx = D->getDeclContext();
 
@@ -166,41 +195,48 @@ bool hasLocalType(const clang::Type *T, clang::ASTContext &Ctx) {
 // subexpressions that are integral constants expressions
 bool isDescendantOfStmtRequiringICE(clang::ASTContext &Ctx,
                                     const clang::Stmt *ST) {
-    if (!ST)
+    if (!ST) {
         return false;
+    }
 
     std::queue<clang::DynTypedNode> Q;
-    for (auto P : Ctx.getParents(*ST))
+    for (auto P : Ctx.getParents(*ST)) {
         Q.push(P);
+    }
     while (!Q.empty()) {
         auto Cur = Q.front();
         Q.pop();
 
-        if (Cur.get<clang::CaseStmt>() || Cur.get<clang::EnumDecl>())
+        if (Cur.get<clang::CaseStmt>() || Cur.get<clang::EnumDecl>()) {
             return true;
+        }
 
-        if (auto FD = Cur.get<clang::FieldDecl>())
-            if (FD->isBitField())
+        if (auto FD = Cur.get<clang::FieldDecl>()) {
+            if (FD->isBitField()) {
                 return true;
+            }
+        }
 
         if (auto VD = Cur.get<clang::VarDecl>()) {
             auto QT = VD->getType();
             if (!QT.isNull()) {
-                if (auto T = QT.getTypePtrOrNull())
-                    if (T->isArrayType())
+                if (auto T = QT.getTypePtrOrNull()) {
+                    if (T->isArrayType()) {
                         return true;
+                    }
+                }
             }
         }
 
-        for (auto P : Ctx.getParents(Cur))
+        for (auto P : Ctx.getParents(Cur)) {
             Q.push(P);
+        }
     }
     return false;
 }
 
-// Tries to get the full real path and line + column number for a given
-// source location.
-// First element is whether the operation was successful, the second
+// Tries to get the full real path and line + column number for a given source
+// location. First element is whether the operation was successful, the second
 // is the error if not and the full path if successful.
 std::pair<bool, std::string> tryGetFullSourceLoc(clang::SourceManager &SM,
                                                  clang::SourceLocation L) {
@@ -241,42 +277,50 @@ std::pair<bool, llvm::StringRef> isGlobalInclude(
     auto HashLoc = IEL.second;
 
     // Check that the included file has a value
-    if (!FE.has_value())
+    if (!FE.has_value()) {
         return { false, "<null>" };
+    }
 
     // Check that the included file actually has a name
     auto IncludedFileRealpath = FE->getFileEntry().tryGetRealPathName();
-    if (IncludedFileRealpath.empty())
+    if (IncludedFileRealpath.empty()) {
         return { false, IncludedFileRealpath };
+    }
 
     // Check that the hash location is valid
-    if (HashLoc.isInvalid())
+    if (HashLoc.isInvalid()) {
         return { false, IncludedFileRealpath };
+    }
 
     // Check that the file the file is included in is valid
     auto IncludedInFID = SM.getFileID(HashLoc);
-    if (IncludedInFID.isInvalid())
+    if (IncludedInFID.isInvalid()) {
         return { false, IncludedFileRealpath };
+    }
 
     // Check that a file entry exists for the  file the file is included in
     auto IncludedInFE = SM.getFileEntryForID(IncludedInFID);
-    if (!IncludedInFE)
+    if (!IncludedInFE) {
         return { false, IncludedFileRealpath };
+    }
 
     // Check that a real path exists for the file the file is included in
     auto IncludedInRealpath = IncludedInFE->tryGetRealPathName();
-    if (IncludedInRealpath.empty())
+    if (IncludedInRealpath.empty()) {
         return { false, IncludedFileRealpath };
+    }
 
     // Check that the file the file is included in is not in turn included
     // in a file included in a non-global scope
-    if (LocalIncludes.find(IncludedInRealpath) != LocalIncludes.end())
+    if (LocalIncludes.find(IncludedInRealpath) != LocalIncludes.end()) {
         return { false, IncludedFileRealpath };
+    }
 
     auto HashFLoc = SM.getFileLoc(HashLoc);
     // Check that the file location is valid
-    if (HashFLoc.isInvalid())
+    if (HashFLoc.isInvalid()) {
         return { false, IncludedFileRealpath };
+    }
 
     // Check that the include does not appear within the range of any
     // declaration in the file
@@ -285,8 +329,9 @@ std::pair<bool, llvm::StringRef> isGlobalInclude(
                         auto B = SM.getFileLoc(D->getBeginLoc());
                         auto E = SM.getFileLoc(D->getEndLoc());
 
-                        if (B.isInvalid() || E.isInvalid())
+                        if (B.isInvalid() || E.isInvalid()) {
                             return false;
+                        }
 
                         // Include the location just after the declaration
                         // to account for semicolons.
@@ -294,11 +339,13 @@ std::pair<bool, llvm::StringRef> isGlobalInclude(
                         // that's fine since it would be a non-global
                         // location anyway
                         if (auto Tok = clang::Lexer::findNextToken(E, SM, LO))
-                            if (Tok.has_value())
+                            if (Tok.has_value()) {
                                 E = SM.getFileLoc(Tok.value().getEndLoc());
+                            }
 
-                        if (E.isInvalid())
+                        if (E.isInvalid()) {
                             return false;
+                        }
 
                         return clang::SourceRange(B, E).fullyContains(HashFLoc);
                     }))
@@ -400,8 +447,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
             // Check if included at global scope or not
             auto Res =
                 isGlobalInclude(SM, LO, IEL, LocalIncludes, TopLevelDecls);
-            if (!Res.first)
+            if (!Res.first) {
                 LocalIncludes.insert(Res.second);
+            }
 
             Valid = Res.first;
             IncludeName = Res.second.empty() ? "" : Res.second.str();
@@ -426,8 +474,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         StmtCollectorMatchHandler Handler;
         Finder.addMatcher(Matcher, &Handler);
         Finder.matchAST(Ctx);
-        for (auto &&ST : Handler.Stmts)
+        for (auto &&ST : Handler.Stmts) {
             AllDeclRefExprs.insert(clang::dyn_cast<clang::DeclRefExpr>(ST));
+        }
     }
 
     // Any reference to a decl declared at a local scope
@@ -437,9 +486,11 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     {
         for (auto &&DRE : AllDeclRefExprs) {
             auto D = DRE->getDecl();
-            if (auto VD = clang::dyn_cast<clang::VarDecl>(D))
-                if (VD->hasLocalStorage())
+            if (auto VD = clang::dyn_cast<clang::VarDecl>(D)) {
+                if (VD->hasLocalStorage()) {
                     DeclRefExprsOfLocallyDefinedDecls.insert(DRE);
+                }
+            }
         }
     }
 
@@ -458,18 +509,20 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         StmtCollectorMatchHandler Handler;
         Finder.addMatcher(Matcher, &Handler);
         Finder.matchAST(Ctx);
-        for (auto &&ST : Handler.Stmts)
+        for (auto &&ST : Handler.Stmts) {
             SideEffectExprs.insert(clang::dyn_cast<clang::Expr>(ST));
+        }
     }
 
     // Any expr that is the modified part of an expression with side-effects
     std::set<clang::Expr *> SideEffectExprsLHSs;
     {
         for (auto &&E : SideEffectExprs) {
-            if (auto B = clang::dyn_cast<clang::BinaryOperator>(E))
+            if (auto B = clang::dyn_cast<clang::BinaryOperator>(E)) {
                 SideEffectExprsLHSs.insert(B->getLHS());
-            else if (auto U = clang::dyn_cast<clang::UnaryOperator>(E))
+            } else if (auto U = clang::dyn_cast<clang::UnaryOperator>(E)) {
                 SideEffectExprsLHSs.insert(U->getSubExpr());
+            }
         }
     }
 
@@ -485,8 +538,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         StmtCollectorMatchHandler Handler;
         Finder.addMatcher(Matcher, &Handler);
         Finder.matchAST(Ctx);
-        for (auto &&S : Handler.Stmts)
+        for (auto &&S : Handler.Stmts) {
             AddressOfExprs.insert(clang::dyn_cast<clang::UnaryOperator>(S));
+        }
     }
 
     // Any expr that is the operand of an expression with short-circuiting.
@@ -504,9 +558,11 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         StmtCollectorMatchHandler Handler;
         Finder.addMatcher(Matcher, &Handler);
         Finder.matchAST(Ctx);
-        for (auto &&ST : Handler.Stmts)
-            if (auto E = clang::dyn_cast<clang::Expr>(ST))
+        for (auto &&ST : Handler.Stmts) {
+            if (auto E = clang::dyn_cast<clang::Expr>(ST)) {
                 ConditionalExprs.insert(E);
+            }
+        }
     }
 
     // Any expr with a type defined at a local scope
@@ -522,8 +578,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         for (auto &&ST : Handler.Stmts) {
             auto E = clang::dyn_cast<clang::Expr>(ST);
             auto QT = E->getType();
-            if (hasLocalType(QT.getTypePtrOrNull(), Ctx))
+            if (hasLocalType(QT.getTypePtrOrNull(), Ctx)) {
                 ExprsWithLocallyDefinedTypes.insert(E);
+            }
         }
     }
 
@@ -613,11 +670,13 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 TopLevelDecls.begin(), TopLevelDecls.end(),
                 [&SM, &Exp](const clang::Decl *D) {
                     auto ND = clang::dyn_cast_or_null<clang::NamedDecl>(D);
-                    if (!ND)
+                    if (!ND) {
                         return false;
+                    }
                     auto II = ND->getIdentifier();
-                    if (!II)
+                    if (!II) {
                         return false;
+                    }
                     return II->getName().str() == Exp->Name.str() &&
                            SM.isBeforeInTranslationUnit(
                                SM.getFileLoc(D->getBeginLoc()),
@@ -688,17 +747,18 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     IsExpansionTypeNull = TL->isNull();
 
                     // FIXME: For some reason, this function call sometimes
-                    // triggers an error. I have tried to debug it the best
-                    // I can, but it seems to be due to a problem with
-                    // Clang.
-                    // Until this is fixed, we will not be able to gather
-                    // full data on TypeLocs.
+                    // triggers an error. I have tried to debug it the best I
+                    // can, but it seems to be due to a problem with Clang.
+                    // Until this is fixed, we will not be able to gather full
+                    // data on TypeLocs.
+                    //
                     // debug("Checking hasTypeDefinedAfter");
                     // IsExpansionTypeDefinedAfterMacro = (!TL->isNull()) &&
-                    //     hasTypeDefinedAfter(TL->getTypePtr(), Ctx, DefLoc);
+                    // hasTypeDefinedAfter(TL->getTypePtr(), Ctx, DefLoc);
                     // debug("Finished checking hasTypeDefinedAfter");
-                } else
+                } else {
                     assert("Aligns with node that is not a Decl/Stmt/TypeLoc");
+                }
             }
 
             // Check that the number of AST nodes aligned with each argument
@@ -747,10 +807,11 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                             clang::Expr *LHS = nullptr;
                             auto B = clang::dyn_cast<clang::BinaryOperator>(E);
                             auto U = clang::dyn_cast<clang::UnaryOperator>(E);
-                            if (B)
+                            if (B) {
                                 LHS = B->getLHS();
-                            else if (U)
+                            } else if (U) {
                                 LHS = U->getSubExpr();
+                            }
                             LHS = skipImplicitAndParens(LHS);
                             return ExpandedFromArgument(LHS);
                         }
@@ -781,8 +842,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 debug("Collecting body subtrees");
                 StmtsExpandedFromBody = subtrees(ST);
                 // Remove all Stmts which were actually expanded from arguments
-                for (auto &&St : StmtsExpandedFromArguments)
+                for (auto &&St : StmtsExpandedFromArguments) {
                     StmtsExpandedFromBody.erase(St);
+                }
 
                 auto ExpandedFromBody =
                     [&StmtsExpandedFromBody](const clang::Stmt *St) {
@@ -852,14 +914,16 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                      &ExpandedFromBody](const clang::DeclRefExpr *DRE) {
                         // References that don't come from the macro's body
                         // are fine
-                        if (!ExpandedFromBody(DRE))
+                        if (!ExpandedFromBody(DRE)) {
                             return false;
+                        }
 
                         auto B = SM.getFileLoc(ST->getBeginLoc());
                         auto E = SM.getFileLoc(ST->getEndLoc());
                         auto D = DRE->getDecl();
-                        if (!D)
+                        if (!D) {
                             return false;
+                        }
 
                         auto L = SM.getFileLoc(D->getLocation());
                         // NOTE: It would be nice if we could instead walk
@@ -878,10 +942,11 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                             clang::Expr *LHS = nullptr;
                             auto B = clang::dyn_cast<clang::BinaryOperator>(E);
                             auto U = clang::dyn_cast<clang::UnaryOperator>(E);
-                            if (B)
+                            if (B) {
                                 LHS = B->getLHS();
-                            else if (U)
+                            } else if (U) {
                                 LHS = U->getSubExpr();
+                            }
                             return inTree(ST, LHS);
                         }
                         return false;
@@ -946,19 +1011,22 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 IsAnyArgumentTypeDefinedAfterMacro = false;
 
                 if (Exp->MI->isFunctionLike() &&
-                    (ASTKind == "Stmt" || ASTKind == "Expr"))
+                    (ASTKind == "Stmt" || ASTKind == "Expr")) {
                     TypeSignature += "(";
+                }
                 debug("Iterating arguments");
                 int ArgNum = 0;
                 for (auto &&Arg : Exp->Arguments) {
-                    if (ArgNum != 0)
+                    if (ArgNum != 0) {
                         TypeSignature += ", ";
+                    }
                     ArgNum += 1;
 
                     IsAnyArgumentNeverExpanded |= Arg.AlignedRoots.empty();
 
-                    if (Arg.AlignedRoots.empty())
+                    if (Arg.AlignedRoots.empty()) {
                         continue;
+                    }
 
                     auto Arg1stExpST = Arg.AlignedRoots.front().ST;
                     auto E = clang::dyn_cast_or_null<clang::Expr>(Arg1stExpST);
@@ -967,8 +1035,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                     debug("Checking if argument is an expression");
 
-                    if (!E)
+                    if (!E) {
                         continue;
+                    }
 
                     std::string ArgTypeStr = "<Null>";
 
@@ -1000,8 +1069,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 }
                 debug("Finished iterating arguments");
                 if (Exp->MI->isFunctionLike() &&
-                    (ASTKind == "Stmt" || ASTKind == "Expr"))
+                    (ASTKind == "Stmt" || ASTKind == "Expr")) {
                     TypeSignature += ")";
+                }
             }
 
             // Set of all Stmts expanded from macro
@@ -1104,10 +1174,12 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
     maki::JSONPrinter::printJSONArray(printers);
 
-    // Only delete top level expansions since deconstructor deletes
-    // nested expansions
-    for (auto &&Exp : MF->Expansions)
-        if (Exp->Depth == 0)
+    // Only delete top level expansions since deconstructor deletes nested
+    // expansions
+    for (auto &&Exp : MF->Expansions) {
+        if (Exp->Depth == 0) {
             delete Exp;
+        }
+    }
 }
 } // namespace maki

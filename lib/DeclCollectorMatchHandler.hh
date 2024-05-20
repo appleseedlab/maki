@@ -1,8 +1,7 @@
 #pragma once
 
-#include "clang/AST/Decl.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-
+#include <clang/AST/DeclBase.h>
+#include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <vector>
 
 namespace maki {

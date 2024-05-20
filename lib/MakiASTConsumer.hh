@@ -3,9 +3,11 @@
 #include "DefinitionInfoCollector.hh"
 #include "IncludeCollector.hh"
 #include "MacroForest.hh"
-
-#include "clang/Frontend/ASTConsumers.h"
-#include "clang/Frontend/CompilerInstance.h"
+#include <clang/AST/ASTConsumer.h>
+#include <clang/AST/ASTContext.h>
+#include <clang/AST/Stmt.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <llvm-17/llvm/Support/Casting.h>
 
 namespace maki {
 class MakiASTConsumer : public clang::ASTConsumer {

@@ -1,21 +1,22 @@
 #include "MacroExpansionNode.hh"
-
-#include "clang/Basic/SourceManager.h"
-
-#include "assert.h"
-
+#include <clang/Basic/LangOptions.h>
+#include <clang/Basic/SourceManager.h>
+#include <llvm-17/llvm/Support/raw_ostream.h>
 #include <queue>
+#include <set>
 
 namespace maki {
 
 MacroExpansionNode::~MacroExpansionNode() {
-    for (auto &&Child : Children)
+    for (auto &&Child : Children) {
         delete Child;
+    }
 }
 
 static inline void printIndent(llvm::raw_fd_ostream &OS, unsigned int indent) {
-    for (unsigned int i = 0; i < indent; i++)
+    for (unsigned int i = 0; i < indent; i++) {
         OS << "\t";
+    }
 }
 
 void MacroExpansionNode::dumpMacroInfo(llvm::raw_fd_ostream &OS,
@@ -34,8 +35,9 @@ void MacroExpansionNode::dumpMacroInfo(llvm::raw_fd_ostream &OS,
         OS << Name << " ends with arg " << ArgDefEndsWith->Name << "\n";
     }
 
-    for (auto Child : Children)
+    for (auto Child : Children) {
         Child->dumpMacroInfo(OS, indent + 1);
+    }
 }
 
 void MacroExpansionNode::dumpASTInfo(llvm::raw_fd_ostream &OS,
@@ -44,35 +46,41 @@ void MacroExpansionNode::dumpASTInfo(llvm::raw_fd_ostream &OS,
     OS << "Top level expansion of " << Name << "\n";
 
     OS << "AST roots: \n";
-    for (auto &&Root : ASTRoots)
+    for (auto &&Root : ASTRoots) {
         Root.dump();
+    }
 
     OS << "Aligned root: \n";
-    if (AlignedRoot)
+    if (AlignedRoot) {
         AlignedRoot->dump();
-    else
+    } else {
         OS << "None\n";
+    }
 
-    if (!Arguments.empty())
-        for (auto &&Arg : Arguments)
+    if (!Arguments.empty()) {
+        for (auto &&Arg : Arguments) {
             Arg.dumpASTInfo(OS, SM, LO);
-    else
+        }
+    } else {
         OS << "No arguments\n";
+    }
 }
 
 std::set<MacroExpansionNode *> MacroExpansionNode::getDescendants() {
     std::set<MacroExpansionNode *> Desc;
     // Collect descendants using BFS
     std::queue<MacroExpansionNode *> Q;
-    for (auto &&Child : Children)
+    for (auto &&Child : Children) {
         Q.push(Child);
+    }
 
     while (!Q.empty()) {
         auto Cur = Q.front();
         Q.pop();
         Desc.insert(Cur);
-        for (auto &&Child : Cur->Children)
+        for (auto &&Child : Cur->Children) {
             Q.push(Child);
+        }
     }
 
     return Desc;

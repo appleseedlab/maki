@@ -1,8 +1,7 @@
 #pragma once
 
-#include "clang/AST/Stmt.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-
+#include <clang/AST/Stmt.h>
+#include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <set>
 
 namespace maki {
