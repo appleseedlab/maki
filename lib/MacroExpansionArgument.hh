@@ -1,12 +1,11 @@
 #pragma once
 
 #include "DeclStmtTypeLoc.hh"
-
-#include "clang/Basic/LangOptions.h"
-#include "clang/Basic/SourceManager.h"
-#include "clang/Lex/Token.h"
-#include "llvm/ADT/StringRef.h"
-
+#include <clang/Basic/LangOptions.h>
+#include <clang/Basic/SourceManager.h>
+#include <clang/Lex/Token.h>
+#include <llvm-17/llvm/ADT/StringRef.h>
+#include <llvm-17/llvm/Support/raw_ostream.h>
 #include <vector>
 
 namespace maki {
