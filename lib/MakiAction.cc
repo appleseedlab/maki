@@ -1,5 +1,10 @@
 #include "MakiAction.hh"
 #include "MakiASTConsumer.hh"
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Frontend/FrontendAction.h>
+#include <clang/Frontend/FrontendPluginRegistry.h>
+#include <llvm-17/llvm/ADT/StringRef.h>
+#include <string>
 
 namespace maki {
 std::unique_ptr<clang::ASTConsumer>
