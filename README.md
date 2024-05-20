@@ -22,10 +22,11 @@ The following instructions assume an Ubuntu 22.04.4 operating system:
 
 ## Setting up
 
-Run the script `build.sh` to build the Clang plugin:
+Build the Clang plugin, e.g.,
 
 ```bash
-bash build.sh
+cmake -S . -B build/ -G Ninja
+cmake --build build/
 ```
 
 ## Running the Clang Plugin
@@ -98,7 +99,8 @@ docker run -it maki:1.0
 Build the plugin:
 
 ```bash
-bash build.sh
+cmake -S . -B build/ -G Ninja
+cmake --build build/
 ```
 
 Run the test suite:
