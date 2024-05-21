@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define X_PLUS_Y_PLUS_2(x, y) 1 + x + y + 1
 #define SUM__ONE_X_Y_X_Y_ONE(x, y) 1 + x + y + x + y + 1
 int main(int argc, char const *argv[]) {
@@ -18,6 +18,15 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + x + y + 1",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:2:43"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "SUM__ONE_X_Y_X_Y_ONE",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "1 + x + y + x + y + 1",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:3:56"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -114,15 +123,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "SUM__ONE_X_Y_X_Y_ONE",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1 + x + y + x + y + 1",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_arguments_arg_not_begin_or_end.c:3:56"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

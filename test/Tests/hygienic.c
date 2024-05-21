@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 int g = 0;
 #define GT_g(x) ((x) > (g))
@@ -25,6 +25,24 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( a ) > ( b ) ? ( a ) : ( b ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/hygienic.c:2:41"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "GT_g",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( x ) > ( g ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/hygienic.c:4:27"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "DO_NOTHING",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "do { int x = 0 ; x ++ ; } while ( 0 )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/hygienic.c:9:15"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -123,15 +141,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "GT_g",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( x ) > ( g ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/hygienic.c:4:27"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "GT_g",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:4:9",
@@ -178,15 +187,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "DO_NOTHING",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "do { int x = 0 ; x ++ ; } while ( 0 )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/hygienic.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/hygienic.c:9:15"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

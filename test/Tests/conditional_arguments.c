@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define ONE_AND_A(A) ((1) && (A))
 #define A_AND_ONE(A) ((A) && (1))
 #define ZERO(A) (1 ? (0) : (A))
@@ -19,6 +19,24 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( 1 ) && ( A ) )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:2:33"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "A_AND_ONE",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( A ) && ( 1 ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:3:33"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ZERO",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( 1 ? ( 0 ) : ( A ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:4:31"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -69,15 +87,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "A_AND_ONE",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( A ) && ( 1 ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:3:33"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "A_AND_ONE",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:3:9",
@@ -124,15 +133,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": true,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ZERO",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( 1 ? ( 0 ) : ( A ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/conditional_arguments.c:4:31"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

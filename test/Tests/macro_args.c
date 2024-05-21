@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define FOO(a, b) a + b + a + b
 #define ID(a) a
 #define PAREN(a) (a)
@@ -31,6 +31,60 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "a + b + a + b",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:2:31"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ID",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:3:15"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "PAREN",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( a )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:4:20"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ADD",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( a ) + ( b ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:5:29"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "SUB",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( a ) - ( b ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:6:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:6:29"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "MULT_MALFORMED",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a * b",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:7:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:7:33"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ADD_MALFORMED",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a + b",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:8:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:8:33"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -129,15 +183,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ID",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:3:15"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "ID",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:3:9",
@@ -234,15 +279,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "PAREN",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( a )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:4:20"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "PAREN",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:4:9",
@@ -337,15 +373,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ADD",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( a ) + ( b ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:5:29"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -1068,15 +1095,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "SUB",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( a ) - ( b ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:6:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:6:29"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "SUB",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:6:9",
@@ -1317,15 +1335,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "MULT_MALFORMED",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a * b",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:7:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:7:33"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "MULT_MALFORMED",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:7:9",
@@ -1372,15 +1381,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ADD_MALFORMED",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a + b",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/macro_args.c:8:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/macro_args.c:8:33"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

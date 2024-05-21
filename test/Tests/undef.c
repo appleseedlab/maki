@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define ONE 1
 #define FOO() 2
 int main(int argc, char const *argv[]) {
@@ -8,14 +8,6 @@ int main(int argc, char const *argv[]) {
 }
 
 // CHECK: [
-// CHECK:   {
-// CHECK:     "Kind": "InspectedByCPP",
-// CHECK:     "Name": "FOO"
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "InspectedByCPP",
-// CHECK:     "Name": "ONE"
-// CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
 // CHECK:     "Name": "ONE",
@@ -33,5 +25,13 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "2",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/undef.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/undef.c:3:15"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "InspectedByCPP",
+// CHECK:     "Name": "FOO"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "InspectedByCPP",
+// CHECK:     "Name": "ONE"
 // CHECK:   }
 // CHECK: ]

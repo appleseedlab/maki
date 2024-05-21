@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define APPEND_0(x) x##0
 #define ADD_10(x) x + APPEND_0(1)
 int main(int argc, char const *argv[]) {
@@ -19,52 +19,13 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_pasting.c:2:24"
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "APPEND_0",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_pasting.c:2:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/token_pasting.c:3:23",
-// CHECK:     "ASTKind": "",
-// CHECK:     "TypeSignature": "",
-// CHECK:     "InvocationDepth": 1,
-// CHECK:     "NumASTRoots": 0,
-// CHECK:     "NumArguments": 1,
-// CHECK:     "HasStringification": false,
-// CHECK:     "HasTokenPasting": true,
-// CHECK:     "HasAlignedArguments": false,
-// CHECK:     "HasSameNameAsOtherDeclaration": false,
-// CHECK:     "IsExpansionControlFlowStmt": false,
-// CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
-// CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
-// CHECK:     "DoesBodyContainDeclRefExpr": false,
-// CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
-// CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
-// CHECK:     "DoesAnyArgumentHaveSideEffects": false,
-// CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
-// CHECK:     "IsHygienic": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "IsInvocationLocationValid": true,
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ADD_10",
 // CHECK:     "IsObjectLike": false,
-// CHECK:     "IsInvokedInMacroArgument": false,
-// CHECK:     "IsNamePresentInCPPConditional": false,
-// CHECK:     "IsExpansionICE": false,
-// CHECK:     "IsExpansionTypeNull": false,
-// CHECK:     "IsExpansionTypeAnonymous": false,
-// CHECK:     "IsExpansionTypeLocalType": false,
-// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
-// CHECK:     "IsExpansionTypeVoid": false,
-// CHECK:     "IsAnyArgumentTypeNull": false,
-// CHECK:     "IsAnyArgumentTypeAnonymous": false,
-// CHECK:     "IsAnyArgumentTypeLocalType": false,
-// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
-// CHECK:     "IsAnyArgumentTypeVoid": false,
-// CHECK:     "IsInvokedWhereModifiableValueRequired": false,
-// CHECK:     "IsInvokedWhereAddressableValueRequired": false,
-// CHECK:     "IsInvokedWhereICERequired": false,
-// CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
-// CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
-// CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
-// CHECK:     "IsAnyArgumentNeverExpanded": false,
-// CHECK:     "IsAnyArgumentNotAnExpression": false
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "x + APPEND_0 ( 1 )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_pasting.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_pasting.c:3:33"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -163,15 +124,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ADD_10",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "x + APPEND_0 ( 1 )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_pasting.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_pasting.c:3:33"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "ADD_10",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_pasting.c:3:9",
@@ -182,7 +134,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "NumASTRoots": 0,
 // CHECK:     "NumArguments": 1,
 // CHECK:     "HasStringification": false,
-// CHECK:     "HasTokenPasting": true,
+// CHECK:     "HasTokenPasting": false,
 // CHECK:     "HasAlignedArguments": true,
 // CHECK:     "HasSameNameAsOtherDeclaration": false,
 // CHECK:     "IsExpansionControlFlowStmt": false,
