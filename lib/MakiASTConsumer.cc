@@ -10,6 +10,8 @@
 #include "Logging.hh"
 #include "MacroExpansionNode.hh"
 #include "MacroForest.hh"
+#include "MakiFlags.hh"
+#include "SourceLocationUtils.hh"
 #include "StmtCollectorMatchHandler.hh"
 #include <algorithm>
 #include <cassert>
@@ -235,35 +237,6 @@ bool isDescendantOfStmtRequiringICE(clang::ASTContext &Ctx,
     return false;
 }
 
-// Tries to get the full real path and line + column number for a given source
-// location. First element is whether the operation was successful, the second
-// is the error if not and the full path if successful.
-std::pair<bool, std::string> tryGetFullSourceLoc(clang::SourceManager &SM,
-                                                 clang::SourceLocation L) {
-    if (L.isValid()) {
-        auto FID = SM.getFileID(L);
-        if (FID.isValid()) {
-            if (auto FE = SM.getFileEntryForID(FID)) {
-                auto Name = FE->tryGetRealPathName();
-                if (!Name.empty()) {
-                    auto FLoc = SM.getFileLoc(L);
-                    if (FLoc.isValid()) {
-                        auto s = FLoc.printToString(SM);
-                        // Find second-to-last colon
-                        auto i = s.rfind(':', s.rfind(':') - 1);
-                        return { true, Name.str() + ":" + s.substr(i + 1) };
-                    }
-                    return { false, "Invalid File SLoc" };
-                }
-                return { false, "Nameless file" };
-            }
-            return { false, "File without FileEntry" };
-        }
-        return { false, "Invalid file ID" };
-    }
-    return { false, "Invalid SLoc" };
-}
-
 // Checks if the included file is a globally included file.
 // The first element of the return result if false if not;
 // true otherwise.
@@ -355,13 +328,15 @@ std::pair<bool, llvm::StringRef> isGlobalInclude(
     return { true, IncludedFileRealpath };
 }
 
-MakiASTConsumer::MakiASTConsumer(clang::CompilerInstance &CI) {
+MakiASTConsumer::MakiASTConsumer(clang::CompilerInstance &CI,
+                                 MakiFlags Flags_) {
     clang::Preprocessor &PP = CI.getPreprocessor();
     clang::ASTContext &Ctx = CI.getASTContext();
+    Flags = Flags_;
 
-    MF = new maki::MacroForest(PP, Ctx);
+    MF = new maki::MacroForest(PP, Ctx, Flags);
     IC = new maki::IncludeCollector();
-    DC = new maki::DefinitionInfoCollector(Ctx);
+    DC = new maki::DefinitionInfoCollector(Ctx, Flags);
 
     PP.addPPCallbacks(std::unique_ptr<maki::MacroForest>(MF));
     PP.addPPCallbacks(std::unique_ptr<maki::IncludeCollector>(IC));
