@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MakiFlags.hh"
 #include <clang/AST/ASTContext.h>
 #include <clang/Basic/LangOptions.h>
 #include <clang/Basic/SourceLocation.h>
@@ -17,13 +18,14 @@ class DefinitionInfoCollector : public clang::PPCallbacks {
 private:
     clang::SourceManager &SM;
     const clang::LangOptions &LO;
+    MakiFlags Flags;
 
 public:
     std::vector<std::pair<std::string, const clang::MacroDirective *>>
         MacroNamesDefinitions;
     std::set<std::string> InspectedMacroNames;
 
-    DefinitionInfoCollector(clang::ASTContext &Ctx);
+    DefinitionInfoCollector(clang::ASTContext &Ctx, MakiFlags Flags);
 
     void MacroDefined(const clang::Token &MacroNameTok,
                       const clang::MacroDirective *MD) override;
