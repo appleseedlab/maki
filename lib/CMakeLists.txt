@@ -21,8 +21,10 @@ target_sources(maki
     ExpansionMatchHandler.cc
     IncludeCollector.cc
     MacroForest.cc
+    MakiFlags.cc
     MacroExpansionArgument.cc
     MacroExpansionNode.cc
+    SourceLocationUtils.cc
     StmtCollectorMatchHandler.cc
     JSONPrinter.cc
 )
