@@ -11,22 +11,22 @@ add_library(maki SHARED)
 # will likely need to be made public.
 target_sources(maki
   PRIVATE
-    ASTUtils.cc
     AlignmentMatchers.cc
-    MakiAction.cc
-    MakiASTConsumer.cc
-    DefinitionInfoCollector.cc
-    DeclStmtTypeLoc.cc
+    ASTUtils.cc
     DeclCollectorMatchHandler.cc
+    DeclStmtTypeLoc.cc
+    DefinitionInfoCollector.cc
     ExpansionMatchHandler.cc
     IncludeCollector.cc
-    MacroForest.cc
-    MakiFlags.cc
+    JSONPrinter.cc
     MacroExpansionArgument.cc
     MacroExpansionNode.cc
+    MacroForest.cc
+    MakiAction.cc
+    MakiASTConsumer.cc
+    MakiFlags.cc
     SourceLocationUtils.cc
     StmtCollectorMatchHandler.cc
-    JSONPrinter.cc
 )
 
 # Include LLVM and Clang include directories as system headers to suppress
