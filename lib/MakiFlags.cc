@@ -7,7 +7,7 @@ namespace maki {
 
 bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
                                const clang::MacroInfo *MI) {
-    return (!Flags.ProcessBuiltinMacros && MI->isBuiltinMacro()) ||
+    return (!MI) || (!Flags.ProcessBuiltinMacros && MI->isBuiltinMacro()) ||
            (!Flags.ProcessMacrosInSystemHeaders &&
             SM.isInSystemHeader(MI->getDefinitionLoc())) ||
            (!Flags.ProcessMacrosAtInvalidLocations &&
@@ -17,7 +17,7 @@ bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
 bool shouldSkipMacroInvocation(clang::SourceManager &SM, MakiFlags Flags,
                                const clang::MacroInfo *MI,
                                clang::SourceLocation Location) {
-    return shouldSkipMacroDefinition(SM, Flags, MI) ||
+    return (!MI) || shouldSkipMacroDefinition(SM, Flags, MI) ||
            (!Flags.ProcessMacrosInSystemHeaders &&
             SM.isInSystemHeader(Location)) ||
            (!Flags.ProcessMacrosAtInvalidLocations &&
