@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 struct A {
     int x;
 };
@@ -20,14 +20,6 @@ int main(int argc, char const *argv[]) {
 
 // CHECK: [
 // CHECK:   {
-// CHECK:     "Kind": "InspectedByCPP",
-// CHECK:     "Name": "M1"
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "InspectedByCPP",
-// CHECK:     "Name": "M2"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Definition",
 // CHECK:     "Name": "M1",
 // CHECK:     "IsObjectLike": true,
@@ -35,6 +27,41 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( Int ) ( 1 )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:14:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:14:19"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "M2",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( A ) { . x = 1 } )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:15:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:15:26"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "M1",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( Int ) ( 1 )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:5:19"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "M2",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( A ) { . x = 1 } )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:6:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:6:26"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "InspectedByCPP",
+// CHECK:     "Name": "M1"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "InspectedByCPP",
+// CHECK:     "Name": "M2"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -85,15 +112,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "M2",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( A ) { . x = 1 } )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:15:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:15:26"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "M2",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:15:9",
@@ -142,15 +160,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "M1",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( Int ) ( 1 )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:5:19"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "M1",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:5:9",
@@ -197,15 +206,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "M2",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( A ) { . x = 1 } )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:6:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_body.c:6:26"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

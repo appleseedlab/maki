@@ -3,6 +3,7 @@
 #include "DefinitionInfoCollector.hh"
 #include "IncludeCollector.hh"
 #include "MacroForest.hh"
+#include "MakiFlags.hh"
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Stmt.h>
@@ -15,9 +16,10 @@ private:
     maki::MacroForest *MF;
     maki::IncludeCollector *IC;
     maki::DefinitionInfoCollector *DC;
+    MakiFlags Flags;
 
 public:
-    MakiASTConsumer(clang::CompilerInstance &CI);
+    MakiASTConsumer(clang::CompilerInstance &CI, MakiFlags flags);
     void HandleTranslationUnit(clang::ASTContext &Ctx) override;
 };
 

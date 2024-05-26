@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define GET_X_STATIC(a) a.x
 #define GET_X_PTR(a) a->x
 #define GET_X_0(a) a[0].x
@@ -25,6 +25,60 @@ int main(int argc, char const *argv[]) {
 
 // CHECK: [
 // CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "GET_X_STATIC",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:17:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:17:27"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "GET_X_PTR",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a -> x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:18:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:18:25"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "GET_X_0",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a [ 0 ] . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:19:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:19:25"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "GET_X_STATIC",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:2:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:2:27"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "GET_X_PTR",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a -> x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:3:25"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "GET_X_0",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "a [ 0 ] . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:4:25"
+// CHECK:   },
+// CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",
 // CHECK:     "Name": "GET_X_0"
 // CHECK:   },
@@ -35,15 +89,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",
 // CHECK:     "Name": "GET_X_STATIC"
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "GET_X_STATIC",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:17:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:17:27"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -94,15 +139,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "GET_X_PTR",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a -> x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:18:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:18:25"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "GET_X_PTR",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:18:9",
@@ -149,15 +185,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "GET_X_0",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a [ 0 ] . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:19:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:19:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -208,15 +235,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "GET_X_STATIC",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:2:27"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "GET_X_STATIC",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:2:9",
@@ -265,15 +283,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "GET_X_PTR",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a -> x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:3:25"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "GET_X_PTR",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:3:9",
@@ -320,15 +329,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "GET_X_0",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "a [ 0 ] . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_argument.c:4:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define T1 Int
 #define T2 Int_Ptr
 typedef unsigned char u8;
@@ -21,6 +21,24 @@ int main() {
 // CHECK:     "Body": "Int",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:2:12"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "T2",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "Int_Ptr",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:3:12"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "T3",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "u8",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:5:12"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -71,15 +89,6 @@ int main() {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "T2",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "Int_Ptr",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:3:12"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "T2",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:3:9",
@@ -126,15 +135,6 @@ int main() {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "T3",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "u8",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_type_list.c:5:12"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

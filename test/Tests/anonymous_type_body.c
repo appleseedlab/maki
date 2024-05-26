@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 typedef struct {
     char *name;
     unsigned int age;
@@ -38,6 +38,33 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( color ) . rgb )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:20:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:20:42"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "COLOR_GET_RGB_PTR",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( color ) -> rgb )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:21:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:21:47"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ID",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "P",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:6:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:6:15"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "PTR",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( & ( P ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:7:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:7:21"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -88,15 +115,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "COLOR_GET_RGB_PTR",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( color ) -> rgb )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:21:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:21:47"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "COLOR_GET_RGB_PTR",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:21:9",
@@ -145,15 +163,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ID",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "P",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:6:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:6:15"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "ID",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:6:9",
@@ -200,15 +209,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "PTR",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( & ( P ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:7:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:7:21"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

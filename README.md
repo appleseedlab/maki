@@ -40,6 +40,19 @@ To easily run the Clang plugin, run its wrapper script like so:
 where `filename` is the name of the C file whose macro usage you would like to
 analyze.
 
+### Flags
+
+Maki offers the following flags to modify its behavior:
+
+| Flag                  | Effect                                                                                                                  | Example invocation                           |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| `--builtin-macros`    | Maki will analyze macro definitions or invocations of compiler builtin macros (this is the default)                     | `maki -fplugin-arg-maki---builtin-macros`    |
+| `--no-builtin-macros` | Maki will not analyze macro definitions or invocations of compiler builtin macros                                       | `maki -fplugin-arg-maki---no-builtin-macros` |
+| `--system-macros`     | Maki will analyze macro definitions or invocations in system headers (this is the default)                              | `maki -fplugin-arg-maki---system-macros`     |
+| `--no-system-macros`  | Maki will not analyze macro definitions or invocations in system headers                                                | `maki -fplugin-arg-maki---no-system-macros`  |
+| `--invalid-macros`    | Maki will analyze macro definitions or invocations at invalid locations, e.g. on the command line (this is the default) | `maki -fplugin-arg-maki---invalid-macros`    |
+| `--no-invalid-macros` | Maki will not analyze macro definitions or invocations at invalid locations                                             | `maki -fplugin-arg-maki---no-invalid-macros` |
+
 ## Testing
 
 Maki's test suite is located in the `tests/Tests` directory and automated with

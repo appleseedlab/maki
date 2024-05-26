@@ -1,5 +1,6 @@
 #include "MacroForest.hh"
 #include "MacroExpansionNode.hh"
+#include "MakiFlags.hh"
 #include <clang/AST/ASTContext.h>
 #include <clang/Basic/SourceLocation.h>
 #include <clang/Lex/MacroArgs.h>
@@ -20,9 +21,11 @@ inline clang::SourceRange getSpellingRange(clang::ASTContext &Ctx,
                               Ctx.getFullLoc(E).getSpellingLoc());
 }
 
-MacroForest::MacroForest(clang::Preprocessor &PP, clang::ASTContext &Ctx)
+MacroForest::MacroForest(clang::Preprocessor &PP, clang::ASTContext &Ctx,
+                         MakiFlags Flags)
     : PP(PP)
-    , Ctx(Ctx) {
+    , Ctx(Ctx)
+    , Flags(Flags) {
 }
 
 void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
@@ -31,6 +34,11 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
                                const clang::MacroArgs *Args) {
     auto MI = MD.getMacroInfo();
     auto &SM = Ctx.getSourceManager();
+    if (shouldSkipMacroDefinition(SM, Flags, MI) ||
+        shouldSkipMacroInvocation(SM, Flags, MI, Range.getBegin())) {
+        return;
+    }
+
     const auto &LO = Ctx.getLangOpts();
 
     // Initialize the new expansion with the parts we can get directly from

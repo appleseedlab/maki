@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 void f() {
 }
 #define CALL_F f()
@@ -18,6 +18,15 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "f ( )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/void_body.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/void_body.c:4:18"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "CALL",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "fun ( )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/void_body.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/void_body.c:5:23"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -66,15 +75,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "CALL",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "fun ( )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/void_body.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/void_body.c:5:23"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define Y y
 #define GT_X(z) ((z) > x)
 int main(int argc, char const *argv[]) {
@@ -19,6 +19,15 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "y",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/unhygienic.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unhygienic.c:2:11"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "GT_X",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( z ) > x )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/unhygienic.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unhygienic.c:3:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -67,15 +76,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "GT_X",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( z ) > x )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/unhygienic.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unhygienic.c:3:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

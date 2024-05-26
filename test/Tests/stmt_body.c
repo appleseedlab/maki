@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define EMPTY_STMT \
     {}
 #define COMPOUND(a, c) \
@@ -21,6 +21,15 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "{ }",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stmt_body.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stmt_body.c:3:6"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "COMPOUND",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "{ a ; c ; }",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/stmt_body.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stmt_body.c:8:5"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -69,15 +78,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "COMPOUND",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "{ a ; c ; }",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/stmt_body.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stmt_body.c:8:5"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

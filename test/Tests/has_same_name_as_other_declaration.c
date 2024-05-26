@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define A 1
 #define FOO(A, B, C) 2
 int bar = 0;
@@ -37,6 +37,69 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "5",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:11:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:11:16"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "fizz",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "6",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:15:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:15:16"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "fuzz",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "7",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:17:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:17:16"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "faz",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "int",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:19:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:19:13"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "A",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "1",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:2:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:2:11"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "FOO",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "2",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:3:22"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "bar",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "3",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:5:15"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "baz",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "4",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:7:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:7:15"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -87,15 +150,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "fizz",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "6",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:15:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:15:16"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "fizz",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:15:9",
@@ -142,15 +196,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "fuzz",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "7",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:17:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:17:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -201,15 +246,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "faz",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "int",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:19:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:19:13"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "faz",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:19:9",
@@ -256,24 +292,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "A",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:2:11"
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "FOO",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "2",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:3:22"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -324,15 +342,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "bar",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "3",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:5:15"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "bar",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:5:9",
@@ -379,15 +388,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "baz",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "4",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:7:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:7:15"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

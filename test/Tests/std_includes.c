@@ -1,13 +1,15 @@
 // RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
-#include "h1.h"
-struct person_t {
-    char *name;
-    int age;
-};
-#include "h2.h"
-int x = 1;
-#include "h3.h"
-int main(int argc, char const *argv[]) {
+
+#include <iso646.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+// COM: Maki should ignore the system header macros and print an empty JSON
+// COM: array
+
+int main(void) {
+    (void)true;
+    printf("Hello, world!\n");
     return 0;
 }
 

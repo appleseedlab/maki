@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define X x
 #define REF(v) v
 #define ADDR_OF(v) (&(v))
@@ -19,6 +19,24 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "x",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:2:11"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "REF",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "v",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:3:16"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ADDR_OF",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( & ( v ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:4:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -69,15 +87,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "REF",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "v",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:3:16"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "REF",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:3:9",
@@ -124,15 +133,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ADDR_OF",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( & ( v ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/decl_ref_expr.c:4:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

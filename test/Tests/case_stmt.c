@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define ONE 1
 #define ADD(a, b) ((a) + (b))
 #define TWO (ADD(1, 1))
@@ -25,6 +25,24 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:2:13"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ADD",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( a ) + ( b ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:29"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "TWO",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ADD ( 1 , 1 ) )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:4:23"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -121,72 +139,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ADD",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( a ) + ( b ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:29"
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "ADD",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/case_stmt.c:4:14",
-// CHECK:     "ASTKind": "",
-// CHECK:     "TypeSignature": "",
-// CHECK:     "InvocationDepth": 1,
-// CHECK:     "NumASTRoots": 0,
-// CHECK:     "NumArguments": 2,
-// CHECK:     "HasStringification": false,
-// CHECK:     "HasTokenPasting": false,
-// CHECK:     "HasAlignedArguments": false,
-// CHECK:     "HasSameNameAsOtherDeclaration": false,
-// CHECK:     "IsExpansionControlFlowStmt": false,
-// CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
-// CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
-// CHECK:     "DoesBodyContainDeclRefExpr": false,
-// CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
-// CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
-// CHECK:     "DoesAnyArgumentHaveSideEffects": false,
-// CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
-// CHECK:     "IsHygienic": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "IsInvocationLocationValid": true,
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsInvokedInMacroArgument": false,
-// CHECK:     "IsNamePresentInCPPConditional": false,
-// CHECK:     "IsExpansionICE": false,
-// CHECK:     "IsExpansionTypeNull": false,
-// CHECK:     "IsExpansionTypeAnonymous": false,
-// CHECK:     "IsExpansionTypeLocalType": false,
-// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
-// CHECK:     "IsExpansionTypeVoid": false,
-// CHECK:     "IsAnyArgumentTypeNull": false,
-// CHECK:     "IsAnyArgumentTypeAnonymous": false,
-// CHECK:     "IsAnyArgumentTypeLocalType": false,
-// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
-// CHECK:     "IsAnyArgumentTypeVoid": false,
-// CHECK:     "IsInvokedWhereModifiableValueRequired": false,
-// CHECK:     "IsInvokedWhereAddressableValueRequired": false,
-// CHECK:     "IsInvokedWhereICERequired": false,
-// CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
-// CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
-// CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
-// CHECK:     "IsAnyArgumentNeverExpanded": false,
-// CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "TWO",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ADD ( 1 , 1 ) )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:4:23"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

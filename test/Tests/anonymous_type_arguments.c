@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 typedef struct {
     char *name;
     unsigned int age;
@@ -43,6 +43,33 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( rgb ) . r )",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:20:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:20:32"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "RGB_PTR_GET_R",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( rgb ) -> r )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:21:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:21:37"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "PARENT_GET_AGE",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( P ) . age )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:6:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:6:35"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "PARENT_PTR_GET_AGE",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( P ) -> age )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:7:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:7:40"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -93,15 +120,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "RGB_PTR_GET_R",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( rgb ) -> r )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:21:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:21:37"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "RGB_PTR_GET_R",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:21:9",
@@ -150,15 +168,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "PARENT_GET_AGE",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( P ) . age )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:6:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:6:35"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "PARENT_GET_AGE",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:6:9",
@@ -205,15 +214,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "PARENT_PTR_GET_AGE",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( P ) -> age )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:7:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_arguments.c:7:40"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

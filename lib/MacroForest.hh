@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MacroExpansionNode.hh"
+#include "MakiFlags.hh"
 #include <clang/AST/ASTContext.h>
 #include <clang/Basic/SourceLocation.h>
 #include <clang/Lex/MacroArgs.h>
@@ -16,6 +17,7 @@ public:
     clang::Preprocessor &PP;
     clang::ASTContext &Ctx;
     std::vector<maki::MacroExpansionNode *> Expansions;
+    MakiFlags Flags;
 
     // Whether or not the current expansion is within a macro argument
     bool InMacroArg = false;
@@ -25,7 +27,7 @@ public:
     // invocation of the current invocation.
     std::stack<maki::MacroExpansionNode *> InvocationStack;
 
-    MacroForest(clang::Preprocessor &PP, clang::ASTContext &Ctx);
+    MacroForest(clang::Preprocessor &PP, clang::ASTContext &Ctx, MakiFlags flags);
 
     void MacroExpands(const clang::Token &MacroNameTok,
                       const clang::MacroDefinition &MD,

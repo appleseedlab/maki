@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define ZERO 0
 #define ONE 1
 enum E {
@@ -15,6 +15,15 @@ enum E {
 // CHECK:     "Body": "0",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/enum_decl.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:2:14"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ONE",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "1",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:13"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -63,15 +72,6 @@ enum E {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ONE",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:13"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

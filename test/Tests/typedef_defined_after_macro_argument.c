@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define F(a) (a).x
 #define G(a) (*(a)).x
 #define H(a) (a[0]).x
@@ -32,6 +32,78 @@ int main(int argc, char const *argv[]) {
 
 // CHECK: [
 // CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "F",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( a ) . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:22:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:22:18"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "G",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( * ( a ) ) . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:23:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:23:21"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "H",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( a [ 0 ] ) . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:24:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:24:21"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "I",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( ( Int ) i )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:25:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:25:21"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "F",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( a ) . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:2:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:2:18"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "G",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( * ( a ) ) . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:3:21"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "H",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( a [ 0 ] ) . x",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:4:21"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "I",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( i )",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:5:16"
+// CHECK:   },
+// CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",
 // CHECK:     "Name": "F"
 // CHECK:   },
@@ -46,15 +118,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",
 // CHECK:     "Name": "I"
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "F",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( a ) . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:22:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:22:18"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -105,15 +168,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "G",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( * ( a ) ) . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:23:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:23:21"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "G",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:23:9",
@@ -160,15 +214,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "H",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( a [ 0 ] ) . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:24:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:24:21"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -219,15 +264,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "I",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( ( Int ) i )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:25:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:25:21"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "I",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:25:9",
@@ -274,15 +310,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "F",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( a ) . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:2:18"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -333,15 +360,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "G",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( * ( a ) ) . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:3:21"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "G",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:3:9",
@@ -390,15 +408,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "H",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( a [ 0 ] ) . x",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:4:21"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "H",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:4:9",
@@ -445,15 +454,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "I",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( i )",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_argument.c:5:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

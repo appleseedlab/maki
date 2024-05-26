@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define ONE_PLUS_X_PLUS_2(x) 1 + x + 2
 #define TWICE_X_PLUS_3(x) 1 + x + 1 + x + 1
 int main(int argc, char const *argv[]) {
@@ -21,6 +21,15 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + x + 2",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:2:38"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "TWICE_X_PLUS_3",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "1 + x + 1 + x + 1",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:3:43"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -165,15 +174,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "TWICE_X_PLUS_3",
-// CHECK:     "IsObjectLike": false,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "1 + x + 1 + x + 1",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/malformed_body_not_arg_begin_or_end.c:3:43"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

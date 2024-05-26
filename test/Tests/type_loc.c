@@ -1,4 +1,4 @@
-// RUN: maki %s | jq '[.[] | select(.IsDefinitionLocationValid == null or .IsDefinitionLocationValid == true)] | sort_by(.PropertiesOf, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
 #define CHAR char
 #define UINT unsigned int
 #define LL long long
@@ -28,6 +28,33 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "char",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:2:14"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "UINT",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "unsigned int",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:3:23"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "LL",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "long long",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:4:17"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ULL",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "unsigned long long",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:5:27"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -174,15 +201,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "UINT",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "unsigned int",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:3:23"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "UINT",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:3:9",
@@ -279,15 +297,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "LL",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "long long",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:4:17"
-// CHECK:   },
-// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "LL",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:4:9",
@@ -382,15 +391,6 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
 // CHECK:     "IsAnyArgumentNeverExpanded": false,
 // CHECK:     "IsAnyArgumentNotAnExpression": false
-// CHECK:   },
-// CHECK:   {
-// CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "ULL",
-// CHECK:     "IsObjectLike": true,
-// CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "unsigned long long",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_loc.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_loc.c:5:27"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
