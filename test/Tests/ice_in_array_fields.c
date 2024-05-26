@@ -21,14 +21,14 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( 3 )",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_array_fields.c:3:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_array_fields.c:3:15"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_in_array_fields.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_in_array_fields.c:3:15"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "LEN",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_array_fields.c:3:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_array_fields.c:10:15",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_in_array_fields.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_in_array_fields.c:10:15",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int LEN",
 // CHECK:     "InvocationDepth": 0,
@@ -75,8 +75,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "LEN",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_array_fields.c:3:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_array_fields.c:6:15",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_in_array_fields.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_in_array_fields.c:6:15",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int LEN",
 // CHECK:     "InvocationDepth": 0,

@@ -16,14 +16,14 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "42",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_function_parameters.c:3:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_function_parameters.c:3:11"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_in_function_parameters.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_in_function_parameters.c:3:11"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "N",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_function_parameters.c:3:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_in_function_parameters.c:5:20",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_in_function_parameters.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_in_function_parameters.c:5:20",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int N",
 // CHECK:     "InvocationDepth": 0,
