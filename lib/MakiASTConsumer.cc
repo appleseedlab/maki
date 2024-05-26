@@ -2,6 +2,7 @@
 //          paren exprs
 
 #include "MakiASTConsumer.hh"
+#include "ASTUtils.hh"
 #include "AlignmentMatchers.hh"
 #include "DeclCollectorMatchHandler.hh"
 #include "DefinitionInfoCollector.hh"
@@ -777,16 +778,21 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         // Only consider side-effect expressions which were
                         // not expanded from an argument of the same macro
                         if (!ExpandedFromArgument(E)) {
-                            clang::Expr *LHS = nullptr;
-                            auto B = clang::dyn_cast<clang::BinaryOperator>(E);
-                            auto U = clang::dyn_cast<clang::UnaryOperator>(E);
-                            if (B) {
-                                LHS = B->getLHS();
-                            } else if (U) {
-                                LHS = U->getSubExpr();
+                            clang::Expr *ModifiedPartOfExpr = nullptr;
+                            if (auto B =
+                                    clang::dyn_cast<clang::BinaryOperator>(E)) {
+                                ModifiedPartOfExpr = B->getLHS();
+                            } else if (auto U =
+                                           clang::dyn_cast<clang::UnaryOperator>(
+                                               E)) {
+                                ModifiedPartOfExpr = U->getSubExpr();
                             }
-                            LHS = skipImplicitAndParens(LHS);
-                            return ExpandedFromArgument(LHS);
+                            ModifiedPartOfExpr =
+                                skipImplicitAndParens(ModifiedPartOfExpr);
+                            // Conservatively return true if any part of the
+                            // modified expression was expanded from the macro
+                            return isInTree(ModifiedPartOfExpr,
+                                            ExpandedFromArgument);
                         }
                         return false;
                     });
