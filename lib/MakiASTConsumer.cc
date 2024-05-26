@@ -193,9 +193,9 @@ bool hasLocalType(const clang::Type *T, clang::ASTContext &Ctx) {
     });
 }
 
-// Returns true if ST is a descendant of a Stmt which can only have
+// Returns true if ST is a descendant of a Node which can only have
 // subexpressions that are integral constants expressions
-bool isDescendantOfStmtRequiringICE(clang::ASTContext &Ctx,
+bool isDescendantOfNodeRequiringICE(clang::ASTContext &Ctx,
                                     const clang::Stmt *ST) {
     if (!ST) {
         return false;
@@ -217,16 +217,14 @@ bool isDescendantOfStmtRequiringICE(clang::ASTContext &Ctx,
             if (FD->isBitField()) {
                 return true;
             }
+            if (auto Type = FD->getType(); clang::isa<clang::ArrayType>(Type)) {
+                return true;
+            }
         }
 
-        if (auto VD = Cur.get<clang::VarDecl>()) {
-            auto QT = VD->getType();
-            if (!QT.isNull()) {
-                if (auto T = QT.getTypePtrOrNull()) {
-                    if (T->isArrayType()) {
-                        return true;
-                    }
-                }
+        if (auto VD = Cur.get<clang::ValueDecl>()) {
+            if (auto Type = VD->getType(); Type->isConstantArrayType()) {
+                return true;
             }
         }
 
@@ -941,7 +939,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     });
 
                 IsInvokedWhereICERequired =
-                    isDescendantOfStmtRequiringICE(Ctx, ST);
+                    isDescendantOfNodeRequiringICE(Ctx, ST);
 
                 //// Generate type signature
 
