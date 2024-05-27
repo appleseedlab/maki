@@ -328,6 +328,52 @@ std::pair<bool, llvm::StringRef> isGlobalInclude(
     return { true, IncludedFileRealpath };
 }
 
+// Checks if the given location is within the declaration range of any of the
+// given declarations, either directly or by being #include'd at a local scope.
+bool isLocationInAnyDecl(clang::SourceManager &SM, const clang::LangOptions &LO,
+                         clang::SourceLocation Location,
+                         std::vector<const clang::Decl *> &Decls) {
+    std::vector<clang::SourceLocation> LocationsToCheck;
+    // Get all the locations that this location was #include'd from, if any.
+    for (auto FileID = SM.getFileID(Location); Location.isValid();
+         Location = SM.getIncludeLoc(FileID), FileID = SM.getFileID(Location)) {
+        LocationsToCheck.push_back(Location);
+    }
+
+    // For all locations to check...
+    return std::all_of(
+        LocationsToCheck.begin(), LocationsToCheck.end(),
+        [&SM, &LO, &Decls](clang::SourceLocation Loc) {
+            // ..check if the location appears in the source range of any of the
+            // given declarations.
+            return !std::any_of(
+                Decls.begin(), Decls.end(),
+                [&SM, &LO, &Loc](const clang::Decl *D) {
+                    auto B = SM.getFileLoc(D->getBeginLoc());
+                    auto E = SM.getFileLoc(D->getEndLoc());
+
+                    if (B.isInvalid() || E.isInvalid()) {
+                        return false;
+                    }
+
+                    // If this decl is not for a function, then extend the range
+                    // to include the location just after the declaration to
+                    // account for semicolons.
+                    if (!clang::isa<clang::FunctionDecl>(D)) {
+                        if (auto Tok = clang::Lexer::findNextToken(E, SM, LO)) {
+                            E = SM.getFileLoc(Tok->getEndLoc());
+                        }
+                    }
+
+                    if (E.isInvalid()) {
+                        return false;
+                    }
+
+                    return clang::SourceRange(B, E).fullyContains(Loc);
+                });
+        });
+}
+
 MakiASTConsumer::MakiASTConsumer(clang::CompilerInstance &CI,
                                  MakiFlags Flags_) {
     clang::Preprocessor &PP = CI.getPreprocessor();
@@ -350,6 +396,17 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     // JSON printer for each invocation, definition, etc.
     std::vector<JSONPrinter> printers;
 
+    // Collect all declarations
+    std::vector<const clang::Decl *> AllDecls = ({
+        MatchFinder Finder;
+        DeclCollectorMatchHandler Handler;
+        auto Matcher = decl(unless(anyOf(isImplicit(), translationUnitDecl())))
+                           .bind("root");
+        Finder.addMatcher(Matcher, &Handler);
+        Finder.matchAST(Ctx);
+        Handler.Decls;
+    });
+
     // Print definition information
     for (auto &&Entry : DC->MacroNamesDefinitions) {
         // String properties
@@ -359,6 +416,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         std::string Name = Entry.first;
 
         // Boolean properties
+        bool IsDefinedAtGlobalScope = false;
         bool IsDefinitionLocationValid = false;
 
         auto MD = Entry.second;
@@ -381,34 +439,28 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
             first = false;
         }
 
+        auto DefLoc = MI->getDefinitionLoc();
+
+        IsDefinedAtGlobalScope = isLocationInAnyDecl(SM, LO, DefLoc, AllDecls);
+
         std::tie(IsDefinitionLocationValid, DefinitionLocation) =
-            tryGetFullSourceLoc(SM, MI->getDefinitionLoc());
+            tryGetFullSourceLoc(SM, DefLoc);
         std::tie(std::ignore, EndDefinitionLocation) =
             tryGetFullSourceLoc(SM, MI->getDefinitionEndLoc());
 
         JSONPrinter printer{ "Definition" };
         printer.add({
+            { "Name", Name },
+            { "IsObjectLike", MI->isObjectLike() },
+            { "IsDefinitionLocationValid", IsDefinitionLocationValid },
             { "Body", Body },
+            { "IsDefinedAtGlobalScope", IsDefinedAtGlobalScope },
             { "DefinitionLocation", DefinitionLocation },
             { "EndDefinitionLocation", EndDefinitionLocation },
-            { "IsDefinitionLocationValid", IsDefinitionLocationValid },
-            { "IsObjectLike", MI->isObjectLike() },
-            { "Name", Name },
         });
 
         printers.push_back(std::move(printer));
     }
-
-    // Collect declaration ranges
-    std::vector<const clang::Decl *> TopLevelDecls = ({
-        MatchFinder Finder;
-        DeclCollectorMatchHandler Handler;
-        auto Matcher = decl(unless(anyOf(isImplicit(), translationUnitDecl())))
-                           .bind("root");
-        Finder.addMatcher(Matcher, &Handler);
-        Finder.matchAST(Ctx);
-        Handler.Decls;
-    });
 
     // Print names of macros inspected by the preprocessor
     for (auto &&Name : DC->InspectedMacroNames) {
@@ -425,8 +477,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
             std::string IncludeName = "";
 
             // Check if included at global scope or not
-            auto Res =
-                isGlobalInclude(SM, LO, IEL, LocalIncludes, TopLevelDecls);
+            auto Res = isGlobalInclude(SM, LO, IEL, LocalIncludes, AllDecls);
             if (!Res.first) {
                 LocalIncludes.insert(Res.second);
             }
@@ -648,7 +699,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
             // Also check if any global declarations defined before this macro
             // have the same name as this macro
             std::any_of(
-                TopLevelDecls.begin(), TopLevelDecls.end(),
+                AllDecls.begin(), AllDecls.end(),
                 [&SM, &Exp](const clang::Decl *D) {
                     auto ND = clang::dyn_cast_or_null<clang::NamedDecl>(D);
                     if (!ND) {
