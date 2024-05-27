@@ -37,6 +37,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
 // CHECK:     "IsObjectLike": true,

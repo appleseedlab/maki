@@ -67,6 +67,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
 // CHECK:     "IsObjectLike": false,

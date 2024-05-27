@@ -26,8 +26,8 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "4294967295",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:3:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:3:20"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:3:20"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -35,8 +35,8 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "4294967296",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:4:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:4:27"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:4:27"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -44,8 +44,8 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "2147483647",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:5:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:5:19"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:5:19"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -53,8 +53,8 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "2147483648",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:6:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:6:26"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:6:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:6:26"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -62,8 +62,8 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( - 2147483648 )",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:8:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:8:31"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:8:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:8:31"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -71,14 +71,14 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( - 2147483649 )",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:9:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:9:39"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:9:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:9:39"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "MAX_UINT32",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:3:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:12:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_bits.c:12:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "long MAX_UINT32",
 // CHECK:     "InvocationDepth": 0,
@@ -126,8 +126,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "MAX_UINT32_PLUS_1",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:4:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:13:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:4:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_bits.c:13:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "long MAX_UINT32_PLUS_1",
 // CHECK:     "InvocationDepth": 0,
@@ -175,8 +175,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "MAX_INT32",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:5:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:14:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:5:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_bits.c:14:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int MAX_INT32",
 // CHECK:     "InvocationDepth": 0,
@@ -224,8 +224,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "MAX_INT32_PLUS_1",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:6:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:15:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:6:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_bits.c:15:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "long MAX_INT32_PLUS_1",
 // CHECK:     "InvocationDepth": 0,
@@ -273,8 +273,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "MIN_INT32",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:8:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:16:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:8:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_bits.c:16:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "long MIN_INT32",
 // CHECK:     "InvocationDepth": 0,
@@ -322,8 +322,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "MIN_INT32_MINUS_1",
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:9:9",
-// CHECK:     "InvocationLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/ice_bits.c:17:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:9:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ice_bits.c:17:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "long MIN_INT32_MINUS_1",
 // CHECK:     "InvocationDepth": 0,
