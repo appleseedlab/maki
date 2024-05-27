@@ -37,6 +37,7 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -351,10 +352,16 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
     // Print definition information
     for (auto &&Entry : DC->MacroNamesDefinitions) {
+        // String properties
+        std::string Body;
+        std::string DefinitionLocation;
+        std::string EndDefinitionLocation;
         std::string Name = Entry.first;
 
-        auto MD = Entry.second;
+        // Boolean properties
+        bool IsDefinitionLocationValid = false;
 
+        auto MD = Entry.second;
         auto MI = MD->getMacroInfo();
         assert(MI);
 
@@ -365,7 +372,6 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         // using the Lexer, so as to avoid including backslashes and newlines in
         // our emitted definition (which would be annoying for downstream tools
         // to have to escape).
-        std::string Body;
         bool first = true;
         for (auto &token : MI->tokens()) {
             if (!first) {
@@ -375,19 +381,19 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
             first = false;
         }
 
-        auto [IsDefinitionLocationValid, DefinitionLocation] =
+        std::tie(IsDefinitionLocationValid, DefinitionLocation) =
             tryGetFullSourceLoc(SM, MI->getDefinitionLoc());
-        auto [IsEndDefinitionLocationValid, EndDefinitionLocation] =
+        std::tie(std::ignore, EndDefinitionLocation) =
             tryGetFullSourceLoc(SM, MI->getDefinitionEndLoc());
 
         JSONPrinter printer{ "Definition" };
         printer.add({
-            { "Name", Name },
-            { "IsObjectLike", MI->isObjectLike() },
-            { "IsDefinitionLocationValid", IsDefinitionLocationValid },
             { "Body", Body },
             { "DefinitionLocation", DefinitionLocation },
             { "EndDefinitionLocation", EndDefinitionLocation },
+            { "IsDefinitionLocationValid", IsDefinitionLocationValid },
+            { "IsObjectLike", MI->isObjectLike() },
+            { "Name", Name },
         });
 
         printers.push_back(std::move(printer));
