@@ -872,17 +872,27 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     ExprsWithLocallyDefinedTypes.end(), ExpandedFromBody);
 
                 DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro =
-                    std::any_of(StmtsExpandedFromBody.begin(),
-                                StmtsExpandedFromBody.end(),
-                                [&Ctx, &DefLoc](const clang::Stmt *St) {
-                                    if (auto E =
-                                            clang::dyn_cast<clang::Expr>(St)) {
-                                        auto QT = E->getType();
-                                        return hasTypeDefinedAfter(
-                                            QT.getTypePtrOrNull(), Ctx, DefLoc);
-                                    }
-                                    return false;
-                                });
+                    std::any_of(
+                        StmtsExpandedFromBody.begin(),
+                        StmtsExpandedFromBody.end(),
+                        [&Ctx, &DefLoc](const clang::Stmt *St) {
+                            // If this is a sizeof/cast expression, check if the
+                            // type passed to the expression was defined after
+                            // this macro.
+                            if (auto CastOrSizeOf = clang::dyn_cast<
+                                    clang::UnaryExprOrTypeTraitExpr>(St)) {
+                                auto T = CastOrSizeOf->getArgumentType()
+                                             .getTypePtrOrNull();
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc);
+                            }
+                            if (auto E = clang::dyn_cast<clang::Expr>(St)) {
+                                // Also check if the type of this subexpression
+                                // was defined after this macro.
+                                auto T = E->getType().getTypePtrOrNull();
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc);
+                            }
+                            return false;
+                        });
 
                 // We only allow references to declarations declared
                 // within the macro expansion itself
