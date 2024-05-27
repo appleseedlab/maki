@@ -606,6 +606,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool IsExpansionTypeNull = false;
         bool IsExpansionTypeVoid = false;
         bool IsHygienic = false;
+        bool IsICERepresentableByInt32 = false;
         bool IsInvocationLocationValid = false;
         bool IsInvokedInMacroArgument = false;
         bool IsInvokedWhereAddressableValueRequired = false;
@@ -987,9 +988,20 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     IsExpansionTypeDefinedAfterMacro =
                         hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
 
-                    // Whether this expression is an integral
-                    // constant expression
-                    IsExpansionICE = E->isIntegerConstantExpr(Ctx);
+                    // Properties of integral constant expressions
+                    if (auto ICE = E->getIntegerConstantExpr(Ctx)) {
+                        IsExpansionICE = true;
+                        // This check is based on the following LLVM function
+                        // definition:
+                        // https://llvm.org/doxygen/APSInt_8h_source.html#l00089
+                        if (ICE->isNegative()) {
+                            IsICERepresentableByInt32 = ICE->isSignedIntN(32);
+                        } else {
+                            // Treat positive values as unsigned so that we can
+                            // try to fit them in a 32-bit int
+                            IsICERepresentableByInt32 = ICE->isIntN(32);
+                        }
+                    }
                 }
                 // Macro identifier
                 TypeSignature += " " + Name;
@@ -1120,6 +1132,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 DoesAnyArgumentContainDeclRefExpr },
 
               { "IsHygienic", IsHygienic },
+              { "IsICERepresentableByInt32", IsICERepresentableByInt32 },
               { "IsDefinitionLocationValid", IsDefinitionLocationValid },
               { "IsInvocationLocationValid", IsInvocationLocationValid },
               { "IsObjectLike", IsObjectLike },
