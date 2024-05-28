@@ -21,6 +21,14 @@ int main(void) {
 }
 #define FIVE 5
 
+struct A {
+    int a;
+    int b;
+// Declared inside struct. Direction translation to variable or enum will break
+// program.
+#define C 10
+};
+
 // COM: This separate definition of EIGHT is at the global scope
 #include "eight.h"
 
@@ -55,6 +63,16 @@ int main(void) {
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:22:9",
 // CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:22:14"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "C",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "10",
+// CHECK:     "IsDefinedAtGlobalScope": false,
+// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:29:9",
+// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:29:11"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
