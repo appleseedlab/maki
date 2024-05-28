@@ -41,8 +41,8 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "3",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:15:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:15:15"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:15:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:15:15"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -51,8 +51,8 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "4",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:19:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:19:14"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:19:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:19:14"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -61,8 +61,8 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "5",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:22:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:22:14"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:22:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:22:14"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -71,8 +71,8 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "10",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:29:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:29:11"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:29:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:29:11"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -81,8 +81,8 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "0",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:3:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:3:14"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:3:14"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -91,8 +91,8 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:5:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:5:13"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:5:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:5:13"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -101,8 +101,8 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "2",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:9:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/define_at_non_global_scope.c:9:13"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:9:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/define_at_non_global_scope.c:9:13"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -111,8 +111,8 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "8",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/eight.h:2:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/eight.h:2:15"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/eight.h:2:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/eight.h:2:15"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -121,7 +121,7 @@ struct A {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "8",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/eight.h:2:9",
-// CHECK:     "EndDefinitionLocation": "/home/bpappas/github.com/appleseedlab/maki/test/Tests/eight.h:2:15"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/eight.h:2:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/eight.h:2:15"
 // CHECK:   }
 // CHECK: ]
