@@ -939,7 +939,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                             // this macro.
                             if (auto CastOrSizeOf = clang::dyn_cast<
                                     clang::UnaryExprOrTypeTraitExpr>(St)) {
-                                auto T = CastOrSizeOf->getArgumentType()
+                                auto T = CastOrSizeOf->getTypeOfArgument()
                                              .getTypePtrOrNull();
                                 return hasTypeDefinedAfter(T, Ctx, DefLoc);
                             }
