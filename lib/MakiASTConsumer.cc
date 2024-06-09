@@ -644,25 +644,6 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         }
     }
 
-    // Any expr with a type defined at a local scope
-    std::set<const clang::Expr *> ExprsWithLocallyDefinedTypes;
-    {
-        MatchFinder Finder;
-        auto Matcher =
-            expr(unless(anyOf(implicitCastExpr(), implicitValueInitExpr())))
-                .bind("root");
-        StmtCollectorMatchHandler Handler;
-        Finder.addMatcher(Matcher, &Handler);
-        Finder.matchAST(Ctx);
-        for (auto &&ST : Handler.Stmts) {
-            auto E = clang::dyn_cast<clang::Expr>(ST);
-            auto QT = E->getType();
-            if (hasLocalType(QT.getTypePtrOrNull(), Ctx)) {
-                ExprsWithLocallyDefinedTypes.insert(E);
-            }
-        }
-    }
-
     // Print macro expansion information
     for (auto Exp : MF->Expansions) {
         assert(Exp);
@@ -975,8 +956,26 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                                 ExpandedFromBody);
 
                 DoesSubexpressionExpandedFromBodyHaveLocalType = std::any_of(
-                    ExprsWithLocallyDefinedTypes.begin(),
-                    ExprsWithLocallyDefinedTypes.end(), ExpandedFromBody);
+                    StmtsExpandedFromBody.begin(), StmtsExpandedFromBody.end(),
+                    [&Ctx](const clang::Stmt *St) {
+                        // If this is a sizeof/cast expression, check if the
+                        // type passed to the expression was defined after this
+                        // macro.
+                        if (auto CastOrSizeOf =
+                                clang::dyn_cast<clang::UnaryExprOrTypeTraitExpr>(
+                                    St)) {
+                            auto T = CastOrSizeOf->getTypeOfArgument()
+                                         .getTypePtrOrNull();
+                            return hasLocalType(T, Ctx);
+                        }
+                        if (auto E = clang::dyn_cast<clang::Expr>(St)) {
+                            // Also check if the type of this subexpression was
+                            // defined after this macro.
+                            auto T = E->getType().getTypePtrOrNull();
+                            return hasLocalType(T, Ctx);
+                        }
+                        return false;
+                    });
 
                 DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro =
                     std::any_of(
