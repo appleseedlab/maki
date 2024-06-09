@@ -38,6 +38,9 @@ RUN apt install -y libcurl4-gnutls-dev
 RUN apt install -y libzstd-dev
 RUN apt install -y libedit-dev
 
+# Add clang alternative
+RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 100
+
 # Cleanup
 RUN rm llvm.sh
 
