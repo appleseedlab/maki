@@ -255,6 +255,36 @@ bool isDescendantOfNodeRequiringICE(clang::ASTContext &Ctx,
     return false;
 }
 
+// Returns true if ST is a descendant of a Node which can only have
+// subexpressions that are constant expressions.
+bool isDescendantOfNodeRequiringConstantExpression(clang::ASTContext &Ctx,
+                                                   const clang::Stmt *ST) {
+    if (!ST) {
+        return false;
+    }
+
+    std::queue<clang::DynTypedNode> Q;
+    for (auto P : Ctx.getParents(*ST)) {
+        Q.push(P);
+    }
+
+    while (!Q.empty()) {
+        auto Cur = Q.front();
+        Q.pop();
+        if (auto VD = Cur.get<clang::VarDecl>()) {
+            // Check if the expression is the initializer of a variable that has
+            // global or static storage.
+            if (VD->hasGlobalStorage() || VD->isStaticLocal()) {
+                return true;
+            }
+        }
+        for (auto P : Ctx.getParents(Cur)) {
+            Q.push(P);
+        }
+    }
+    return false;
+}
+
 // Checks if the included file is a globally included file.
 // The first element of the return result if false if not;
 // true otherwise.
@@ -686,6 +716,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool IsInvokedInMacroArgument = false;
         bool IsInvokedWhereAddressableValueRequired = false;
         bool IsInvokedWhereICERequired = false;
+        bool IsInvokedWhereConstantExpressionRequired = false;
         bool IsInvokedWhereModifiableValueRequired = false;
         bool IsNamePresentInCPPConditional = false;
         bool IsObjectLike = false;
@@ -1032,6 +1063,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                 IsInvokedWhereICERequired =
                     isDescendantOfNodeRequiringICE(Ctx, ST);
+                IsInvokedWhereConstantExpressionRequired =
+                    IsInvokedWhereICERequired |
+                    isDescendantOfNodeRequiringConstantExpression(Ctx, ST);
 
                 //// Generate type signature
 
@@ -1235,6 +1269,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
               { "IsInvokedWhereAddressableValueRequired",
                 IsInvokedWhereAddressableValueRequired },
               { "IsInvokedWhereICERequired", IsInvokedWhereICERequired },
+              { "IsInvokedWhereConstantExpressionRequired",
+                IsInvokedWhereConstantExpressionRequired },
 
               { "IsAnyArgumentExpandedWhereModifiableValueRequired",
                 IsAnyArgumentExpandedWhereModifiableValueRequired },
