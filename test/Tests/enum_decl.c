@@ -13,6 +13,7 @@ enum E {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "0",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/enum_decl.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:2:14"
 // CHECK:   },
@@ -22,6 +23,7 @@ enum E {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:13"
 // CHECK:   },
@@ -68,6 +70,7 @@ enum E {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": true,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": true,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -117,6 +120,7 @@ enum E {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": true,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": true,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,

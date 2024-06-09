@@ -32,7 +32,6 @@ struct A {
 // COM: This separate definition of EIGHT is at the global scope
 #include "eight.h"
 
-
 // CHECK: [
 // CHECK:   {
 // CHECK:     "Kind": "Definition",

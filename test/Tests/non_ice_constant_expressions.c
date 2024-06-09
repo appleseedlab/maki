@@ -24,8 +24,8 @@ int main(void) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "3.14",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:3:12"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:3:12"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -34,14 +34,14 @@ int main(void) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "5",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:4:11"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:4:11"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "PI",
-// CHECK:     "DefinitionLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:3:9",
-// CHECK:     "InvocationLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:11:39",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:11:39",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "double PI",
 // CHECK:     "InvocationDepth": 0,
@@ -90,8 +90,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "R",
-// CHECK:     "DefinitionLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:4:9",
-// CHECK:     "InvocationLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:11:44",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:4:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:11:44",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int R",
 // CHECK:     "InvocationDepth": 0,
@@ -140,8 +140,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "R",
-// CHECK:     "DefinitionLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:4:9",
-// CHECK:     "InvocationLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:14:26",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:4:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:14:26",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int R",
 // CHECK:     "InvocationDepth": 0,
@@ -190,8 +190,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "R",
-// CHECK:     "DefinitionLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:4:9",
-// CHECK:     "InvocationLocation": "{{.*}}/test/Tests/non_ice_constant_expressions.c:7:16",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:4:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/non_ice_constant_expressions.c:7:16",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int R",
 // CHECK:     "InvocationDepth": 0,

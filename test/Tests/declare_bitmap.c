@@ -15,6 +15,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:2:24"
 // CHECK:   },
@@ -24,6 +25,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "CONFIG_NR_CPUS",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:3:17"
 // CHECK:   },
@@ -33,6 +35,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ( ( n ) + ( d ) - 1 ) / ( d ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:4:57"
 // CHECK:   },
@@ -42,6 +45,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "8",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:5:23"
 // CHECK:   },
@@ -51,6 +55,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( sizeof ( type ) * BITS_PER_BYTE )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:6:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:6:58"
 // CHECK:   },
@@ -60,6 +65,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "__KERNEL_DIV_ROUND_UP ( nr , BITS_PER_TYPE ( long ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:7:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:7:72"
 // CHECK:   },
@@ -69,6 +75,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "unsigned long name [ BITS_TO_LONGS ( bits ) ]",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:8:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/declare_bitmap.c:8:74"
 // CHECK:   },
@@ -115,6 +122,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -164,6 +172,7 @@ extern const DECLARE_BITMAP(cpu_all_bits, NR_CPUS);
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
