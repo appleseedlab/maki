@@ -225,7 +225,25 @@ bool isDescendantOfNodeRequiringICE(clang::ASTContext &Ctx,
         }
 
         if (auto VD = Cur.get<clang::ValueDecl>()) {
+            // Check if this expression is the size specifier for an array type
+            // for a value declaration.
             if (auto Type = VD->getType(); Type->isConstantArrayType()) {
+                return true;
+            } else if (auto VarD = clang::dyn_cast<clang::VarDecl>(VD)) {
+                // Check if the expression is the initializer of an integer
+                // variable that has global or static storage.
+                if (VarD->hasGlobalStorage() || VarD->isStaticLocal()) {
+                    if (VarD->getType()->isIntegerType()) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // Check if this expression is the size specifier for an array type
+        // inside a typedef.
+        if (auto TD = Cur.get<clang::TypedefDecl>()) {
+            if (TD->getUnderlyingType()->isConstantArrayType()) {
                 return true;
             }
         }
