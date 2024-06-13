@@ -16,6 +16,7 @@ int main(void) {
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "sizeof ( ID )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/size_of_undeclared_type.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/size_of_undeclared_type.c:3:24"
 // CHECK:   },
@@ -62,6 +63,7 @@ int main(void) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,

@@ -23,6 +23,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:2:13"
 // CHECK:   },
@@ -32,6 +33,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ( a ) + ( b ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:3:29"
 // CHECK:   },
@@ -41,6 +43,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ADD ( 1 , 1 ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/case_stmt.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/case_stmt.c:4:23"
 // CHECK:   },
@@ -87,6 +90,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": true,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": true,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -136,6 +140,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": true,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": true,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -185,6 +190,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": true,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": true,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,

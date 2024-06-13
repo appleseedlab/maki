@@ -8,6 +8,7 @@
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "8",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/eight.h:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/eight.h:2:15"
 // CHECK:   }

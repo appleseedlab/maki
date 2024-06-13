@@ -22,6 +22,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "do { char * lim = ( limit ) ; while ( p < lim ) { if ( * p ++ != ' ' ) { p -- ; break ; } } } while ( 0 )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/do_while.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/do_while.c:11:15"
 // CHECK:   },
@@ -68,6 +69,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": true,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,

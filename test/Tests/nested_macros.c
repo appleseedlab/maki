@@ -32,6 +32,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "L4",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:10:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:10:12"
 // CHECK:   },
@@ -41,6 +42,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:11:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:11:12"
 // CHECK:   },
@@ -50,6 +52,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ADD ( ONE + ONE , TWO ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:12:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:12:37"
 // CHECK:   },
@@ -59,6 +62,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ADD ( ( ADD ( ONE , ONE ) ) , TWO ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:13:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:13:42"
 // CHECK:   },
@@ -68,6 +72,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ONE + ( ADD ( ( ADD ( ONE , ONE ) ) , ONE + ONE ) ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:14:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:14:56"
 // CHECK:   },
@@ -77,6 +82,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ( a ) + ( b ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:2:29"
 // CHECK:   },
@@ -86,6 +92,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:3:13"
 // CHECK:   },
@@ -95,6 +102,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ADD ( ONE , ONE ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:4:27"
 // CHECK:   },
@@ -104,6 +112,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ADD ( ONE , TWO ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:5:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:5:29"
 // CHECK:   },
@@ -113,6 +122,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ADD ( TWO , TWO ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:6:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:6:28"
 // CHECK:   },
@@ -122,6 +132,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ADD ( TWO , FOUR ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:7:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:7:29"
 // CHECK:   },
@@ -131,6 +142,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "L2",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:8:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:8:12"
 // CHECK:   },
@@ -140,6 +152,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "L3",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/nested_macros.c:9:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/nested_macros.c:9:12"
 // CHECK:   },
@@ -186,6 +199,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -235,6 +249,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -284,6 +299,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -333,6 +349,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -382,6 +399,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -431,6 +449,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -480,6 +499,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -529,6 +549,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -578,6 +599,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,

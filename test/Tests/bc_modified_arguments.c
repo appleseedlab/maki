@@ -40,6 +40,7 @@ int main(void) {
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ( n ) . rdx ^= ( ( BcBigDig ) 1 ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:28:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:28:55"
 // CHECK:   },
@@ -49,6 +50,7 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "__restrict",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:8:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:8:18"
 // CHECK:   },
@@ -95,6 +97,7 @@ int main(void) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": true,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
@@ -144,6 +147,7 @@ int main(void) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,

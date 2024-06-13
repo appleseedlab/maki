@@ -23,6 +23,7 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:11:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:11:9"
 // CHECK:   },
@@ -32,6 +33,7 @@ int main(void) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "a b c",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:4:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:6:13"
 // CHECK:   },
@@ -41,6 +43,7 @@ int main(void) {
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( ( unsigned int ) ( unsigned char ) ( c ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:9:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:9:50"
 // CHECK:   },
@@ -87,6 +90,7 @@ int main(void) {
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
 // CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
 // CHECK:     "IsAnyArgumentConditionallyEvaluated": false,

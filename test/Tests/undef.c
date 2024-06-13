@@ -14,6 +14,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/undef.c:2:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/undef.c:2:13"
 // CHECK:   },
@@ -23,6 +24,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "2",
+// CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/undef.c:3:9",
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/undef.c:3:15"
 // CHECK:   },
