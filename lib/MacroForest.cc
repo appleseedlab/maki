@@ -7,7 +7,7 @@
 #include <clang/Lex/MacroInfo.h>
 #include <clang/Lex/Preprocessor.h>
 #include <clang/Lex/Token.h>
-#include <llvm-17/llvm/ADT/StringRef.h>
+#include <llvm/ADT/StringRef.h>
 
 // TODO:    Check if we should treat expansions written in scratch space
 //          differently from other expansions
