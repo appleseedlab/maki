@@ -34,8 +34,10 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
                                const clang::MacroArgs *Args) {
     auto MI = MD.getMacroInfo();
     auto &SM = Ctx.getSourceManager();
+
+    auto SpellingLocBegin = SM.getSpellingLoc(Range.getBegin());
     if (shouldSkipMacroDefinition(SM, Flags, MI) ||
-        shouldSkipMacroInvocation(SM, Flags, MI, Range.getBegin())) {
+        shouldSkipMacroInvocation(SM, Flags, MI, SpellingLocBegin)) {
         return;
     }
 
