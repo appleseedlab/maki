@@ -7,21 +7,47 @@ namespace maki {
 
 bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
                                const clang::MacroInfo *MI) {
-    return (!MI) || (!Flags.ProcessBuiltinMacros && MI->isBuiltinMacro()) ||
-           (!Flags.ProcessMacrosInSystemHeaders &&
-            SM.isInSystemHeader(MI->getDefinitionLoc())) ||
-           (!Flags.ProcessMacrosAtInvalidLocations &&
-            !tryGetFullSourceLoc(SM, MI->getDefinitionLoc()).first);
+    if (!MI) {
+        return true;
+    }
+    if (!Flags.ProcessBuiltinMacros && MI->isBuiltinMacro()) {
+        return true;
+    }
+    auto DefinitionLocation = MI->getDefinitionLoc();
+    if (!Flags.ProcessMacrosInSystemHeaders &&
+        SM.isInSystemHeader(DefinitionLocation)) {
+        return true;
+    }
+    if (!Flags.ProcessMacrosAtInvalidLocations) {
+        [[maybe_unused]] auto [Valid, LocationOrError] =
+            tryGetFullSourceLoc(SM, DefinitionLocation);
+        if (!Valid) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool shouldSkipMacroInvocation(clang::SourceManager &SM, MakiFlags Flags,
                                const clang::MacroInfo *MI,
                                clang::SourceLocation Location) {
-    return (!MI) || shouldSkipMacroDefinition(SM, Flags, MI) ||
-           (!Flags.ProcessMacrosInSystemHeaders &&
-            SM.isInSystemHeader(Location)) ||
-           (!Flags.ProcessMacrosAtInvalidLocations &&
-            !tryGetFullSourceLoc(SM, Location).first);
+    if (!MI) {
+        return true;
+    }
+    if (shouldSkipMacroDefinition(SM, Flags, MI)) {
+        return true;
+    }
+    if (!Flags.ProcessMacrosInSystemHeaders && SM.isInSystemHeader(Location)) {
+        return true;
+    }
+    if (!Flags.ProcessMacrosAtInvalidLocations) {
+        [[maybe_unused]] auto [Valid, LocationOrError] =
+            tryGetFullSourceLoc(SM, Location);
+        if (!Valid) {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace maki
