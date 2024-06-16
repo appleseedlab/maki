@@ -14,13 +14,6 @@
 
 namespace maki {
 
-inline clang::SourceRange getSpellingRange(clang::ASTContext &Ctx,
-                                           clang::SourceLocation B,
-                                           clang::SourceLocation E) {
-    return clang::SourceRange(Ctx.getFullLoc(B).getSpellingLoc(),
-                              Ctx.getFullLoc(E).getSpellingLoc());
-}
-
 MacroForest::MacroForest(clang::Preprocessor &PP, clang::ASTContext &Ctx,
                          MakiFlags Flags)
     : PP(PP)
@@ -35,11 +28,12 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
     auto MI = MD.getMacroInfo();
     auto &SM = Ctx.getSourceManager();
 
-    auto SpellingLocBegin = SM.getSpellingLoc(Range.getBegin());
+    auto BeginSpellingLocation = SM.getSpellingLoc(Range.getBegin());
     if (shouldSkipMacroDefinition(SM, Flags, MI) ||
-        shouldSkipMacroInvocation(SM, Flags, MI, SpellingLocBegin)) {
+        shouldSkipMacroInvocation(SM, Flags, MI, BeginSpellingLocation)) {
         return;
     }
+    auto EndSpellingLocation = SM.getSpellingLoc(Range.getEnd());
 
     const auto &LO = Ctx.getLangOpts();
 
@@ -54,7 +48,7 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
         clang::SourceRange(MI->getDefinitionLoc(), MI->getDefinitionEndLoc());
     Expansion->DefinitionTokens = MI->tokens();
     Expansion->SpellingRange =
-        getSpellingRange(Ctx, Range.getBegin(), Range.getEnd());
+        clang::SourceRange(BeginSpellingLocation, EndSpellingLocation);
     Expansion->InMacroArg = InMacroArg;
 
     // Add the expansion to the forest
