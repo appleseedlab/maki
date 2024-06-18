@@ -41,7 +41,13 @@ public:
     void Ifdef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
                const clang::MacroDefinition &MD) override;
 
+    void Elifdef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
+                 const clang::MacroDefinition &MD) override;
+
     void Ifndef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
                 const clang::MacroDefinition &MD) override;
+
+    void Elifndef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
+                  const clang::MacroDefinition &MD) override;
 };
 } // namespace maki

@@ -42,9 +42,25 @@ void DefinitionInfoCollector::Ifdef(clang::SourceLocation Loc,
     InspectedMacroNames.insert(Name);
 }
 
+// NOTE(Brent): This only visits branches that are taken.
+void DefinitionInfoCollector::Elifdef(clang::SourceLocation Loc,
+                                      const clang::Token &MacroNameTok,
+                                      const clang::MacroDefinition &MD) {
+    auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
+    InspectedMacroNames.insert(Name);
+}
+
 void DefinitionInfoCollector::Ifndef(clang::SourceLocation Loc,
                                      const clang::Token &MacroNameTok,
                                      const clang::MacroDefinition &MD) {
+    auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
+    InspectedMacroNames.insert(Name);
+}
+
+// NOTE(Brent): This only visits branches that are taken.
+void DefinitionInfoCollector::Elifndef(clang::SourceLocation Loc,
+                                       const clang::Token &MacroNameTok,
+                                       const clang::MacroDefinition &MD) {
     auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
     InspectedMacroNames.insert(Name);
 }
