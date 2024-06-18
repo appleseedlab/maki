@@ -34,10 +34,12 @@
 #include <functional>
 #include <llvm-17/llvm/ADT/StringRef.h>
 #include <llvm-17/llvm/Support/Casting.h>
+#include <llvm/ADT/SmallPtrSet.h>
+#include <llvm/ADT/StringSet.h>
 #include <queue>
-#include <set>
 #include <string>
 #include <tuple>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -45,8 +47,8 @@ namespace maki {
 using namespace clang::ast_matchers;
 
 // Collect all subtrees of the given stmt using BFS
-std::set<const clang::Stmt *> subtrees(const clang::Stmt *ST) {
-    std::set<const clang::Stmt *> Subtrees;
+std::unordered_set<const clang::Stmt *> subtrees(const clang::Stmt *ST) {
+    std::unordered_set<const clang::Stmt *> Subtrees;
     if (!ST) {
         return Subtrees;
     }
@@ -292,8 +294,7 @@ bool isDescendantOfNodeRequiringConstantExpression(clang::ASTContext &Ctx,
 std::pair<bool, llvm::StringRef> isGlobalInclude(
     clang::SourceManager &SM, const clang::LangOptions &LO,
     std::pair<clang::OptionalFileEntryRef, clang::SourceLocation> &IEL,
-    std::set<llvm::StringRef> &LocalIncludes,
-    std::vector<const clang::Decl *> &Decls) {
+    llvm::StringSet<> &LocalIncludes, std::vector<const clang::Decl *> &Decls) {
     auto FE = IEL.first;
     auto HashLoc = IEL.second;
 
@@ -513,12 +514,12 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     // Print names of macros inspected by the preprocessor
     for (auto &&Name : DC->InspectedMacroNames) {
         JSONPrinter printer{ "InspectedByCPP" };
-        printer.add({ { "Name", Name } });
+        printer.add({ { "Name", Name.getKeyData() } });
         printers.push_back(std::move(printer));
     }
     // Print include-directive information
     {
-        std::set<llvm::StringRef> LocalIncludes;
+        llvm::StringSet<> LocalIncludes;
         for (auto &&IEL : IC->IncludeEntriesLocs) {
             // Facts for includes
             bool Valid = false;
@@ -544,7 +545,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     // whether properties are satisfied
 
     // Any reference to a decl
-    std::set<const clang::DeclRefExpr *> AllDeclRefExprs;
+    llvm::SmallPtrSet<const clang::DeclRefExpr *, 8> AllDeclRefExprs;
     {
         MatchFinder Finder;
         auto Matcher = declRefExpr(unless(anyOf(implicitCastExpr(),
@@ -561,7 +562,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     // Any reference to a decl declared at a local scope
     // FIXME: Are there more types of decls we should be accounting for?
     // Types, perhaps?
-    std::set<const clang::DeclRefExpr *> DeclRefExprsOfLocallyDefinedDecls;
+    llvm::SmallPtrSet<const clang::DeclRefExpr *, 8>
+        DeclRefExprsOfLocallyDefinedDecls;
     {
         for (auto &&DRE : AllDeclRefExprs) {
             auto D = DRE->getDecl();
@@ -575,7 +577,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
     // Any expr with side-effects
     // Binary assignment expressions, Pre/Post Inc/Dec
-    std::set<const clang::Expr *> SideEffectExprs;
+    llvm::SmallPtrSet<const clang::Expr *, 8> SideEffectExprs;
     {
         MatchFinder Finder;
         auto Matcher =
@@ -594,7 +596,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     }
 
     // Any expr that is the modified part of an expression with side-effects
-    std::set<clang::Expr *> SideEffectExprsLHSs;
+    llvm::SmallPtrSet<const clang::Expr *, 8> SideEffectExprsLHSs;
     {
         for (auto &&E : SideEffectExprs) {
             if (auto B = clang::dyn_cast<clang::BinaryOperator>(E)) {
@@ -606,7 +608,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     }
 
     // Any expr that is an address-of expr
-    std::set<const clang::UnaryOperator *> AddressOfExprs;
+    llvm::SmallPtrSet<const clang::UnaryOperator *, 8> AddressOfExprs;
     {
         MatchFinder Finder;
         auto Matcher =
@@ -624,7 +626,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
     // Any expr that is the operand of an expression with short-circuiting.
     // ConditionalOperator, LogicalAnd, LogicalOr
-    std::set<const clang::Expr *> ConditionalExprs;
+    llvm::SmallPtrSet<const clang::Expr *, 8> ConditionalExprs;
     {
         MatchFinder Finder;
         auto Matcher =
@@ -833,7 +835,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 });
             debug("Done checking if arguments are all aligned");
 
-            std::set<const clang::Stmt *> StmtsExpandedFromArguments;
+            llvm::SmallPtrSet<const clang::Stmt *, 8> StmtsExpandedFromArguments;
             // Semantic properties of the macro's arguments
             if (HasAlignedArguments) {
                 debug("Collecting argument subtrees");
@@ -900,7 +902,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         });
             }
 
-            std::set<const clang::Stmt *> StmtsExpandedFromBody;
+            std::unordered_set<const clang::Stmt *> StmtsExpandedFromBody;
             // Semantic properties of the macro body
             if (Exp->AlignedRoot && Exp->AlignedRoot->ST &&
                 HasAlignedArguments) {
@@ -1184,7 +1186,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
             }
 
             // Set of all Stmts expanded from macro
-            std::set<const clang::Stmt *> AllStmtsExpandedFromMacro =
+            std::unordered_set<const clang::Stmt *> AllStmtsExpandedFromMacro =
                 StmtsExpandedFromBody;
             AllStmtsExpandedFromMacro.insert(StmtsExpandedFromArguments.begin(),
                                              StmtsExpandedFromArguments.end());
