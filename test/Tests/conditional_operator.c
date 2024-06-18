@@ -1,4 +1,4 @@
-// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+// RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation, .Name)' | FileCheck %s --color
 #define IF_A_THEN_B_ELSE_C(a, b, c) ((a) ? (b) : (c))
 int main(int argc, char const *argv[]) {
     IF_A_THEN_B_ELSE_C(1, 2, 3);
