@@ -15,7 +15,12 @@ DefinitionInfoCollector::DefinitionInfoCollector(clang::ASTContext &Ctx,
     , Flags(Flags) {
 }
 
-void DefinitionInfoCollector::CollectMacroNameToken(const clang::Token &Token) {
+void DefinitionInfoCollector::CollectMacroName(
+    const clang::Token &Token, const clang::MacroDefinition &MD) {
+    // Only skip macro definitions which we are sure exist.
+    if (MD && shouldSkipMacroDefinition(SM, Flags, MD)) {
+        return;
+    }
     auto Name = clang::Lexer::getSpelling(Token, SM, LO);
     InspectedMacroNames.insert(std::move(Name));
 }
@@ -29,38 +34,38 @@ void DefinitionInfoCollector::MacroDefined(const clang::Token &MacroNameTok,
 void DefinitionInfoCollector::MacroUndefined(
     const clang::Token &MacroNameTok, const clang::MacroDefinition &MD,
     const clang::MacroDirective *Undef) {
-    CollectMacroNameToken(MacroNameTok);
+    CollectMacroName(MacroNameTok, MD);
 }
 
 void DefinitionInfoCollector::Defined(const clang::Token &MacroNameTok,
                                       const clang::MacroDefinition &MD,
                                       clang::SourceRange Range) {
-    CollectMacroNameToken(MacroNameTok);
+    CollectMacroName(MacroNameTok, MD);
 }
 
 void DefinitionInfoCollector::Ifdef(clang::SourceLocation Loc,
                                     const clang::Token &MacroNameTok,
                                     const clang::MacroDefinition &MD) {
-    CollectMacroNameToken(MacroNameTok);
+    CollectMacroName(MacroNameTok, MD);
 }
 
 // NOTE(Brent): This only visits branches that are taken.
 void DefinitionInfoCollector::Elifdef(clang::SourceLocation Loc,
                                       const clang::Token &MacroNameTok,
                                       const clang::MacroDefinition &MD) {
-    CollectMacroNameToken(MacroNameTok);
+    CollectMacroName(MacroNameTok, MD);
 }
 
 void DefinitionInfoCollector::Ifndef(clang::SourceLocation Loc,
                                      const clang::Token &MacroNameTok,
                                      const clang::MacroDefinition &MD) {
-    CollectMacroNameToken(MacroNameTok);
+    CollectMacroName(MacroNameTok, MD);
 }
 
 // NOTE(Brent): This only visits branches that are taken.
 void DefinitionInfoCollector::Elifndef(clang::SourceLocation Loc,
                                        const clang::Token &MacroNameTok,
                                        const clang::MacroDefinition &MD) {
-    CollectMacroNameToken(MacroNameTok);
+    CollectMacroName(MacroNameTok, MD);
 }
 } // namespace maki
