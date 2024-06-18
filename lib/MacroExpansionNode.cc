@@ -3,7 +3,6 @@
 #include <clang/Basic/SourceManager.h>
 #include <llvm-17/llvm/Support/raw_ostream.h>
 #include <queue>
-#include <set>
 
 namespace maki {
 
@@ -66,8 +65,8 @@ void MacroExpansionNode::dumpASTInfo(llvm::raw_fd_ostream &OS,
     }
 }
 
-std::set<MacroExpansionNode *> MacroExpansionNode::getDescendants() {
-    std::set<MacroExpansionNode *> Desc;
+SmallMacroExpansionPtrSet MacroExpansionNode::getDescendants() {
+    SmallMacroExpansionPtrSet Desc;
     // Collect descendants using BFS
     std::queue<MacroExpansionNode *> Q;
     for (auto &&Child : Children) {
