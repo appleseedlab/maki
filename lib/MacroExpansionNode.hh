@@ -5,12 +5,17 @@
 #include <clang/Basic/SourceLocation.h>
 #include <clang/Lex/MacroInfo.h>
 #include <clang/Lex/Token.h>
-#include <llvm-17/llvm/ADT/StringRef.h>
-#include <set>
+#include <llvm/ADT/SmallPtrSet.h>
+#include <llvm/ADT/StringRef.h>
 #include <string>
 #include <vector>
 
 namespace maki {
+class MacroExpansionNode;
+
+// We arbitrarily choose 8 as the size here.
+using SmallMacroExpansionPtrSet = llvm::SmallPtrSet<MacroExpansionNode *, 8>;
+
 class MacroExpansionNode {
 public:
     // Info about the macro this is an expansion of
@@ -73,7 +78,6 @@ public:
     // Returns the set of all macros expanded under this invocation.
     // Does not include macros passed to this macro's invocation as
     // arguments.
-    std::set<MacroExpansionNode *> getDescendants();
+    SmallMacroExpansionPtrSet getDescendants();
 };
-
 } // namespace maki
