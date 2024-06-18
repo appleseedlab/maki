@@ -20,6 +20,8 @@ private:
     const clang::LangOptions &LO;
     MakiFlags Flags;
 
+    void CollectMacroNameToken(const clang::Token &Token);
+
 public:
     std::vector<std::pair<std::string, const clang::MacroDirective *>>
         MacroNamesDefinitions;

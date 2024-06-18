@@ -15,6 +15,11 @@ DefinitionInfoCollector::DefinitionInfoCollector(clang::ASTContext &Ctx,
     , Flags(Flags) {
 }
 
+void DefinitionInfoCollector::CollectMacroNameToken(const clang::Token &Token) {
+    auto Name = clang::Lexer::getSpelling(Token, SM, LO);
+    InspectedMacroNames.insert(std::move(Name));
+}
+
 void DefinitionInfoCollector::MacroDefined(const clang::Token &MacroNameTok,
                                            const clang::MacroDirective *MD) {
     std::string Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
@@ -24,44 +29,38 @@ void DefinitionInfoCollector::MacroDefined(const clang::Token &MacroNameTok,
 void DefinitionInfoCollector::MacroUndefined(
     const clang::Token &MacroNameTok, const clang::MacroDefinition &MD,
     const clang::MacroDirective *Undef) {
-    auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
-    InspectedMacroNames.insert(Name);
+    CollectMacroNameToken(MacroNameTok);
 }
 
 void DefinitionInfoCollector::Defined(const clang::Token &MacroNameTok,
                                       const clang::MacroDefinition &MD,
                                       clang::SourceRange Range) {
-    auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
-    InspectedMacroNames.insert(Name);
+    CollectMacroNameToken(MacroNameTok);
 }
 
 void DefinitionInfoCollector::Ifdef(clang::SourceLocation Loc,
                                     const clang::Token &MacroNameTok,
                                     const clang::MacroDefinition &MD) {
-    auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
-    InspectedMacroNames.insert(Name);
+    CollectMacroNameToken(MacroNameTok);
 }
 
 // NOTE(Brent): This only visits branches that are taken.
 void DefinitionInfoCollector::Elifdef(clang::SourceLocation Loc,
                                       const clang::Token &MacroNameTok,
                                       const clang::MacroDefinition &MD) {
-    auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
-    InspectedMacroNames.insert(Name);
+    CollectMacroNameToken(MacroNameTok);
 }
 
 void DefinitionInfoCollector::Ifndef(clang::SourceLocation Loc,
                                      const clang::Token &MacroNameTok,
                                      const clang::MacroDefinition &MD) {
-    auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
-    InspectedMacroNames.insert(Name);
+    CollectMacroNameToken(MacroNameTok);
 }
 
 // NOTE(Brent): This only visits branches that are taken.
 void DefinitionInfoCollector::Elifndef(clang::SourceLocation Loc,
                                        const clang::Token &MacroNameTok,
                                        const clang::MacroDefinition &MD) {
-    auto Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
-    InspectedMacroNames.insert(Name);
+    CollectMacroNameToken(MacroNameTok);
 }
 } // namespace maki
