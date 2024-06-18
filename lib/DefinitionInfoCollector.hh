@@ -8,7 +8,7 @@
 #include <clang/Lex/MacroInfo.h>
 #include <clang/Lex/PPCallbacks.h>
 #include <clang/Lex/Token.h>
-#include <set>
+#include <llvm/ADT/StringSet.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -23,7 +23,7 @@ private:
 public:
     std::vector<std::pair<std::string, const clang::MacroDirective *>>
         MacroNamesDefinitions;
-    std::set<std::string> InspectedMacroNames;
+    llvm::StringSet<> InspectedMacroNames;
 
     DefinitionInfoCollector(clang::ASTContext &Ctx, MakiFlags Flags);
 
