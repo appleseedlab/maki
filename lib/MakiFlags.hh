@@ -20,12 +20,12 @@ std::pair<bool, std::string> tryGetFullSourceLoc(clang::SourceManager &SM,
 // Whether or not to process the given macro definition based on the given
 // flags.
 bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
-                               const clang::MacroInfo *MI);
+                               const clang::MacroDefinition &MD);
 
 // Whether or not to process the invocation of the given macro at the given
 // location based on the given flags.
 bool shouldSkipMacroInvocation(clang::SourceManager &SM, MakiFlags Flags,
-                               const clang::MacroInfo *MI,
+                               const clang::MacroDefinition &MD,
                                clang::SourceLocation Location);
 
 } // namespace maki

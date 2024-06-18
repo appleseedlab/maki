@@ -25,12 +25,11 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
                                const clang::MacroDefinition &MD,
                                clang::SourceRange Range,
                                const clang::MacroArgs *Args) {
-    auto MI = MD.getMacroInfo();
     auto &SM = Ctx.getSourceManager();
 
     auto BeginSpellingLocation = SM.getSpellingLoc(Range.getBegin());
-    if (shouldSkipMacroDefinition(SM, Flags, MI) ||
-        shouldSkipMacroInvocation(SM, Flags, MI, BeginSpellingLocation)) {
+    if (shouldSkipMacroDefinition(SM, Flags, MD) ||
+        shouldSkipMacroInvocation(SM, Flags, MD, BeginSpellingLocation)) {
         return;
     }
     auto EndSpellingLocation = SM.getSpellingLoc(Range.getEnd());
@@ -40,8 +39,9 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
     // Initialize the new expansion with the parts we can get directly from
     // clang
 
+    auto MI = MD.getMacroInfo();
     auto Expansion = new MacroExpansionNode();
-    Expansion->MI = MD.getMacroInfo();
+    Expansion->MI = MI;
     Expansion->Name = MacroNameTok.getIdentifierInfo()->getName();
     Expansion->MacroHash = MI->getDefinitionLoc().printToString(SM);
     Expansion->DefinitionRange =
