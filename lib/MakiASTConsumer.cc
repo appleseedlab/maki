@@ -684,6 +684,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool IsAnyArgumentTypeLocalType = false;
         bool IsAnyArgumentTypeNull = false;
         bool IsAnyArgumentTypeVoid = false;
+        bool IsAnyArgumentTypeFunctionType = false;
         bool IsDefinitionLocationValid = false;
         bool IsExpansionControlFlowStmt = false;
         bool IsExpansionICE = false;
@@ -692,6 +693,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool IsExpansionTypeLocalType = false;
         bool IsExpansionTypeNull = false;
         bool IsExpansionTypeVoid = false;
+        bool IsExpansionTypeFunctionType = false;
         bool IsHygienic = false;
         bool IsICERepresentableByInt32 = false;
         bool IsInvocationLocationValid = false;
@@ -1081,6 +1083,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                     if (T) {
                         IsExpansionTypeVoid = T->isVoidType();
+                        IsExpansionTypeFunctionType =
+                            T->isFunctionType() || T->isFunctionPointerType();
                         IsExpansionTypeAnonymous = hasAnonymousType(T, Ctx);
                         IsExpansionTypeLocalType = hasLocalType(T, Ctx);
                         auto CT = QT.getDesugaredType(Ctx)
@@ -1158,6 +1162,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                     if (T) {
                         IsAnyArgumentTypeVoid |= T->isVoidType();
+                        IsAnyArgumentTypeFunctionType |=
+                            T->isFunctionType() || T->isFunctionPointerType();
                         IsAnyArgumentTypeAnonymous |= hasAnonymousType(T, Ctx);
                         IsAnyArgumentTypeLocalType |= hasLocalType(T, Ctx);
                         auto CT = QT.getDesugaredType(Ctx)
@@ -1256,6 +1262,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
               { "IsExpansionTypeDefinedAfterMacro",
                 IsExpansionTypeDefinedAfterMacro },
               { "IsExpansionTypeVoid", IsExpansionTypeVoid },
+              { "IsExpansionTypeFunctionType", IsExpansionTypeFunctionType },
 
               { "IsAnyArgumentTypeNull", IsAnyArgumentTypeNull },
               { "IsAnyArgumentTypeAnonymous", IsAnyArgumentTypeAnonymous },
@@ -1263,6 +1270,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
               { "IsAnyArgumentTypeDefinedAfterMacro",
                 IsAnyArgumentTypeDefinedAfterMacro },
               { "IsAnyArgumentTypeVoid", IsAnyArgumentTypeVoid },
+              { "IsAnyArgumentTypeFunctionType",
+                IsAnyArgumentTypeFunctionType },
 
               { "IsInvokedWhereModifiableValueRequired",
                 IsInvokedWhereModifiableValueRequired },
