@@ -11,4 +11,25 @@ int main(int argc, char const *argv[]) {
     return 0;
 }
 
-// CHECK: []
+// CHECK: [
+// CHECK:   {
+// CHECK:     "Kind": "Include",
+// CHECK:     "IsValid": true,
+// CHECK:     "IncludeName": "{{.*}}/Tests/h1.h"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Include",
+// CHECK:     "IsValid": true,
+// CHECK:     "IncludeName": "{{.*}}/Tests/h2.h"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Include",
+// CHECK:     "IsValid": true,
+// CHECK:     "IncludeName": "{{.*}}/Tests/h4.h"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Include",
+// CHECK:     "IsValid": true,
+// CHECK:     "IncludeName": "{{.*}}/Tests/h3.h"
+// CHECK:   }
+// CHECK: ]
