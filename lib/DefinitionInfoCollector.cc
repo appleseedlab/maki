@@ -27,6 +27,12 @@ void DefinitionInfoCollector::CollectMacroName(
 
 void DefinitionInfoCollector::MacroDefined(const clang::Token &MacroNameTok,
                                            const clang::MacroDirective *MD) {
+    if (MD) {
+        auto MI = MD->getMacroInfo();
+        if (MI && shouldSkipMacroDefinition(SM, Flags, MI)) {
+            return;
+        }
+    }
     std::string Name = clang::Lexer::getSpelling(MacroNameTok, SM, LO);
     MacroNamesDefinitions.push_back({ Name, MD });
 }
