@@ -536,6 +536,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
             JSONPrinter printer{ "Include" };
             printer.add(
                 { { "IsValid", Valid }, { "IncludeName", IncludeName } });
+            printers.push_back(std::move(printer));
         }
     }
     debug("Finished checking includes");
