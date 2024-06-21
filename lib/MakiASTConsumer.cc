@@ -1156,9 +1156,9 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     IsAnyArgumentTypeNull |= QT.isNull() || T == nullptr;
 
                     if (T) {
-                        IsAnyArgumentTypeVoid = T->isVoidType();
-                        IsAnyArgumentTypeAnonymous = hasAnonymousType(T, Ctx);
-                        IsAnyArgumentTypeLocalType = hasLocalType(T, Ctx);
+                        IsAnyArgumentTypeVoid |= T->isVoidType();
+                        IsAnyArgumentTypeAnonymous |= hasAnonymousType(T, Ctx);
+                        IsAnyArgumentTypeLocalType |= hasLocalType(T, Ctx);
                         auto CT = QT.getDesugaredType(Ctx)
                                       .getUnqualifiedType()
                                       .getCanonicalType();
