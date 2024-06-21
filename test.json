@@ -1,0 +1,207 @@
+[
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/lib/llvm-17/lib/clang/17/include/iso646.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/stdio.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/libc-header-start.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/features.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/features-time64.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/wordsize.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/timesize.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/wordsize.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/stdc-predef.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/sys/cdefs.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/wordsize.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/long-double.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/gnu/stubs.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/gnu/stubs-64.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/lib/llvm-17/lib/clang/17/include/stddef.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/lib/llvm-17/lib/clang/17/include/stdarg.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/features.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/wordsize.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/timesize.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/wordsize.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/typesizes.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/time64.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types/__FILE.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types/FILE.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/types.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/stdio_lim.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/floatn.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/features.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/floatn-common.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/features.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/long-double.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/include/x86_64-linux-gnu/bits/floatn.h"
+  },
+  {
+    "Kind": "Include",
+    "IsValid": true,
+    "IncludeName": "/usr/lib/llvm-17/lib/clang/17/include/stdbool.h"
+  }
+]

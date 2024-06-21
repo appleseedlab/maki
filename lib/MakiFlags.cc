@@ -7,8 +7,7 @@
 namespace maki {
 
 bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
-                               const clang::MacroDefinition &MD) {
-    auto MI = MD.getMacroInfo();
+                               const clang::MacroInfo *MI) {
     if (!Flags.ProcessBuiltinMacros && MI->isBuiltinMacro()) {
         return true;
     }
@@ -26,6 +25,11 @@ bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
         }
     }
     return false;
+}
+
+bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
+                               const clang::MacroDefinition &MD) {
+    return shouldSkipMacroDefinition(SM, Flags, MD.getMacroInfo());
 }
 
 bool shouldSkipMacroInvocation(clang::SourceManager &SM, MakiFlags Flags,
