@@ -17,6 +17,10 @@ std::pair<bool, std::string> tryGetFullSourceLoc(clang::SourceManager &SM,
                                                  clang::SourceLocation L);
 
 // Whether or not to process the given macro definition based on the given
+// flags. The given MacroInfo must not be nullptr.
+bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
+                               const clang::MacroInfo *MI);
+// Whether or not to process the given macro definition based on the given
 // flags. The given MacroDefinition's MacroInfo must not be nullptr (i.e., !!MD
 // should be true).
 bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
