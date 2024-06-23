@@ -1,0 +1,3 @@
+For Maki's tests, jq sorts the JSON objects in Maki's output based on property
+kind, definition location, and then invocation location ALPHABETICALLY, not
+numerically!

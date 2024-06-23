@@ -20,6 +20,9 @@ private:
     const clang::LangOptions &LO;
     MakiFlags Flags;
 
+    void CollectMacroName(const clang::Token &Token,
+                          const clang::MacroDefinition &MD);
+
 public:
     std::vector<std::pair<std::string, const clang::MacroDirective *>>
         MacroNamesDefinitions;
@@ -41,7 +44,13 @@ public:
     void Ifdef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
                const clang::MacroDefinition &MD) override;
 
+    void Elifdef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
+                 const clang::MacroDefinition &MD) override;
+
     void Ifndef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
                 const clang::MacroDefinition &MD) override;
+
+    void Elifndef(clang::SourceLocation Loc, const clang::Token &MacroNameTok,
+                  const clang::MacroDefinition &MD) override;
 };
 } // namespace maki
