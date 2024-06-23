@@ -1,1 +1,0 @@
-clang -fsyntax-only -Xclang -ast-dump "$1"
