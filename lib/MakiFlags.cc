@@ -2,6 +2,7 @@
 #include "SourceLocationUtils.hh"
 #include <clang/Basic/SourceManager.h>
 #include <clang/Lex/MacroInfo.h>
+#include <tuple>
 
 namespace maki {
 
@@ -19,7 +20,8 @@ bool shouldSkipMacroDefinition(clang::SourceManager &SM, MakiFlags Flags,
         return true;
     }
     if (!Flags.ProcessMacrosAtInvalidLocations) {
-        [[maybe_unused]] auto [Valid, LocationOrError] =
+        bool Valid = false;
+        std::tie(Valid, std::ignore) =
             tryGetFullSourceLoc(SM, DefinitionLocation);
         if (!Valid) {
             return true;
@@ -41,8 +43,8 @@ bool shouldSkipMacroInvocation(clang::SourceManager &SM, MakiFlags Flags,
         return true;
     }
     if (!Flags.ProcessMacrosAtInvalidLocations) {
-        [[maybe_unused]] auto [Valid, LocationOrError] =
-            tryGetFullSourceLoc(SM, Location);
+        bool Valid = false;
+        std::tie(Valid, std::ignore) = tryGetFullSourceLoc(SM, Location);
         if (!Valid) {
             return true;
         }
