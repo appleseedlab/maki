@@ -7,19 +7,12 @@
 #include <clang/Lex/MacroInfo.h>
 #include <clang/Lex/Preprocessor.h>
 #include <clang/Lex/Token.h>
-#include <llvm-17/llvm/ADT/StringRef.h>
+#include <llvm/ADT/StringRef.h>
 
 // TODO:    Check if we should treat expansions written in scratch space
 //          differently from other expansions
 
 namespace maki {
-
-inline clang::SourceRange getSpellingRange(clang::ASTContext &Ctx,
-                                           clang::SourceLocation B,
-                                           clang::SourceLocation E) {
-    return clang::SourceRange(Ctx.getFullLoc(B).getSpellingLoc(),
-                              Ctx.getFullLoc(E).getSpellingLoc());
-}
 
 MacroForest::MacroForest(clang::Preprocessor &PP, clang::ASTContext &Ctx,
                          MakiFlags Flags)
@@ -34,10 +27,13 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
                                const clang::MacroArgs *Args) {
     auto MI = MD.getMacroInfo();
     auto &SM = Ctx.getSourceManager();
+
+    auto BeginSpellingLocation = SM.getSpellingLoc(Range.getBegin());
     if (shouldSkipMacroDefinition(SM, Flags, MI) ||
-        shouldSkipMacroInvocation(SM, Flags, MI, Range.getBegin())) {
+        shouldSkipMacroInvocation(SM, Flags, MI, BeginSpellingLocation)) {
         return;
     }
+    auto EndSpellingLocation = SM.getSpellingLoc(Range.getEnd());
 
     const auto &LO = Ctx.getLangOpts();
 
@@ -52,7 +48,7 @@ void MacroForest::MacroExpands(const clang::Token &MacroNameTok,
         clang::SourceRange(MI->getDefinitionLoc(), MI->getDefinitionEndLoc());
     Expansion->DefinitionTokens = MI->tokens();
     Expansion->SpellingRange =
-        getSpellingRange(Ctx, Range.getBegin(), Range.getEnd());
+        clang::SourceRange(BeginSpellingLocation, EndSpellingLocation);
     Expansion->InMacroArg = InMacroArg;
 
     // Add the expansion to the forest
