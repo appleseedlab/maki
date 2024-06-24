@@ -695,6 +695,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool IsExpansionTypeVoid = false;
         bool IsExpansionTypeFunctionType = false;
         bool IsHygienic = false;
+        bool IsICERepresentableByInt16 = false;
         bool IsICERepresentableByInt32 = false;
         bool IsInvocationLocationValid = false;
         bool IsInvokedInMacroArgument = false;
@@ -1104,14 +1105,16 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     // Properties of integral constant expressions
                     if (auto ICE = E->getIntegerConstantExpr(Ctx)) {
                         IsExpansionICE = true;
-                        // This check is based on the following LLVM function
+                        // These checks are based on the following LLVM function
                         // definition:
                         // https://llvm.org/doxygen/APSInt_8h_source.html#l00089
                         if (ICE->isNegative()) {
+                            IsICERepresentableByInt16 = ICE->isSignedIntN(16);
                             IsICERepresentableByInt32 = ICE->isSignedIntN(32);
                         } else {
-                            // Treat positive values as unsigned so that we can
-                            // try to fit them in a 32-bit int
+                            // Treat positive values as unsigned to maximize the
+                            // available number of bits.
+                            IsICERepresentableByInt16 = ICE->isIntN(16);
                             IsICERepresentableByInt32 = ICE->isIntN(32);
                         }
                     }
@@ -1247,6 +1250,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 DoesAnyArgumentContainDeclRefExpr },
 
               { "IsHygienic", IsHygienic },
+              { "IsICERepresentableByInt16", IsICERepresentableByInt16 },
               { "IsICERepresentableByInt32", IsICERepresentableByInt32 },
               { "IsDefinitionLocationValid", IsDefinitionLocationValid },
               { "IsInvocationLocationValid", IsInvocationLocationValid },
