@@ -1,12 +1,23 @@
 // RUN: maki %s -fplugin-arg-maki---no-system-macros -fplugin-arg-maki---no-builtin-macros -fplugin-arg-maki---no-invalid-macros | jq 'sort_by(.Kind, .DefinitionLocation, .InvocationLocation)' | FileCheck %s --color
+
 #define X x
-#define ID(x) x
+#define X_PAREN (x)
+
+#define ID(X) X
+#define ID_PAREN(X) X
+
 int main(int argc, char const *argv[]) {
     int x = 0;
-    &ID(x);
+
     &X;
-    &((ID(x)));
-    &(X);
+    &X_PAREN;
+
+    &ID(x);
+    &ID((x));
+
+    &ID_PAREN(x);
+    &ID_PAREN((x));
+
     return 0;
 }
 
@@ -18,24 +29,44 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "x",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:2:11"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:3:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:3:11"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "X_PAREN",
+// CHECK:     "IsObjectLike": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( x )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:4:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:4:19"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
 // CHECK:     "Name": "ID",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "x",
+// CHECK:     "Body": "X",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:3:15"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:6:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:6:15"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ID_PAREN",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "X",
+// CHECK:     "IsDefinedAtGlobalScope": true,
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:7:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:7:21"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "X",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:2:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:7:6",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:3:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:12:6",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int X",
 // CHECK:     "InvocationDepth": 0,
@@ -85,11 +116,11 @@ int main(int argc, char const *argv[]) {
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "X",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:2:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:9:7",
+// CHECK:     "Name": "X_PAREN",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:4:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:13:6",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "int X",
+// CHECK:     "TypeSignature": "int X_PAREN",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 0,
@@ -138,17 +169,17 @@ int main(int argc, char const *argv[]) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "ID",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:3:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:6:6",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:6:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:15:6",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "int ID(int x)",
+// CHECK:     "TypeSignature": "int ID(int X)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
 // CHECK:     "HasStringification": false,
 // CHECK:     "HasTokenPasting": false,
 // CHECK:     "HasAlignedArguments": true,
-// CHECK:     "HasSameNameAsOtherDeclaration": false,
+// CHECK:     "HasSameNameAsOtherDeclaration": true,
 // CHECK:     "IsExpansionControlFlowStmt": false,
 // CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
 // CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
@@ -190,17 +221,121 @@ int main(int argc, char const *argv[]) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "ID",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:3:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:8:8",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:6:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:16:6",
 // CHECK:     "ASTKind": "Expr",
-// CHECK:     "TypeSignature": "int ID(int x)",
+// CHECK:     "TypeSignature": "int ID(int X)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
 // CHECK:     "HasStringification": false,
 // CHECK:     "HasTokenPasting": false,
 // CHECK:     "HasAlignedArguments": true,
-// CHECK:     "HasSameNameAsOtherDeclaration": false,
+// CHECK:     "HasSameNameAsOtherDeclaration": true,
+// CHECK:     "IsExpansionControlFlowStmt": false,
+// CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
+// CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
+// CHECK:     "DoesBodyContainDeclRefExpr": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
+// CHECK:     "DoesAnyArgumentHaveSideEffects": false,
+// CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
+// CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt32": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "IsInvocationLocationValid": true,
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsInvokedInMacroArgument": false,
+// CHECK:     "IsNamePresentInCPPConditional": false,
+// CHECK:     "IsExpansionICE": false,
+// CHECK:     "IsExpansionTypeNull": false,
+// CHECK:     "IsExpansionTypeAnonymous": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeFunctionType": false,
+// CHECK:     "IsAnyArgumentTypeNull": false,
+// CHECK:     "IsAnyArgumentTypeAnonymous": false,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
+// CHECK:     "IsAnyArgumentTypeVoid": false,
+// CHECK:     "IsAnyArgumentTypeFunctionType": false,
+// CHECK:     "IsInvokedWhereModifiableValueRequired": false,
+// CHECK:     "IsInvokedWhereAddressableValueRequired": true,
+// CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": true,
+// CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
+// CHECK:     "IsAnyArgumentNeverExpanded": false,
+// CHECK:     "IsAnyArgumentNotAnExpression": false
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Invocation",
+// CHECK:     "Name": "ID_PAREN",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:7:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:18:6",
+// CHECK:     "ASTKind": "Expr",
+// CHECK:     "TypeSignature": "int ID_PAREN(int X)",
+// CHECK:     "InvocationDepth": 0,
+// CHECK:     "NumASTRoots": 1,
+// CHECK:     "NumArguments": 1,
+// CHECK:     "HasStringification": false,
+// CHECK:     "HasTokenPasting": false,
+// CHECK:     "HasAlignedArguments": true,
+// CHECK:     "HasSameNameAsOtherDeclaration": true,
+// CHECK:     "IsExpansionControlFlowStmt": false,
+// CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
+// CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
+// CHECK:     "DoesBodyContainDeclRefExpr": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
+// CHECK:     "DoesAnyArgumentHaveSideEffects": false,
+// CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
+// CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt32": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "IsInvocationLocationValid": true,
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsInvokedInMacroArgument": false,
+// CHECK:     "IsNamePresentInCPPConditional": false,
+// CHECK:     "IsExpansionICE": false,
+// CHECK:     "IsExpansionTypeNull": false,
+// CHECK:     "IsExpansionTypeAnonymous": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeFunctionType": false,
+// CHECK:     "IsAnyArgumentTypeNull": false,
+// CHECK:     "IsAnyArgumentTypeAnonymous": false,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
+// CHECK:     "IsAnyArgumentTypeVoid": false,
+// CHECK:     "IsAnyArgumentTypeFunctionType": false,
+// CHECK:     "IsInvokedWhereModifiableValueRequired": false,
+// CHECK:     "IsInvokedWhereAddressableValueRequired": true,
+// CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": true,
+// CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
+// CHECK:     "IsAnyArgumentNeverExpanded": false,
+// CHECK:     "IsAnyArgumentNotAnExpression": false
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Invocation",
+// CHECK:     "Name": "ID_PAREN",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/addressed_invocation.c:7:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/addressed_invocation.c:19:6",
+// CHECK:     "ASTKind": "Expr",
+// CHECK:     "TypeSignature": "int ID_PAREN(int X)",
+// CHECK:     "InvocationDepth": 0,
+// CHECK:     "NumASTRoots": 1,
+// CHECK:     "NumArguments": 1,
+// CHECK:     "HasStringification": false,
+// CHECK:     "HasTokenPasting": false,
+// CHECK:     "HasAlignedArguments": true,
+// CHECK:     "HasSameNameAsOtherDeclaration": true,
 // CHECK:     "IsExpansionControlFlowStmt": false,
 // CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
 // CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
