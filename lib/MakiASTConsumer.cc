@@ -876,21 +876,21 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     });
 
                 IsAnyArgumentExpandedWhereAddressableValueRequired =
-                    std::any_of(AddressOfExprs.begin(), AddressOfExprs.end(),
-                                [&ExpandedFromArgument](const clang::UnaryOperator *U) {
-                                    // Only consider address of expressions
-                                    // which were not expanded from an argument
-                                    // of the same macro.
-                                    if (!ExpandedFromArgument(U)) {
-                                        auto Operand = U->getSubExpr();
-                                        // Conservatively return true if any
-                                        // part of the addressed expression was
-                                        // expanded from the argument.
-                                        return isInTree(Operand,
-                                                        ExpandedFromArgument);
-                                    }
-                                    return false;
-                                });
+                    std::any_of(
+                        AddressOfExprs.begin(), AddressOfExprs.end(),
+                        [&ExpandedFromArgument](const clang::UnaryOperator *U) {
+                            // Only consider address of expressions
+                            // which were not expanded from an argument
+                            // of the same macro.
+                            if (!ExpandedFromArgument(U)) {
+                                auto Operand = U->getSubExpr();
+                                // Conservatively return true if any
+                                // part of the addressed expression was
+                                // expanded from the argument.
+                                return isInTree(Operand, ExpandedFromArgument);
+                            }
+                            return false;
+                        });
             }
 
             std::set<const clang::Stmt *> StmtsExpandedFromBody;
