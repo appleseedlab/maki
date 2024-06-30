@@ -861,10 +861,14 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                             clang::Expr *ModifiedPartOfExpr = nullptr;
                             if (auto B =
                                     clang::dyn_cast<clang::BinaryOperator>(E)) {
+                                // Side-effecting binary operators, i.e.,
+                                // assignment operators.
                                 ModifiedPartOfExpr = B->getLHS();
                             } else if (auto U =
                                            clang::dyn_cast<clang::UnaryOperator>(
                                                E)) {
+                                // Side-effecting unary operators, i.e.,
+                                // increment/decrement operators.
                                 ModifiedPartOfExpr = U->getSubExpr();
                             }
                             // Conservatively return true if any part of the
