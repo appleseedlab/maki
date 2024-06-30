@@ -65,18 +65,6 @@ std::set<const clang::Stmt *> subtrees(const clang::Stmt *ST) {
     return Subtrees;
 }
 
-clang::Expr *skipImplicitAndParens(clang::Expr *E) {
-    while (E && (llvm::isa_and_nonnull<clang::ParenExpr>(E) ||
-                 llvm::isa_and_nonnull<clang::ImplicitCastExpr>(E))) {
-        if (auto P = clang::dyn_cast<clang::ParenExpr>(E)) {
-            E = P->getSubExpr();
-        } else if (auto I = clang::dyn_cast<clang::ImplicitCastExpr>(E)) {
-            E = I->getSubExpr();
-        }
-    }
-    return E;
-}
-
 // Returns true if LHS is a subtree of RHS via BFS
 bool inTree(const clang::Stmt *LHS, const clang::Stmt *RHS) {
     std::queue<const clang::Stmt *> Q({ RHS });
@@ -847,7 +835,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                                                           STs.end());
                     }
                 }
-                debug("Done collecting argument subtrees");
+                debug("Done collecting argument subtrees: ",
+                      (unsigned int)StmtsExpandedFromArguments.size());
 
                 auto ExpandedFromArgument =
                     [&StmtsExpandedFromArguments](const clang::Stmt *St) {
@@ -878,8 +867,6 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                                                E)) {
                                 ModifiedPartOfExpr = U->getSubExpr();
                             }
-                            ModifiedPartOfExpr =
-                                skipImplicitAndParens(ModifiedPartOfExpr);
                             // Conservatively return true if any part of the
                             // modified expression was expanded from the macro
                             return isInTree(ModifiedPartOfExpr,
@@ -889,18 +876,21 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     });
 
                 IsAnyArgumentExpandedWhereAddressableValueRequired =
-                    std::any_of(
-                        AddressOfExprs.begin(), AddressOfExprs.end(),
-                        [&ExpandedFromArgument](const clang::UnaryOperator *U) {
-                            // Only consider address of expressions which were
-                            // not expanded from an argument of the same macro
-                            if (!ExpandedFromArgument(U)) {
-                                auto Operand = U->getSubExpr();
-                                Operand = skipImplicitAndParens(Operand);
-                                return ExpandedFromArgument(Operand);
-                            }
-                            return false;
-                        });
+                    std::any_of(AddressOfExprs.begin(), AddressOfExprs.end(),
+                                [&ExpandedFromArgument](const clang::UnaryOperator *U) {
+                                    // Only consider address of expressions
+                                    // which were not expanded from an argument
+                                    // of the same macro.
+                                    if (!ExpandedFromArgument(U)) {
+                                        auto Operand = U->getSubExpr();
+                                        // Conservatively return true if any
+                                        // part of the addressed expression was
+                                        // expanded from the argument.
+                                        return isInTree(Operand,
+                                                        ExpandedFromArgument);
+                                    }
+                                    return false;
+                                });
             }
 
             std::set<const clang::Stmt *> StmtsExpandedFromBody;
@@ -1057,7 +1047,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         // not expanded from the body of the same macro
                         if (!ExpandedFromBody(U)) {
                             auto Operand = U->getSubExpr();
-                            Operand = skipImplicitAndParens(Operand);
+                            Operand = Operand->IgnoreImplicit();
                             return inTree(ST, Operand);
                         }
                         return false;
