@@ -1,25 +1,23 @@
-if(LLVM_EXTERNAL_LIT)
-  get_filename_component(LLVM_LIT_TOOLS_DIR "${LLVM_EXTERNAL_LIT}" DIRECTORY)
-  find_program(FILECHECK_PATH FileCheck HINTS "${LLVM_LIT_TOOLS_DIR}")
-else()
-  find_program(FILECHECK_PATH FileCheck)
-endif()
+find_program(FILECHECK_PATH NAMES FileCheck FileCheck-${LLVM_VERSION_MAJOR})
+message(STATUS "FileCheck found at ${FILECHECK_PATH}")
+find_program(LIT_PATH NAMES lit llvm-lit)
+message(STATUS "Lit found at ${LIT_PATH}")
 
-if(FILECHECK_PATH STREQUAL "FILECHECK_PATH-NOTFOUND")
+if(NOT FILECHECK_PATH)
   message(FATAL_ERROR "Could not find FileCheck")
 endif()
 
-configure_lit_site_cfg(
-  ${CMAKE_CURRENT_SOURCE_DIR}/lit.site.cfg.py.in
-  ${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg.py MAIN_CONFIG
-  ${CMAKE_CURRENT_SOURCE_DIR}/lit.cfg.py)
+if(NOT LIT_PATH)
+  message(FATAL_ERROR "Could not find LLVM LIT")
+endif()
+
+configure_file(lit.site.cfg.py.in lit.cfg.py @ONLY)
 
 set(MAKI_TEST_DEPENDS maki)
 
-add_lit_testsuite(check-maki "Running maki regression tests"
-                  ${CMAKE_CURRENT_BINARY_DIR} DEPENDS ${MAKI_TEST_DEPENDS})
-
-set_target_properties(check-maki PROPERTIES FOLDER "Tests")
-
-add_lit_testsuites(maki ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS
-                   ${MAKI_TEST_DEPENDS})
+add_custom_target(check-maki
+  COMMAND ${LIT_PATH} -s ${CMAKE_CURRENT_BINARY_DIR} 
+  DEPENDS ${MAKI_TEST_DEPENDS}
+  COMMENT "Running maki tests"
+  USES_TERMINAL
+)
