@@ -6,7 +6,7 @@
 #include <clang/Basic/SourceManager.h>
 #include <clang/Lex/PPCallbacks.h>
 #include <clang/Lex/Token.h>
-#include <llvm-17/llvm/ADT/StringRef.h>
+#include <llvm/ADT/StringRef.h>
 #include <utility>
 #include <vector>
 

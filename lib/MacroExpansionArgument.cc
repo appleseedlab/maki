@@ -3,7 +3,7 @@
 #include <clang/Basic/SourceManager.h>
 #include <clang/Basic/TokenKinds.h>
 #include <clang/Lex/Lexer.h>
-#include <llvm-17/llvm/Support/raw_ostream.h>
+#include <llvm/Support/raw_ostream.h>
 
 namespace maki {
 void MacroExpansionArgument::dumpASTInfo(llvm::raw_fd_ostream &OS,

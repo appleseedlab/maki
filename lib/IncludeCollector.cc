@@ -4,7 +4,7 @@
 #include <clang/Basic/SourceLocation.h>
 #include <clang/Basic/SourceManager.h>
 #include <clang/Lex/Token.h>
-#include <llvm-17/llvm/ADT/StringRef.h>
+#include <llvm/ADT/StringRef.h>
 
 namespace maki {
 void IncludeCollector::InclusionDirective(

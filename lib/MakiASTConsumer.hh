@@ -8,7 +8,7 @@
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Stmt.h>
 #include <clang/Frontend/CompilerInstance.h>
-#include <llvm-17/llvm/Support/Casting.h>
+#include <llvm/Support/Casting.h>
 
 namespace maki {
 class MakiASTConsumer : public clang::ASTConsumer {

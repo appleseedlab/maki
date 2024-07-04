@@ -32,8 +32,8 @@
 #include <clang/Lex/Lexer.h>
 #include <clang/Lex/Preprocessor.h>
 #include <functional>
-#include <llvm-17/llvm/ADT/StringRef.h>
-#include <llvm-17/llvm/Support/Casting.h>
+#include <llvm/ADT/StringRef.h>
+#include <llvm/Support/Casting.h>
 #include <queue>
 #include <set>
 #include <string>
