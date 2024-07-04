@@ -1,7 +1,7 @@
 #include "JSONPrinter.hh"
 #include <initializer_list>
 #include <iomanip>
-#include <llvm-17/llvm/Support/raw_ostream.h>
+#include <llvm/Support/raw_ostream.h>
 #include <sstream>
 #include <string>
 #include <utility>

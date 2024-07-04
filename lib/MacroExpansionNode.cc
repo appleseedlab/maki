@@ -1,7 +1,7 @@
 #include "MacroExpansionNode.hh"
 #include <clang/Basic/LangOptions.h>
 #include <clang/Basic/SourceManager.h>
-#include <llvm-17/llvm/Support/raw_ostream.h>
+#include <llvm/Support/raw_ostream.h>
 #include <queue>
 #include <set>
 

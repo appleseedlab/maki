@@ -5,7 +5,7 @@
 #include <clang/Basic/SourceLocation.h>
 #include <clang/Lex/MacroInfo.h>
 #include <clang/Lex/Token.h>
-#include <llvm-17/llvm/ADT/StringRef.h>
+#include <llvm/ADT/StringRef.h>
 #include <set>
 #include <string>
 #include <vector>

@@ -3,8 +3,8 @@
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendAction.h>
 #include <clang/Frontend/FrontendPluginRegistry.h>
-#include <llvm-17/llvm/ADT/StringRef.h>
-#include <llvm-17/llvm/Support/raw_ostream.h>
+#include <llvm/ADT/StringRef.h>
+#include <llvm/Support/raw_ostream.h>
 #include <string>
 
 namespace maki {
