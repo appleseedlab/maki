@@ -65,6 +65,5 @@ option(MAKI_ENABLE_TESTING "Controls whether to build Maki's test suite" OFF)
 if(${MAKI_ENABLE_TESTING})
   enable_testing()
   # For LLVM lit test suite.
-  include(AddLLVM)
   add_subdirectory(test)
 endif()
