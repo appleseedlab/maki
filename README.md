@@ -86,10 +86,18 @@ enabled and to run its test suite:
 
 ```bash
 cmake -S . -B build/ \
-    -DMAKI_ENABLE_TESTING=ON \
-    -DLLVM_EXTERNAL_LIT=<lit_path> \
-    -DFILECHECK_PATH=<filecheck_path>
+    -DMAKI_ENABLE_TESTING=ON 
 cmake --build build/ -t check-maki --parallel
+```
+
+Note: If lit and FileCheck are not in your PATH, you can specify their
+locations manually with the following command:
+
+```bash
+cmake -S . -B build/ \
+    -DMAKI_ENABLE_TESTING=ON \
+    -DLIT_PATH=<lit_path> \
+    -DFILECHECK_PATH=<filecheck_path> \
 ```
 
 Where `<lit_path>` and `<filecheck_path>` are the paths to your `lit` Python
@@ -120,9 +128,7 @@ Run the test suite:
 
 ```bash
 cmake -S . -B build/ \
-    -DMAKI_ENABLE_TESTING=ON \
-    -DLLVM_EXTERNAL_LIT=/usr/local/bin/lit \
-    -DFILECHECK_PATH=/lib/llvm-17/bin/FileCheck
+    -DMAKI_ENABLE_TESTING=ON
 cmake --build build/ -t check-maki --parallel
 ```
 
