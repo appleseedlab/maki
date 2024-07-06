@@ -45,13 +45,17 @@ void storeChildren(maki::DeclStmtTypeLoc DSTL,
     // }
 }
 
-template <typename T>
+template <typename T, typename... Matchers>
 std::vector<DeclStmtTypeLoc>
-matchNodes(clang::ast_matchers::internal::Matcher<T> Matcher,
-           clang::ASTContext &Ctx) {
+matchNodes(clang::ASTContext &Ctx,
+           const clang::ast_matchers::internal::Matcher<T> &Matcher,
+           const Matchers &...matchers) {
     MatchFinder Finder;
     ExpansionMatchHandler MatchHandler;
+
     Finder.addMatcher(Matcher, &MatchHandler);
+    (Finder.addMatcher(matchers, &MatchHandler), ...);
+
     Finder.matchAST(Ctx);
     return MatchHandler.Matches;
 }
@@ -61,26 +65,18 @@ void findAlignedASTNodesForExpansion(maki::MacroExpansionNode *Expansion,
     using namespace clang::ast_matchers;
     // Find AST nodes aligned with the entire expansion.
 
-    // Match stmts
-    auto StmtMatches = matchNodes(
+    // Create matchers
+    auto stmtMatcher =
         stmt(unless(anyOf(implicitCastExpr(), implicitValueInitExpr())),
              alignsWithExpansion(&Ctx, Expansion))
-            .bind("root"),
-        Ctx);
-    Expansion->ASTRoots.insert(Expansion->ASTRoots.end(), StmtMatches.begin(),
-                               StmtMatches.end());
+            .bind("root");
+    auto declMatcher = decl(alignsWithExpansion(&Ctx, Expansion)).bind("root");
+    auto typeLocMatcher =
+        typeLoc(alignsWithExpansion(&Ctx, Expansion)).bind("root");
 
-    // Match decls
-    auto DeclMatches = matchNodes(
-        decl(alignsWithExpansion(&Ctx, Expansion)).bind("root"), Ctx);
-    Expansion->ASTRoots.insert(Expansion->ASTRoots.end(), DeclMatches.begin(),
-                               DeclMatches.end());
-
-    // Match type locs
-    auto TypeLocMatches = matchNodes(
-        typeLoc(alignsWithExpansion(&Ctx, (Expansion))).bind("root"), Ctx);
-    Expansion->ASTRoots.insert(Expansion->ASTRoots.end(),
-                               TypeLocMatches.begin(), TypeLocMatches.end());
+    // Populate ASTRoots with all nodes that align w/ expansion
+    Expansion->ASTRoots =
+        matchNodes(Ctx, stmtMatcher, declMatcher, typeLocMatcher);
 
     // If the expansion only aligns with one node, then set this
     // as its aligned root
@@ -90,26 +86,18 @@ void findAlignedASTNodesForExpansion(maki::MacroExpansionNode *Expansion,
         Expansion->AlignedRoot = nullptr;
     }
 
-    //// Find AST nodes aligned with each of the expansion's arguments
-    for (auto &&Arg : Expansion->Arguments) {
-        // Match stmts
-        auto StmtMatches = matchNodes(
+    // Find AST nodes aligned with each of the expansion's arguments
+    for (auto &Arg : Expansion->Arguments) {
+        auto spelledFromTokens = isSpelledFromTokens(&Ctx, Arg.Tokens);
+        auto stmtMatcher =
             stmt(unless(anyOf(implicitCastExpr(), implicitValueInitExpr())),
-                 isSpelledFromTokens(&Ctx, Arg.Tokens))
-                .bind("root"),
-            Ctx);
-        Arg.AlignedRoots.insert(Arg.AlignedRoots.end(), StmtMatches.begin(),
-                                StmtMatches.end());
-        // Match decls
-        auto DeclMatches = matchNodes(
-            decl(isSpelledFromTokens(&Ctx, Arg.Tokens)).bind("root"), Ctx);
-        Arg.AlignedRoots.insert(Arg.AlignedRoots.end(), DeclMatches.begin(),
-                                DeclMatches.end());
+                 spelledFromTokens)
+                .bind("root");
+        auto declMatcher = decl(spelledFromTokens).bind("root");
+        auto typeLocMatcher = typeLoc(spelledFromTokens).bind("root");
 
-        auto TypeLocMatches = matchNodes(
-            typeLoc(isSpelledFromTokens(&Ctx, Arg.Tokens)).bind("root"), Ctx);
-        Arg.AlignedRoots.insert(Arg.AlignedRoots.end(), TypeLocMatches.begin(),
-                                TypeLocMatches.end());
+        Arg.AlignedRoots =
+            matchNodes(Ctx, stmtMatcher, declMatcher, typeLocMatcher);
     }
 }
 } // namespace maki
