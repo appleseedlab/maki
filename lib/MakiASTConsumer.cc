@@ -105,7 +105,7 @@ clang::Decl *getTypeDeclOrNull(const clang::Type *T) {
     }
 
     if (auto TD = clang::dyn_cast<clang::TypedefType>(T)) {
-        return TD->getDecl();
+        return getTypeDeclOrNull(TD->desugar().getTypePtrOrNull());
     } else if (auto TD = clang::dyn_cast<clang::TagType>(T)) {
         return TD->getDecl();
     } else if (auto ET = clang::dyn_cast<clang::ElaboratedType>(T)) {
