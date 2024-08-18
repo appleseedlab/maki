@@ -35,7 +35,7 @@ int main(void) {
 // CHECK:     "Body": "a b c",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:6:13"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:6:14"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -45,7 +45,7 @@ int main(void) {
 // CHECK:     "Body": "( ( unsigned int ) ( unsigned char ) ( c ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/token_separation.c:9:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:9:50"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/token_separation.c:9:51"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -70,6 +70,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

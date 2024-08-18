@@ -42,7 +42,7 @@ int main(void) {
 // CHECK:     "Body": "( ( n ) . rdx ^= ( ( BcBigDig ) 1 ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:28:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:28:55"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:28:56"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -52,7 +52,7 @@ int main(void) {
 // CHECK:     "Body": "__restrict",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:8:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:8:18"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/bc_modified_arguments.c:8:28"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -77,6 +77,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -129,6 +130,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": false,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

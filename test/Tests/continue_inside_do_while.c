@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "continue",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/continue_inside_do_while.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/continue_inside_do_while.c:2:18"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/continue_inside_do_while.c:2:26"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -28,7 +28,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "do continue ; while ( 0 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/continue_inside_do_while.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/continue_inside_do_while.c:6:13"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/continue_inside_do_while.c:6:14"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -53,6 +53,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

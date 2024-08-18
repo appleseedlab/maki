@@ -18,7 +18,7 @@ int main(void) {
 // CHECK:     "Body": "42",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_in_function_parameters.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_in_function_parameters.c:3:11"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_in_function_parameters.c:3:13"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -43,6 +43,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

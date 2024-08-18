@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( & ( g ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/unaddressed_invocation.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unaddressed_invocation.c:2:24"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/unaddressed_invocation.c:2:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -40,6 +40,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

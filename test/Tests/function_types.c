@@ -22,7 +22,7 @@ int main(void) {
 // CHECK:     "Body": "( F ( ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/function_types.c:7:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/function_types.c:7:23"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/function_types.c:7:24"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -32,7 +32,7 @@ int main(void) {
 // CHECK:     "Body": "( X )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/function_types.c:8:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/function_types.c:8:17"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/function_types.c:8:18"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -57,6 +57,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -109,6 +110,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

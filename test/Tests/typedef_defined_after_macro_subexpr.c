@@ -35,7 +35,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + ( ( A ) { . x = 1 } . x )",
 // CHECK:     "IsDefinedAtGlobalScope": false,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:19:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:19:31"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:19:32"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -45,7 +45,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + a . x",
 // CHECK:     "IsDefinedAtGlobalScope": false,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:20:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:20:20"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:20:21"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -55,7 +55,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( 1 + ( ( Int ) i ) )",
 // CHECK:     "IsDefinedAtGlobalScope": false,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:21:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:21:38"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:21:39"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -65,7 +65,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + ( ( A ) { . x = 1 } . x )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:2:31"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:2:32"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -75,7 +75,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "i + ( ( A ) { . x = 1 } . x )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:3:34"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:3:35"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -85,7 +85,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( a ) + ( b ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:4:29"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:4:30"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -95,7 +95,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( 1 + ( ( Int ) i ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:5:38"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:5:39"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",

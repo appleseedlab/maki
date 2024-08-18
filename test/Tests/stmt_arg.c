@@ -17,7 +17,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "do { stmt ; } while ( 0 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stmt_arg.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stmt_arg.c:5:15"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stmt_arg.c:5:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -42,6 +42,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

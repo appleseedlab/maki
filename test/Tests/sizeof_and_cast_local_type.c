@@ -33,7 +33,7 @@ int main(void) {
 // CHECK:     "Body": "( sizeof ( struct my_struct ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:3:54"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:3:55"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -43,7 +43,7 @@ int main(void) {
 // CHECK:     "Body": "( sizeof ( my_typedefd_struct ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:4:65"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:4:66"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -53,7 +53,7 @@ int main(void) {
 // CHECK:     "Body": "( ( struct my_struct ) X )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:6:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:6:51"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:6:52"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -63,7 +63,7 @@ int main(void) {
 // CHECK:     "Body": "( ( my_typedefd_struct ) X )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:7:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:7:62"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/sizeof_and_cast_local_type.c:7:63"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -88,6 +88,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -140,6 +141,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -192,6 +194,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -244,6 +247,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

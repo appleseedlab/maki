@@ -10,6 +10,6 @@
 // CHECK:     "Body": "1",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/one.h:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/one.h:2:13"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/one.h:2:14"
 // CHECK:   }
 // CHECK: ]
