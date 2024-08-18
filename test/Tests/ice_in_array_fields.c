@@ -23,7 +23,7 @@ int main(void) {
 // CHECK:     "Body": "( 3 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_in_array_fields.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_in_array_fields.c:3:15"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_in_array_fields.c:3:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -48,6 +48,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -100,6 +101,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

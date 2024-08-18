@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "5",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:11:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:11:16"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:11:17"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -47,7 +47,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "6",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:15:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:15:16"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:15:17"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -57,7 +57,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "7",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:17:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:17:16"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:17:17"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -67,7 +67,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "int",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:19:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:19:13"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:19:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -77,7 +77,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:2:11"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:2:12"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -87,7 +87,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "2",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:3:22"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:3:23"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -97,7 +97,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "3",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:5:15"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:5:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -107,7 +107,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "4",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:7:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:7:15"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/has_same_name_as_other_declaration.c:7:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -132,6 +132,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -184,6 +185,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -236,6 +238,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -288,6 +291,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": false,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -340,6 +344,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -392,6 +397,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -444,6 +450,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

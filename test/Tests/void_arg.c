@@ -19,7 +19,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "do { CALL_TO_F ; } while ( 0 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/void_arg.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/void_arg.c:5:15"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/void_arg.c:5:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -44,6 +44,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

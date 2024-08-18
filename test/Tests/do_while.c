@@ -24,7 +24,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "do { char * lim = ( limit ) ; while ( p < lim ) { if ( * p ++ != ' ' ) { p -- ; break ; } } } while ( 0 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/do_while.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/do_while.c:11:15"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/do_while.c:11:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -49,6 +49,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

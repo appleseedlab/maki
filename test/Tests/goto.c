@@ -16,7 +16,7 @@ end:
 // CHECK:     "Body": "goto end",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/goto.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/goto.c:2:23"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/goto.c:2:26"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -41,6 +41,7 @@ end:
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

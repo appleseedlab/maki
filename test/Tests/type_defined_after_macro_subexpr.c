@@ -28,7 +28,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + ( ( struct A ) { . x = 1 } . x )",
 // CHECK:     "IsDefinedAtGlobalScope": false,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:14:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:14:38"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:14:39"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -38,7 +38,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + a . x",
 // CHECK:     "IsDefinedAtGlobalScope": false,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:15:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:15:20"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:15:21"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -48,7 +48,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + ( ( struct A ) { . x = 1 } . x )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:2:38"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:2:39"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1 + a . x",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:3:20"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:3:21"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -68,7 +68,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( a ) + ( b ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:4:29"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/type_defined_after_macro_subexpr.c:4:30"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",
@@ -101,6 +101,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -153,6 +154,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -205,6 +207,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -257,6 +260,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

@@ -60,7 +60,7 @@ int main() {
 // CHECK:     "Body": "( ( a ) -> x )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:22:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:22:37"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:22:38"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -70,7 +70,7 @@ int main() {
 // CHECK:     "Body": "( ( b ) -> x )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:23:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:23:37"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:23:38"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -80,7 +80,7 @@ int main() {
 // CHECK:     "Body": "( ( c ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:24:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:24:34"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:24:35"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -90,7 +90,7 @@ int main() {
 // CHECK:     "Body": "( i )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:25:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:25:34"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:25:35"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -100,7 +100,7 @@ int main() {
 // CHECK:     "Body": "( 1 + ( A ) { . x = 1 } . x )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:27:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:27:53"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_type_declared_before_but_defined_after.c:27:54"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

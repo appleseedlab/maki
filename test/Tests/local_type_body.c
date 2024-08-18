@@ -19,7 +19,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( struct local_t ) { . x = 1 } )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_body.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_body.c:2:43"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_body.c:2:44"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -29,7 +29,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "& ( ( struct local_t ) { . x = 1 } )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/local_type_body.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_body.c:3:41"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/local_type_body.c:3:42"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -54,6 +54,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -106,6 +107,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

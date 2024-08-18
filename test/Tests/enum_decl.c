@@ -15,7 +15,7 @@ enum E {
 // CHECK:     "Body": "0",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/enum_decl.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:2:14"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:2:15"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -25,7 +25,7 @@ enum E {
 // CHECK:     "Body": "1",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:13"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/enum_decl.c:3:14"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -50,6 +50,7 @@ enum E {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -102,6 +103,7 @@ enum E {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

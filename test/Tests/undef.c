@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "1",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/undef.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/undef.c:2:13"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/undef.c:2:14"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -26,7 +26,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "2",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/undef.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/undef.c:3:15"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/undef.c:3:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",

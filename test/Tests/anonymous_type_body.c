@@ -38,7 +38,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( color ) . rgb )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:20:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:20:42"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:20:43"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -48,7 +48,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( ( color ) -> rgb )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:21:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:21:47"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:21:48"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "P",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:6:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:6:15"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:6:16"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -68,7 +68,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "( & ( P ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:7:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:7:21"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/anonymous_type_body.c:7:22"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

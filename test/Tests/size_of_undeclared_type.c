@@ -18,7 +18,7 @@ int main(void) {
 // CHECK:     "Body": "sizeof ( ID )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/size_of_undeclared_type.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/size_of_undeclared_type.c:3:24"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/size_of_undeclared_type.c:3:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -43,6 +43,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
 // CHECK:     "IsICERepresentableByInt32": true,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

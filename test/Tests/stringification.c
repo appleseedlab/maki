@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "# x",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stringification.c:2:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:2:23"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:2:24"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -28,7 +28,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "\"<h1>\" # t \"</h1>\"",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stringification.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:3:25"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:3:32"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -38,7 +38,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Body": "\"<p>\" STRINGIFY ( t ) \"</p>\"",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/stringification.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:4:33"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/stringification.c:4:39"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -63,6 +63,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": false,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -75,11 +76,13 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsExpansionTypeLocalType": false,
 // CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
 // CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeFunctionType": false,
 // CHECK:     "IsAnyArgumentTypeNull": false,
 // CHECK:     "IsAnyArgumentTypeAnonymous": false,
 // CHECK:     "IsAnyArgumentTypeLocalType": false,
 // CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
 // CHECK:     "IsAnyArgumentTypeVoid": false,
+// CHECK:     "IsAnyArgumentTypeFunctionType": false,
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
@@ -113,6 +116,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": false,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -165,6 +169,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": false,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -217,6 +222,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
 // CHECK:     "IsHygienic": false,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,

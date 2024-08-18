@@ -43,7 +43,7 @@ int main(void) {
 // CHECK:     "Body": "65535",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:11:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:11:20"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:11:25"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -53,7 +53,7 @@ int main(void) {
 // CHECK:     "Body": "65536",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:12:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:12:27"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:12:32"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -63,7 +63,7 @@ int main(void) {
 // CHECK:     "Body": "32767",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:13:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:13:19"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:13:24"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -73,7 +73,7 @@ int main(void) {
 // CHECK:     "Body": "32768",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:14:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:14:26"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:14:31"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -83,7 +83,7 @@ int main(void) {
 // CHECK:     "Body": "( - 32768 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:16:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:16:26"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:16:27"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -93,7 +93,7 @@ int main(void) {
 // CHECK:     "Body": "( - 32769 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:17:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:17:34"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:17:35"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -103,7 +103,7 @@ int main(void) {
 // CHECK:     "Body": "4294967295",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:3:20"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:3:30"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -113,7 +113,7 @@ int main(void) {
 // CHECK:     "Body": "4294967296",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:4:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:4:27"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:4:37"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -123,7 +123,7 @@ int main(void) {
 // CHECK:     "Body": "2147483647",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:5:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:5:19"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:5:29"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -133,7 +133,7 @@ int main(void) {
 // CHECK:     "Body": "2147483648",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:6:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:6:26"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:6:36"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -143,7 +143,7 @@ int main(void) {
 // CHECK:     "Body": "( - 2147483648 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:8:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:8:31"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:8:32"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -153,7 +153,7 @@ int main(void) {
 // CHECK:     "Body": "( - 2147483649 )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ice_bits.c:9:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:9:39"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ice_bits.c:9:40"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",

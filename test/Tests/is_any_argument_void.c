@@ -23,7 +23,7 @@ int main(void) {
 // CHECK:     "Body": "( ( A ) , ( B ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/is_any_argument_void.c:3:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/is_any_argument_void.c:3:28"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/is_any_argument_void.c:3:29"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
@@ -48,6 +48,7 @@ int main(void) {
 // CHECK:     "DoesAnyArgumentHaveSideEffects": false,
 // CHECK:     "DoesAnyArgumentContainDeclRefExpr": true,
 // CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
 // CHECK:     "IsICERepresentableByInt32": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "IsInvocationLocationValid": true,
@@ -60,11 +61,13 @@ int main(void) {
 // CHECK:     "IsExpansionTypeLocalType": false,
 // CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
 // CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeFunctionType": false,
 // CHECK:     "IsAnyArgumentTypeNull": false,
 // CHECK:     "IsAnyArgumentTypeAnonymous": false,
 // CHECK:     "IsAnyArgumentTypeLocalType": false,
 // CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
 // CHECK:     "IsAnyArgumentTypeVoid": true,
+// CHECK:     "IsAnyArgumentTypeFunctionType": false,
 // CHECK:     "IsInvokedWhereModifiableValueRequired": false,
 // CHECK:     "IsInvokedWhereAddressableValueRequired": false,
 // CHECK:     "IsInvokedWhereICERequired": false,
