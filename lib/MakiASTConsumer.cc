@@ -481,8 +481,27 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
         std::tie(IsDefinitionLocationValid, DefinitionLocation) =
             tryGetFullSourceLoc(SM, DefLoc);
+
+        // Set the end definition location.
+        //
+        // If the macro has no tokens then we can just call the
+        // getDefinitionEndLoc() method to get the end of the macro's
+        // definition. If the macro has tokens, however, then we can't use this
+        // method because it doesn't return correct results when a macro
+        // contains a backslash-newline immediately followed by a non-whitespace
+        // token. For instance, assuming that the character # corresponds to the
+        // first character in a line:
+        //
+        //          #define PLATFORM \
+        //          "LINUX"
+        //
+        // Then getDefinitionEndLoc() would say that the macro's definition ends
+        // on line 1, whereas it really ends on line 2. Instead, we can use the
+        // end location of the macro's last token to get this information.
+        auto EndLoc = 0 == MI->getNumTokens() ? MI->getDefinitionEndLoc() :
+                                                MI->tokens().back().getEndLoc();
         std::tie(std::ignore, EndDefinitionLocation) =
-            tryGetFullSourceLoc(SM, MI->getDefinitionEndLoc());
+            tryGetFullSourceLoc(SM, EndLoc);
 
         JSONPrinter printer{ "Definition" };
         printer.add({
