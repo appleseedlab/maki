@@ -105,7 +105,9 @@ bool isInTree(const clang::Stmt *Stmt,
     }
 
     for (auto &&child : Stmt->children()) {
-        return isInTree(child, pred);
+        if (isInTree(child, pred)) {
+            return true;
+        }
     }
 
     return false;
