@@ -50,4 +50,8 @@ bool isInType(const clang::Type *T, clang::ASTContext &Ctx,
 
 // Collect all subtrees of the given stmt using BFS.
 std::set<const clang::Stmt *> subtrees(const clang::Stmt *ST);
+
+// Returns true if the given statement is a compound statement, or a
+// for/while/if statement whose body ends with a compound statement.
+bool endsWithCompound(const clang::Stmt *ST);
 } // namespace maki

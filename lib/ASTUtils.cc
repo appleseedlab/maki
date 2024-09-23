@@ -6,6 +6,7 @@
 #include <clang/AST/ParentMapContext.h>
 #include <clang/AST/Stmt.h>
 #include <clang/AST/Type.h>
+#include <clang/Basic/LLVM.h>
 #include <clang/Basic/SourceLocation.h>
 #include <clang/Basic/SourceManager.h>
 #include <functional>
@@ -248,5 +249,25 @@ std::set<const clang::Stmt *> subtrees(const clang::Stmt *ST) {
         }
     }
     return Subtrees;
+}
+
+bool endsWithCompound(const clang::Stmt *ST) {
+    if (!ST) {
+        return false;
+    } else if (clang::isa<clang::CompoundStmt>(ST)) {
+        return true;
+    } else if (auto While = clang::dyn_cast<clang::WhileStmt>(ST)) {
+        return endsWithCompound(While->getBody());
+    } else if (auto For = clang::dyn_cast<clang::ForStmt>(ST)) {
+        return endsWithCompound(For->getBody());
+    } else if (auto If = clang::dyn_cast<clang::IfStmt>(ST)) {
+        if (auto Else = If->getElse()) {
+            return endsWithCompound(Else);
+        } else {
+            return endsWithCompound(If->getThen());
+        }
+    } else {
+        return false;
+    }
 }
 } // namespace maki
