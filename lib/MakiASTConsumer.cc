@@ -443,6 +443,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool DoesAnyArgumentContainDeclRefExpr = false;
         bool DoesAnyArgumentHaveSideEffects = false;
         bool DoesBodyContainDeclRefExpr = false;
+        bool DoesBodyEndWithCompoundStmt = false;
         bool DoesBodyReferenceDeclDeclaredAfterMacro = false;
         bool DoesBodyReferenceMacroDefinedAfterMacro = false;
         bool DoesSubexpressionExpandedFromBodyHaveLocalType = false;
@@ -742,6 +743,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                     std::any_of(AllDeclRefExprs.begin(), AllDeclRefExprs.end(),
                                 ExpandedFromBody);
 
+                DoesBodyEndWithCompoundStmt = endsWithCompound(ST);
+
                 DoesSubexpressionExpandedFromBodyHaveLocalType = std::any_of(
                     StmtsExpandedFromBody.begin(), StmtsExpandedFromBody.end(),
                     [&Ctx](const clang::Stmt *St) {
@@ -1022,6 +1025,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
               { "DoesBodyReferenceDeclDeclaredAfterMacro",
                 DoesBodyReferenceDeclDeclaredAfterMacro },
               { "DoesBodyContainDeclRefExpr", DoesBodyContainDeclRefExpr },
+              { "DoesBodyEndWithCompoundStmt", DoesBodyEndWithCompoundStmt },
               { "DoesSubexpressionExpandedFromBodyHaveLocalType",
                 DoesSubexpressionExpandedFromBodyHaveLocalType },
               { "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro",
