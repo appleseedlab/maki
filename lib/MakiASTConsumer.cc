@@ -455,6 +455,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool IsAnyArgumentConditionallyEvaluated = false;
         bool IsAnyArgumentExpandedWhereAddressableValueRequired = false;
         bool IsAnyArgumentExpandedWhereModifiableValueRequired = false;
+        bool IsAnyArgumentExpandedWhereConstExprRequired = false;
         bool IsAnyArgumentNeverExpanded = false;
         bool IsAnyArgumentNotAnExpression = false;
         bool IsAnyArgumentTypeAnonymous = false;
@@ -942,6 +943,10 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         continue;
                     }
 
+                    IsAnyArgumentExpandedWhereConstExprRequired |=
+                        isDescendantOfNodeRequiringICE(Ctx, E) ||
+                        isDescendantOfNodeRequiringConstantExpression(Ctx, E);
+
                     std::string ArgTypeStr = "<Null>";
 
                     // Type information about arguments
@@ -1078,6 +1083,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 IsAnyArgumentExpandedWhereAddressableValueRequired },
               { "IsAnyArgumentConditionallyEvaluated",
                 IsAnyArgumentConditionallyEvaluated },
+              { "IsAnyArgumentExpandedWhereConstExprRequired",
+                IsAnyArgumentExpandedWhereConstExprRequired },
               { "IsAnyArgumentNeverExpanded", IsAnyArgumentNeverExpanded },
               { "IsAnyArgumentNotAnExpression",
                 IsAnyArgumentNotAnExpression } });
