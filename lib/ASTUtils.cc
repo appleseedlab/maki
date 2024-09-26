@@ -266,6 +266,8 @@ bool endsWithCompound(const clang::Stmt *ST) {
         } else {
             return endsWithCompound(If->getThen());
         }
+    } else if (auto Switch = clang::dyn_cast<clang::SwitchStmt>(ST)) {
+        return endsWithCompound(Switch->getBody());
     } else {
         return false;
     }
