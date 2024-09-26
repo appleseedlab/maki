@@ -20,7 +20,7 @@ find_package(Clang ${MAKI_CLANG_VERSION} REQUIRED CONFIG)
 find_package(LLVM  REQUIRED CONFIG)
 
 # Set this variable for configuring the test suite and wrapper script.
-find_program(CLANG_C_COMPILER NAMES clang clang-${MAKI_CLANG_VERSION})
+find_program(CLANG_C_COMPILER NAMES clang-${MAKI_CLANG_VERSION})
 
 if (NOT CLANG_C_COMPILER)
   message(FATAL_ERROR "Clang executable not found")
