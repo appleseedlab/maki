@@ -6,13 +6,15 @@
 #define FOR() for (;0;) {}
 #define IF_THEN() if (0) {}
 #define IF_ELSE() if (0) {} else {}
-#define WHILE_FOR_IF_ELSE() while (0) for (;0;) if (0) {} else {}
+#define SWITCH() switch (0) { case 0: break; }
+#define WHILE_FOR_IF_ELSE_SWITCH() while (0) for (;0;) if (0) {} else switch (0) { case 0: break; }
 
 #define WHILE_NO_COMPOUND() while (0);
 #define FOR_NO_COMPOUND() for (;0;);
 #define IF_THEN_NO_COMPOUND() if (0);
 #define IF_ELSE_NO_COMPOUND() if (0); else;
-#define WHILE_FOR_IF_ELSE_NO_COMPOUND() while (0) for (;0;) if (0) {} else;
+#define SWITCH_NO_COMPOUND() switch (0);
+#define WHILE_FOR_IF_ELSE_SWITCH_NO_COMPOUND() while (0) for (;0;) if (0) {} else switch (0);
 // clang-format on
 
 int main(void) {
@@ -21,13 +23,15 @@ int main(void) {
     FOR()
     IF_THEN()
     IF_ELSE()
-    WHILE_FOR_IF_ELSE()
+    SWITCH()
+    WHILE_FOR_IF_ELSE_SWITCH()
 
     WHILE_NO_COMPOUND()
     FOR_NO_COMPOUND()
     IF_THEN_NO_COMPOUND()
     IF_ELSE_NO_COMPOUND()
-    WHILE_FOR_IF_ELSE_NO_COMPOUND()
+    SWITCH_NO_COMPOUND()
+    WHILE_FOR_IF_ELSE_SWITCH_NO_COMPOUND()
 
     return 0;
 }
@@ -35,13 +39,23 @@ int main(void) {
 // CHECK: [
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "WHILE_FOR_IF_ELSE_SWITCH",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "while ( 0 ) for ( ; 0 ; ) if ( 0 ) { } else switch ( 0 ) { case 0 : break ; }",
+// CHECK:     "IsDefinedAtGlobalScope": true,
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:10:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:10:100"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
 // CHECK:     "Name": "WHILE_NO_COMPOUND",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "while ( 0 ) ;",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:11:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:11:39"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:12:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:12:39"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -50,8 +64,8 @@ int main(void) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "for ( ; 0 ; ) ;",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:12:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:12:37"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:13:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:13:37"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -60,8 +74,8 @@ int main(void) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "if ( 0 ) ;",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:13:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:13:38"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:14:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:14:38"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -70,18 +84,28 @@ int main(void) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "if ( 0 ) ; else ;",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:14:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:14:44"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:15:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:15:44"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "WHILE_FOR_IF_ELSE_NO_COMPOUND",
+// CHECK:     "Name": "SWITCH_NO_COMPOUND",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "while ( 0 ) for ( ; 0 ; ) if ( 0 ) { } else ;",
+// CHECK:     "Body": "switch ( 0 ) ;",
 // CHECK:     "IsDefinedAtGlobalScope": true,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:15:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:15:76"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:16:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:16:41"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "WHILE_FOR_IF_ELSE_SWITCH_NO_COMPOUND",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "while ( 0 ) for ( ; 0 ; ) if ( 0 ) { } else switch ( 0 ) ;",
+// CHECK:     "IsDefinedAtGlobalScope": true,
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:17:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:17:94"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -135,19 +159,73 @@ int main(void) {
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
-// CHECK:     "Name": "WHILE_FOR_IF_ELSE",
+// CHECK:     "Name": "SWITCH",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "while ( 0 ) for ( ; 0 ; ) if ( 0 ) { } else { }",
+// CHECK:     "Body": "switch ( 0 ) { case 0 : break ; }",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:9:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:9:66"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:9:47"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Invocation",
+// CHECK:     "Name": "WHILE_FOR_IF_ELSE_SWITCH",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:10:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:27:5",
+// CHECK:     "ASTKind": "Stmt",
+// CHECK:     "TypeSignature": "void WHILE_FOR_IF_ELSE_SWITCH()",
+// CHECK:     "InvocationDepth": 0,
+// CHECK:     "NumASTRoots": 1,
+// CHECK:     "NumArguments": 0,
+// CHECK:     "HasStringification": false,
+// CHECK:     "HasTokenPasting": false,
+// CHECK:     "HasAlignedArguments": true,
+// CHECK:     "HasSameNameAsOtherDeclaration": false,
+// CHECK:     "IsExpansionControlFlowStmt": true,
+// CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
+// CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
+// CHECK:     "DoesBodyContainDeclRefExpr": false,
+// CHECK:     "DoesBodyEndWithCompoundStmt": true,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
+// CHECK:     "DoesAnyArgumentHaveSideEffects": false,
+// CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
+// CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
+// CHECK:     "IsICERepresentableByInt32": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "IsInvocationLocationValid": true,
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsInvokedInMacroArgument": false,
+// CHECK:     "IsNamePresentInCPPConditional": false,
+// CHECK:     "IsExpansionICE": false,
+// CHECK:     "IsExpansionTypeNull": false,
+// CHECK:     "IsExpansionTypeAnonymous": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeFunctionType": false,
+// CHECK:     "IsAnyArgumentTypeNull": false,
+// CHECK:     "IsAnyArgumentTypeAnonymous": false,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
+// CHECK:     "IsAnyArgumentTypeVoid": false,
+// CHECK:     "IsAnyArgumentTypeFunctionType": false,
+// CHECK:     "IsInvokedWhereModifiableValueRequired": false,
+// CHECK:     "IsInvokedWhereAddressableValueRequired": false,
+// CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
+// CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
+// CHECK:     "IsAnyArgumentNeverExpanded": false,
+// CHECK:     "IsAnyArgumentNotAnExpression": false
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "WHILE_NO_COMPOUND",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:11:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:26:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:12:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:29:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void WHILE_NO_COMPOUND()",
 // CHECK:     "InvocationDepth": 0,
@@ -200,8 +278,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "FOR_NO_COMPOUND",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:12:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:27:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:13:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:30:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void FOR_NO_COMPOUND()",
 // CHECK:     "InvocationDepth": 0,
@@ -254,8 +332,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "IF_THEN_NO_COMPOUND",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:13:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:28:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:14:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:31:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void IF_THEN_NO_COMPOUND()",
 // CHECK:     "InvocationDepth": 0,
@@ -308,8 +386,8 @@ int main(void) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "IF_ELSE_NO_COMPOUND",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:14:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:29:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:15:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:32:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void IF_ELSE_NO_COMPOUND()",
 // CHECK:     "InvocationDepth": 0,
@@ -361,11 +439,65 @@ int main(void) {
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "WHILE_FOR_IF_ELSE_NO_COMPOUND",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:15:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:30:5",
+// CHECK:     "Name": "SWITCH_NO_COMPOUND",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:16:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:33:5",
 // CHECK:     "ASTKind": "Stmt",
-// CHECK:     "TypeSignature": "void WHILE_FOR_IF_ELSE_NO_COMPOUND()",
+// CHECK:     "TypeSignature": "void SWITCH_NO_COMPOUND()",
+// CHECK:     "InvocationDepth": 0,
+// CHECK:     "NumASTRoots": 1,
+// CHECK:     "NumArguments": 0,
+// CHECK:     "HasStringification": false,
+// CHECK:     "HasTokenPasting": false,
+// CHECK:     "HasAlignedArguments": true,
+// CHECK:     "HasSameNameAsOtherDeclaration": false,
+// CHECK:     "IsExpansionControlFlowStmt": false,
+// CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
+// CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
+// CHECK:     "DoesBodyContainDeclRefExpr": false,
+// CHECK:     "DoesBodyEndWithCompoundStmt": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
+// CHECK:     "DoesAnyArgumentHaveSideEffects": false,
+// CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
+// CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": false,
+// CHECK:     "IsICERepresentableByInt32": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "IsInvocationLocationValid": true,
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsInvokedInMacroArgument": false,
+// CHECK:     "IsNamePresentInCPPConditional": false,
+// CHECK:     "IsExpansionICE": false,
+// CHECK:     "IsExpansionTypeNull": false,
+// CHECK:     "IsExpansionTypeAnonymous": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeFunctionType": false,
+// CHECK:     "IsAnyArgumentTypeNull": false,
+// CHECK:     "IsAnyArgumentTypeAnonymous": false,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
+// CHECK:     "IsAnyArgumentTypeVoid": false,
+// CHECK:     "IsAnyArgumentTypeFunctionType": false,
+// CHECK:     "IsInvokedWhereModifiableValueRequired": false,
+// CHECK:     "IsInvokedWhereAddressableValueRequired": false,
+// CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
+// CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
+// CHECK:     "IsAnyArgumentNeverExpanded": false,
+// CHECK:     "IsAnyArgumentNotAnExpression": false
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Invocation",
+// CHECK:     "Name": "WHILE_FOR_IF_ELSE_SWITCH_NO_COMPOUND",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:17:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:34:5",
+// CHECK:     "ASTKind": "Stmt",
+// CHECK:     "TypeSignature": "void WHILE_FOR_IF_ELSE_SWITCH_NO_COMPOUND()",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 0,
@@ -417,7 +549,7 @@ int main(void) {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "COMPOUND",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:4:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:19:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:21:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void COMPOUND()",
 // CHECK:     "InvocationDepth": 0,
@@ -471,7 +603,7 @@ int main(void) {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "WHILE",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:5:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:20:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:22:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void WHILE()",
 // CHECK:     "InvocationDepth": 0,
@@ -525,7 +657,7 @@ int main(void) {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "FOR",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:6:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:21:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:23:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void FOR()",
 // CHECK:     "InvocationDepth": 0,
@@ -579,7 +711,7 @@ int main(void) {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "IF_THEN",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:7:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:22:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:24:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void IF_THEN()",
 // CHECK:     "InvocationDepth": 0,
@@ -633,7 +765,7 @@ int main(void) {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "IF_ELSE",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:8:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:23:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:25:5",
 // CHECK:     "ASTKind": "Stmt",
 // CHECK:     "TypeSignature": "void IF_ELSE()",
 // CHECK:     "InvocationDepth": 0,
@@ -685,11 +817,11 @@ int main(void) {
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
-// CHECK:     "Name": "WHILE_FOR_IF_ELSE",
+// CHECK:     "Name": "SWITCH",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/ends_with_compound.c:9:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:24:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/ends_with_compound.c:26:5",
 // CHECK:     "ASTKind": "Stmt",
-// CHECK:     "TypeSignature": "void WHILE_FOR_IF_ELSE()",
+// CHECK:     "TypeSignature": "void SWITCH()",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 0,
@@ -697,7 +829,7 @@ int main(void) {
 // CHECK:     "HasTokenPasting": false,
 // CHECK:     "HasAlignedArguments": true,
 // CHECK:     "HasSameNameAsOtherDeclaration": false,
-// CHECK:     "IsExpansionControlFlowStmt": false,
+// CHECK:     "IsExpansionControlFlowStmt": true,
 // CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
 // CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
 // CHECK:     "DoesBodyContainDeclRefExpr": false,
