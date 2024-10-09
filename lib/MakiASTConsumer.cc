@@ -400,6 +400,22 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         }
     }
 
+    // Any expr that is an sizeof expr
+    std::set<const clang::UnaryExprOrTypeTraitExpr *> SizeOfExprs;
+    {
+        MatchFinder Finder;
+        auto Matcher = sizeOfExpr(unless(anyOf(implicitCastExpr(),
+                                               implicitValueInitExpr())))
+                           .bind("root");
+        StmtCollectorMatchHandler Handler;
+        Finder.addMatcher(Matcher, &Handler);
+        Finder.matchAST(Ctx);
+        for (auto &&S : Handler.Stmts) {
+            SizeOfExprs.insert(
+                clang::dyn_cast<clang::UnaryExprOrTypeTraitExpr>(S));
+        }
+    }
+
     // Any expr that is the operand of an expression with short-circuiting.
     // ConditionalOperator, LogicalAnd, LogicalOr
     std::set<const clang::Expr *> ConditionalExprs;
@@ -454,6 +470,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool HasTokenPasting = false;
         bool IsAnyArgumentConditionallyEvaluated = false;
         bool IsAnyArgumentExpandedWhereAddressableValueRequired = false;
+        bool IsAnyArgumentExpandedInSizeOf = false;
         bool IsAnyArgumentExpandedWhereModifiableValueRequired = false;
         bool IsAnyArgumentExpandedWhereConstExprRequired = false;
         bool IsAnyArgumentNeverExpanded = false;
@@ -479,6 +496,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         bool IsInvocationLocationValid = false;
         bool IsInvokedInMacroArgument = false;
         bool IsInvokedWhereAddressableValueRequired = false;
+        bool IsInvokedInSizeOf = false;
         bool IsInvokedWhereICERequired = false;
         bool IsInvokedWhereConstantExpressionRequired = false;
         bool IsInvokedWhereModifiableValueRequired = false;
@@ -687,6 +705,22 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                             }
                             return false;
                         });
+
+                IsAnyArgumentExpandedInSizeOf = std::any_of(
+                    SizeOfExprs.begin(), SizeOfExprs.end(),
+                    [&ExpandedFromArgument](
+                        const clang::UnaryExprOrTypeTraitExpr *U) {
+                        // Only consider sizeof expressions which were not
+                        // expanded from an argument of the same macro.
+                        if (!U->isArgumentType() && !ExpandedFromArgument(U)) {
+                            auto Operand = U->getArgumentExpr();
+                            // Conservatively return true if any
+                            // part of the size of'd expression was
+                            // expanded from the argument.
+                            return isInTree(Operand, ExpandedFromArgument);
+                        }
+                        return false;
+                    });
             }
 
             std::set<const clang::Stmt *> StmtsExpandedFromBody;
@@ -845,6 +879,21 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         // not expanded from the body of the same macro
                         if (!ExpandedFromBody(U)) {
                             auto Operand = U->getSubExpr();
+                            Operand = Operand->IgnoreImplicit();
+                            return inTree(ST, Operand);
+                        }
+                        return false;
+                    });
+
+                IsInvokedInSizeOf = std::any_of(
+                    SizeOfExprs.begin(), SizeOfExprs.end(),
+                    [&ST, &ExpandedFromBody](
+                        const clang::UnaryExprOrTypeTraitExpr *U) {
+                        // Only consider size of expressions which
+                        // were not expanded from the body of the
+                        // same macro
+                        if (!U->isArgumentType() && !ExpandedFromBody(U)) {
+                            auto Operand = U->getArgumentExpr();
                             Operand = Operand->IgnoreImplicit();
                             return inTree(ST, Operand);
                         }
@@ -1073,6 +1122,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 IsInvokedWhereModifiableValueRequired },
               { "IsInvokedWhereAddressableValueRequired",
                 IsInvokedWhereAddressableValueRequired },
+              { "IsInvokedInSizeOf", IsInvokedInSizeOf },
               { "IsInvokedWhereICERequired", IsInvokedWhereICERequired },
               { "IsInvokedWhereConstantExpressionRequired",
                 IsInvokedWhereConstantExpressionRequired },
@@ -1081,6 +1131,8 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 IsAnyArgumentExpandedWhereModifiableValueRequired },
               { "IsAnyArgumentExpandedWhereAddressableValueRequired",
                 IsAnyArgumentExpandedWhereAddressableValueRequired },
+              { "IsAnyArgumentExpandedInSizeOf",
+                IsAnyArgumentExpandedInSizeOf },
               { "IsAnyArgumentConditionallyEvaluated",
                 IsAnyArgumentConditionallyEvaluated },
               { "IsAnyArgumentExpandedWhereConstExprRequired",
