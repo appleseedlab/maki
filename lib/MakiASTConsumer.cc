@@ -186,12 +186,14 @@ MakiASTConsumer::MakiASTConsumer(clang::CompilerInstance &CI,
     clang::ASTContext &Ctx = CI.getASTContext();
     Flags = Flags_;
 
-    MF = new maki::MacroForest(PP, Ctx, Flags);
-    IC = new maki::IncludeCollector();
-    DC = new maki::DefinitionInfoCollector(Ctx, Flags);
+    if (!Flags.OnlyCollectDefinitionInfo) {
+        MF = new maki::MacroForest(PP, Ctx, Flags);
+        IC = new maki::IncludeCollector();
+        PP.addPPCallbacks(std::unique_ptr<maki::MacroForest>(MF));
+        PP.addPPCallbacks(std::unique_ptr<maki::IncludeCollector>(IC));
+    }
 
-    PP.addPPCallbacks(std::unique_ptr<maki::MacroForest>(MF));
-    PP.addPPCallbacks(std::unique_ptr<maki::IncludeCollector>(IC));
+    DC = new maki::DefinitionInfoCollector(Ctx, Flags);
     PP.addPPCallbacks(std::unique_ptr<maki::DefinitionInfoCollector>(DC));
 }
 
@@ -201,6 +203,33 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
     // JSON printer for each invocation, definition, etc.
     std::vector<JSONPrinter> printers;
+
+    if (Flags.OnlyCollectDefinitionInfo) {
+        for (auto &&Entry : DC->MacroNamesDefinitions) {
+            std::string Name = Entry.first;
+            std::string DefinitionLocation;
+            bool IsDefinitionLocationValid = false;
+
+            auto MD = Entry.second;
+            auto MI = MD->getMacroInfo();
+
+            auto DefLoc = MI->getDefinitionLoc();
+            std::tie(IsDefinitionLocationValid, DefinitionLocation) =
+                tryGetFullSourceLoc(SM, DefLoc);
+            JSONPrinter printer{ "Definition" };
+
+            printer.add({
+                    { "Name", Name },
+                    { "IsDefinitionLocationValid", IsDefinitionLocationValid },
+                    { "DefinitionLocation", std::move(DefinitionLocation) }
+            });
+
+            printers.push_back(std::move(printer));
+        }
+
+        maki::JSONPrinter::printJSONArray(printers);
+        return;
+    }
 
     // Collect all declarations
     std::vector<const clang::Decl *> AllDecls = ({
