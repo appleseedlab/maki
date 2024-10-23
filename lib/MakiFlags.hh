@@ -11,6 +11,7 @@ struct MakiFlags {
     bool ProcessBuiltinMacros = true;
     bool ProcessMacrosInSystemHeaders = true;
     bool ProcessMacrosAtInvalidLocations = true;
+    bool OnlyCollectDefinitionInfo = false;
 };
 
 std::pair<bool, std::string> tryGetFullSourceLoc(clang::SourceManager &SM,
