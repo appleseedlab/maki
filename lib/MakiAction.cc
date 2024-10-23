@@ -29,6 +29,10 @@ bool MakiAction::ParseArgs(const clang::CompilerInstance &CI,
             Flags.ProcessMacrosAtInvalidLocations = true;
         } else if ("--no-invalid-macros" == arg) {
             Flags.ProcessMacrosAtInvalidLocations = false;
+        }  else if ("--only-collect-definition-info" == arg) {
+            Flags.OnlyCollectDefinitionInfo = true;
+        } else if ("--no-only-collect-definition-info" == arg) {
+            Flags.OnlyCollectDefinitionInfo = false;
         } else {
             llvm::errs() << "Error: Unrecognized argument: " << arg << '\n';
             return false;
