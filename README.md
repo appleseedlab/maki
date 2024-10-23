@@ -44,14 +44,16 @@ analyze.
 
 Maki offers the following flags to modify its behavior:
 
-| Flag                  | Effect                                                                                                                  | Example invocation                           |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| `--builtin-macros`    | Maki will analyze macro definitions or invocations of compiler builtin macros (this is the default)                     | `maki -fplugin-arg-maki---builtin-macros`    |
-| `--no-builtin-macros` | Maki will not analyze macro definitions or invocations of compiler builtin macros                                       | `maki -fplugin-arg-maki---no-builtin-macros` |
-| `--system-macros`     | Maki will analyze macro definitions or invocations in system headers (this is the default)                              | `maki -fplugin-arg-maki---system-macros`     |
-| `--no-system-macros`  | Maki will not analyze macro definitions or invocations in system headers                                                | `maki -fplugin-arg-maki---no-system-macros`  |
-| `--invalid-macros`    | Maki will analyze macro definitions or invocations at invalid locations, e.g. on the command line (this is the default) | `maki -fplugin-arg-maki---invalid-macros`    |
-| `--no-invalid-macros` | Maki will not analyze macro definitions or invocations at invalid locations                                             | `maki -fplugin-arg-maki---no-invalid-macros` |
+| Flag                                | Effect                                                                                                                  | Example invocation                                         |
+|-------------------------------------|-------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| `--builtin-macros`                  | Maki will analyze macro definitions or invocations of compiler builtin macros (this is the default)                     | `maki -fplugin-arg-maki---builtin-macros`                  |
+| `--no-builtin-macros`               | Maki will not analyze macro definitions or invocations of compiler builtin macros                                       | `maki -fplugin-arg-maki---no-builtin-macros`               |
+| `--system-macros`                   | Maki will analyze macro definitions or invocations in system headers (this is the default)                              | `maki -fplugin-arg-maki---system-macros`                   |
+| `--no-system-macros`                | Maki will not analyze macro definitions or invocations in system headers                                                | `maki -fplugin-arg-maki---no-system-macros`                |
+| `--invalid-macros`                  | Maki will analyze macro definitions or invocations at invalid locations, e.g. on the command line (this is the default) | `maki -fplugin-arg-maki---invalid-macros`                  |
+| `--no-invalid-macros`               | Maki will not analyze macro definitions or invocations at invalid locations                                             | `maki -fplugin-arg-maki---no-invalid-macros`               |
+| `--only-collect-definition-info`    | Maki will only print macro definition locations                                                                         | `maki -fplugin-arg-maki---only-collect-definition-info`    |
+| `--no-only-collect-definition-info` | Maki will perform its normal analyses                                                                                   | `maki -fplugin-arg-maki---no-only-collect-definition-info` |
 
 ## Testing
 
