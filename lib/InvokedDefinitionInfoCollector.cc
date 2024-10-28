@@ -6,7 +6,8 @@ namespace maki {
 InvokedDefinitionInfoCollector::InvokedDefinitionInfoCollector(
     clang::ASTContext &Ctx, MakiFlags Flags)
     : SM(Ctx.getSourceManager())
-    , LO(Ctx.getLangOpts()) {
+    , LO(Ctx.getLangOpts())
+    , Flags(Flags) {
 }
 
 void InvokedDefinitionInfoCollector::MacroExpands(
