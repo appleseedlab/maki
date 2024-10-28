@@ -7,6 +7,7 @@
 #include "DeclCollectorMatchHandler.hh"
 #include "DefinitionInfoCollector.hh"
 #include "IncludeCollector.hh"
+#include "InvokedDefinitionInfoCollector.hh"
 #include "JSONPrinter.hh"
 #include "Logging.hh"
 #include "MacroExpansionNode.hh"
@@ -34,6 +35,7 @@
 #include <functional>
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Support/Casting.h>
+#include <memory>
 #include <set>
 #include <string>
 #include <tuple>
@@ -186,15 +188,20 @@ MakiASTConsumer::MakiASTConsumer(clang::CompilerInstance &CI,
     clang::ASTContext &Ctx = CI.getASTContext();
     Flags = Flags_;
 
-    if (!Flags.OnlyCollectDefinitionInfo) {
+    if (NO == Flags.OnlyCollectDefinitionInfo) {
         MF = new maki::MacroForest(PP, Ctx, Flags);
         IC = new maki::IncludeCollector();
         PP.addPPCallbacks(std::unique_ptr<maki::MacroForest>(MF));
         PP.addPPCallbacks(std::unique_ptr<maki::IncludeCollector>(IC));
     }
 
-    DC = new maki::DefinitionInfoCollector(Ctx, Flags);
-    PP.addPPCallbacks(std::unique_ptr<maki::DefinitionInfoCollector>(DC));
+    if (INVOKED != Flags.OnlyCollectDefinitionInfo) {
+        DC = new maki::DefinitionInfoCollector(Ctx, Flags);
+        PP.addPPCallbacks(std::unique_ptr<maki::DefinitionInfoCollector>(DC));
+    } else {
+        IDC = new InvokedDefinitionInfoCollector(Ctx, Flags);
+        PP.addPPCallbacks(std::unique_ptr<InvokedDefinitionInfoCollector>(IDC));
+    }
 }
 
 void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
@@ -204,7 +211,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
     // JSON printer for each invocation, definition, etc.
     std::vector<JSONPrinter> printers;
 
-    if (Flags.OnlyCollectDefinitionInfo) {
+    if (ALL == Flags.OnlyCollectDefinitionInfo) {
         for (auto &&Entry : DC->MacroNamesDefinitions) {
             std::string Name = Entry.first;
             std::string DefinitionLocation;
@@ -218,13 +225,35 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 tryGetFullSourceLoc(SM, DefLoc);
             JSONPrinter printer{ "Definition" };
 
-            printer.add({
-                    { "Name", Name },
-                    { "IsDefinitionLocationValid", IsDefinitionLocationValid },
-                    { "DefinitionLocation", std::move(DefinitionLocation) }
-            });
+            printer.add(
+                { { "Name", Name },
+                  { "IsDefinitionLocationValid", IsDefinitionLocationValid },
+                  { "DefinitionLocation", std::move(DefinitionLocation) } });
 
             printers.push_back(std::move(printer));
+        }
+
+        maki::JSONPrinter::printJSONArray(printers);
+        return;
+    } else if (INVOKED == Flags.OnlyCollectDefinitionInfo) {
+        for (auto &[Name, MIs] : IDC->MacroNamesInfos) {
+            std::string DefinitionLocation;
+            bool IsDefinitionLocationValid = false;
+
+            for (auto &MI : MIs) {
+                auto DefLoc = MI->getDefinitionLoc();
+                std::tie(IsDefinitionLocationValid, DefinitionLocation) =
+                    tryGetFullSourceLoc(SM, DefLoc);
+                JSONPrinter printer{ "Definition" };
+
+                printer.add({ { "Name", Name.str() },
+                              { "IsDefinitionLocationValid",
+                                IsDefinitionLocationValid },
+                              { "DefinitionLocation",
+                                std::move(DefinitionLocation) } });
+
+                printers.push_back(std::move(printer));
+            }
         }
 
         maki::JSONPrinter::printJSONArray(printers);

@@ -2,6 +2,7 @@
 
 #include "DefinitionInfoCollector.hh"
 #include "IncludeCollector.hh"
+#include "InvokedDefinitionInfoCollector.hh"
 #include "MacroForest.hh"
 #include "MakiFlags.hh"
 #include <clang/AST/ASTConsumer.h>
@@ -16,6 +17,7 @@ private:
     maki::MacroForest *MF;
     maki::IncludeCollector *IC;
     maki::DefinitionInfoCollector *DC;
+    maki::InvokedDefinitionInfoCollector *IDC;
     MakiFlags Flags;
 
 public:
