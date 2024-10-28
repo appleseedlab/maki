@@ -18,6 +18,7 @@ target_sources(maki
     DefinitionInfoCollector.cc
     ExpansionMatchHandler.cc
     IncludeCollector.cc
+    InvokedDefinitionInfoCollector.cc
     JSONPrinter.cc
     MacroExpansionArgument.cc
     MacroExpansionNode.cc
