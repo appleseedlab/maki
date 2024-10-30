@@ -7,11 +7,17 @@
 #include <utility>
 
 namespace maki {
+enum OnlyCollectDefinitionInfoFlags {
+    NO,
+    ALL,
+    INVOKED
+};
+
 struct MakiFlags {
     bool ProcessBuiltinMacros = true;
     bool ProcessMacrosInSystemHeaders = true;
     bool ProcessMacrosAtInvalidLocations = true;
-    bool OnlyCollectDefinitionInfo = false;
+    OnlyCollectDefinitionInfoFlags OnlyCollectDefinitionInfo = NO;
 };
 
 std::pair<bool, std::string> tryGetFullSourceLoc(clang::SourceManager &SM,
