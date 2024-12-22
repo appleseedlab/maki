@@ -26,9 +26,11 @@ tryGetFullSourceLoc(clang::SourceManager &SM, clang::SourceLocation Location) {
     if (FLoc.isInvalid()) {
         return { false, "Invalid File SLoc" };
     }
-    auto s = FLoc.printToString(SM);
-    // Find second-to-last colon
-    auto i = s.rfind(':', s.rfind(':') - 1);
-    return { true, Name.str() + ":" + s.substr(i + 1) };
+
+    // Use getSpellingLineNumber instead of presumed location to ignore #line directives
+    auto LineNum = SM.getSpellingLineNumber(FLoc);
+    auto ColNum = SM.getSpellingColumnNumber(FLoc);
+
+    return { true, Name.str() + ":" + std::to_string(LineNum) + ":" + std::to_string(ColNum) };
 }
 }
