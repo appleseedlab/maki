@@ -861,18 +861,29 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                                 auto T = CL->getType().getTypePtrOrNull();
                                 return hasTypeDefinedAfter(T, Ctx, DefLoc,
                                                            false);
-
                             } else if (auto E =
                                            clang::dyn_cast<clang::Expr>(St)) {
-                                // Also check if the type of this subexpression
-                                // was defined after this macro. We can ignore
-                                // typedefs in this case because expressions
-                                // evaluating to typedef'd types are valid so
-                                // long as the underlying type is defined before
-                                // the expression is evaluated.
                                 auto T = E->getType().getTypePtrOrNull();
-                                return hasTypeDefinedAfter(T, Ctx, DefLoc,
-                                                           true);
+                                return
+                                    // Ditto for typeof types.
+                                    [&T, &Ctx, &DefLoc]() {
+                                        if (auto ToT = clang::dyn_cast_or_null<
+                                                clang::TypeOfType>(T)) {
+                                            auto T = ToT->getUnmodifiedType()
+                                                         .getTypePtrOrNull();
+                                            return hasTypeDefinedAfter(
+                                                T, Ctx, DefLoc, false);
+                                        }
+                                        return false;
+                                    }() ||
+                                    // Also check if the type of this
+                                    // subexpression was defined after this
+                                    // macro. We can ignore typedefs in this
+                                    // case because expressions evaluating to
+                                    // typedef'd types are valid so long as the
+                                    // underlying type is defined before the
+                                    // expression is evaluated.
+                                    hasTypeDefinedAfter(T, Ctx, DefLoc, true);
                             }
                             return false;
                         });
