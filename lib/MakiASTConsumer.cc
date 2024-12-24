@@ -857,7 +857,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                             } else if (auto CL = clang::dyn_cast<
                                            clang::CompoundLiteralExpr>(St)) {
-                                // Ditto for compoudn literal expressions.
+                                // Ditto for compound literal expressions.
                                 auto T = CL->getType().getTypePtrOrNull();
                                 return hasTypeDefinedAfter(T, Ctx, DefLoc,
                                                            false);
