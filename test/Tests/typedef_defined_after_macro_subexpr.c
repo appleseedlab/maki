@@ -3,6 +3,7 @@
 #define F(i) i + ((A){ .x = 1 }.x)
 #define ADD(a, b) ((a) + (b))
 #define ONE_PLUS_INT(i) (1 + ((Int)i))
+#define ONE_PLUS_INT_typeof(i) (1 + ((typeof(Int))i))
 typedef struct A {
     int x;
 } A;
@@ -13,16 +14,20 @@ int main(int argc, char const *argv[]) {
     M;
     F(1);
     ONE_PLUS_INT(1);
+    ONE_PLUS_INT_typeof(1);
 #undef M
 #undef F
 #undef ONE_PLUS_INT
+#undef ONE_PLUS_INT_typeof
 #define M 1 + ((A){ .x = 1 }.x)
 #define F(a) 1 + a.x
 #define ONE_PLUS_INT(i) (1 + ((Int)i))
+#define ONE_PLUS_INT_typeof(i) (1 + ((typeof(Int))i))
     ADD(1, (1 + (Int)(1)));
     M;
     F(a);
     ONE_PLUS_INT(1);
+    ONE_PLUS_INT_typeof(1);
     return 0;
 }
 
@@ -34,8 +39,8 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1 + ( ( A ) { . x = 1 } . x )",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:19:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:19:32"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:22:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:22:32"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -44,8 +49,8 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "1 + a . x",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:20:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:20:21"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:23:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:23:21"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -54,8 +59,18 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "IsDefinitionLocationValid": true,
 // CHECK:     "Body": "( 1 + ( ( Int ) i ) )",
 // CHECK:     "IsDefinedAtGlobalScope": false,
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:21:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:21:39"
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:24:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:24:39"
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ONE_PLUS_INT_typeof",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( 1 + ( ( typeof ( Int ) ) i ) )",
+// CHECK:     "IsDefinedAtGlobalScope": false,
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:25:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:25:54"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Definition",
@@ -98,6 +113,16 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:5:39"
 // CHECK:   },
 // CHECK:   {
+// CHECK:     "Kind": "Definition",
+// CHECK:     "Name": "ONE_PLUS_INT_typeof",
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "Body": "( 1 + ( ( typeof ( Int ) ) i ) )",
+// CHECK:     "IsDefinedAtGlobalScope": true,
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:6:9",
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:6:54"
+// CHECK:   },
+// CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",
 // CHECK:     "Name": "F"
 // CHECK:   },
@@ -110,10 +135,14 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ONE_PLUS_INT"
 // CHECK:   },
 // CHECK:   {
+// CHECK:     "Kind": "InspectedByCPP",
+// CHECK:     "Name": "ONE_PLUS_INT_typeof"
+// CHECK:   },
+// CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "M",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:19:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:23:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:22:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:27:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int M",
 // CHECK:     "InvocationDepth": 0,
@@ -169,8 +198,8 @@ int main(int argc, char const *argv[]) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "F",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:20:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:24:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:23:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:28:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int F(struct A a)",
 // CHECK:     "InvocationDepth": 0,
@@ -226,8 +255,8 @@ int main(int argc, char const *argv[]) {
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "ONE_PLUS_INT",
-// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:21:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:25:5",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:24:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:29:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int ONE_PLUS_INT(int i)",
 // CHECK:     "InvocationDepth": 0,
@@ -282,9 +311,66 @@ int main(int argc, char const *argv[]) {
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "Invocation",
+// CHECK:     "Name": "ONE_PLUS_INT_typeof",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:25:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:30:5",
+// CHECK:     "ASTKind": "Expr",
+// CHECK:     "TypeSignature": "int ONE_PLUS_INT_typeof(int i)",
+// CHECK:     "InvocationDepth": 0,
+// CHECK:     "NumASTRoots": 1,
+// CHECK:     "NumArguments": 1,
+// CHECK:     "HasStringification": false,
+// CHECK:     "HasTokenPasting": false,
+// CHECK:     "HasAlignedArguments": true,
+// CHECK:     "HasSameNameAsOtherDeclaration": false,
+// CHECK:     "IsExpansionControlFlowStmt": false,
+// CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
+// CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
+// CHECK:     "DoesBodyContainDeclRefExpr": false,
+// CHECK:     "DoesBodyEndWithCompoundStmt": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": false,
+// CHECK:     "DoesAnyArgumentHaveSideEffects": false,
+// CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
+// CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
+// CHECK:     "IsICERepresentableByInt32": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "IsInvocationLocationValid": true,
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsInvokedInMacroArgument": false,
+// CHECK:     "IsNamePresentInCPPConditional": true,
+// CHECK:     "IsExpansionICE": true,
+// CHECK:     "IsExpansionTypeNull": false,
+// CHECK:     "IsExpansionTypeAnonymous": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeFunctionType": false,
+// CHECK:     "IsAnyArgumentTypeNull": false,
+// CHECK:     "IsAnyArgumentTypeAnonymous": false,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
+// CHECK:     "IsAnyArgumentTypeVoid": false,
+// CHECK:     "IsAnyArgumentTypeFunctionType": false,
+// CHECK:     "IsInvokedWhereModifiableValueRequired": false,
+// CHECK:     "IsInvokedWhereAddressableValueRequired": false,
+// CHECK:     "IsInvokedInSizeOf": false,
+// CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
+// CHECK:     "IsAnyArgumentExpandedInSizeOf": false,
+// CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
+// CHECK:     "IsAnyArgumentExpandedWhereConstExprRequired": false,
+// CHECK:     "IsAnyArgumentNeverExpanded": false,
+// CHECK:     "IsAnyArgumentNotAnExpression": false
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "M",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:2:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:13:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:14:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int M",
 // CHECK:     "InvocationDepth": 0,
@@ -341,7 +427,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "F",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:3:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:14:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:15:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int F(int i)",
 // CHECK:     "InvocationDepth": 0,
@@ -398,7 +484,7 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "ADD",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:4:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:22:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:26:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int ADD(int a, int b)",
 // CHECK:     "InvocationDepth": 0,
@@ -455,9 +541,66 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Kind": "Invocation",
 // CHECK:     "Name": "ONE_PLUS_INT",
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:5:9",
-// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:15:5",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:16:5",
 // CHECK:     "ASTKind": "Expr",
 // CHECK:     "TypeSignature": "int ONE_PLUS_INT(int i)",
+// CHECK:     "InvocationDepth": 0,
+// CHECK:     "NumASTRoots": 1,
+// CHECK:     "NumArguments": 1,
+// CHECK:     "HasStringification": false,
+// CHECK:     "HasTokenPasting": false,
+// CHECK:     "HasAlignedArguments": true,
+// CHECK:     "HasSameNameAsOtherDeclaration": false,
+// CHECK:     "IsExpansionControlFlowStmt": false,
+// CHECK:     "DoesBodyReferenceMacroDefinedAfterMacro": false,
+// CHECK:     "DoesBodyReferenceDeclDeclaredAfterMacro": false,
+// CHECK:     "DoesBodyContainDeclRefExpr": false,
+// CHECK:     "DoesBodyEndWithCompoundStmt": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveLocalType": false,
+// CHECK:     "DoesSubexpressionExpandedFromBodyHaveTypeDefinedAfterMacro": true,
+// CHECK:     "DoesAnyArgumentHaveSideEffects": false,
+// CHECK:     "DoesAnyArgumentContainDeclRefExpr": false,
+// CHECK:     "IsHygienic": true,
+// CHECK:     "IsICERepresentableByInt16": true,
+// CHECK:     "IsICERepresentableByInt32": true,
+// CHECK:     "IsDefinitionLocationValid": true,
+// CHECK:     "IsInvocationLocationValid": true,
+// CHECK:     "IsObjectLike": false,
+// CHECK:     "IsInvokedInMacroArgument": false,
+// CHECK:     "IsNamePresentInCPPConditional": true,
+// CHECK:     "IsExpansionICE": true,
+// CHECK:     "IsExpansionTypeNull": false,
+// CHECK:     "IsExpansionTypeAnonymous": false,
+// CHECK:     "IsExpansionTypeLocalType": false,
+// CHECK:     "IsExpansionTypeDefinedAfterMacro": false,
+// CHECK:     "IsExpansionTypeVoid": false,
+// CHECK:     "IsExpansionTypeFunctionType": false,
+// CHECK:     "IsAnyArgumentTypeNull": false,
+// CHECK:     "IsAnyArgumentTypeAnonymous": false,
+// CHECK:     "IsAnyArgumentTypeLocalType": false,
+// CHECK:     "IsAnyArgumentTypeDefinedAfterMacro": false,
+// CHECK:     "IsAnyArgumentTypeVoid": false,
+// CHECK:     "IsAnyArgumentTypeFunctionType": false,
+// CHECK:     "IsInvokedWhereModifiableValueRequired": false,
+// CHECK:     "IsInvokedWhereAddressableValueRequired": false,
+// CHECK:     "IsInvokedInSizeOf": false,
+// CHECK:     "IsInvokedWhereICERequired": false,
+// CHECK:     "IsInvokedWhereConstantExpressionRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereModifiableValueRequired": false,
+// CHECK:     "IsAnyArgumentExpandedWhereAddressableValueRequired": false,
+// CHECK:     "IsAnyArgumentExpandedInSizeOf": false,
+// CHECK:     "IsAnyArgumentConditionallyEvaluated": false,
+// CHECK:     "IsAnyArgumentExpandedWhereConstExprRequired": false,
+// CHECK:     "IsAnyArgumentNeverExpanded": false,
+// CHECK:     "IsAnyArgumentNotAnExpression": false
+// CHECK:   },
+// CHECK:   {
+// CHECK:     "Kind": "Invocation",
+// CHECK:     "Name": "ONE_PLUS_INT_typeof",
+// CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:6:9",
+// CHECK:     "InvocationLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:17:5",
+// CHECK:     "ASTKind": "Expr",
+// CHECK:     "TypeSignature": "int ONE_PLUS_INT_typeof(int i)",
 // CHECK:     "InvocationDepth": 0,
 // CHECK:     "NumASTRoots": 1,
 // CHECK:     "NumArguments": 1,
