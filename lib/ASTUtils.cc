@@ -68,8 +68,33 @@ bool hasLocalType(const clang::Type *T, clang::ASTContext &Ctx) {
 }
 
 bool hasTypeDefinedAfter(const clang::Type *T, clang::ASTContext &Ctx,
-                         clang::SourceLocation L) {
+                         clang::SourceLocation L, bool IgnoreTypedefs) {
     auto &SM = Ctx.getSourceManager();
+
+    if (!T) {
+        return false;
+    }
+
+    if (!IgnoreTypedefs) {
+        auto TD = clang::dyn_cast<clang::TypedefType>(T);
+        if (!TD) {
+            auto ET = clang::dyn_cast<clang::ElaboratedType>(T);
+            if (ET) {
+                TD = clang::dyn_cast<clang::TypedefType>(ET->getNamedType());
+            }
+        }
+        if (TD) {
+            auto D = TD->getDecl();
+            auto DLoc = D->getLocation();
+            if (DLoc.isValid()) {
+                auto DFLoc = SM.getFileLoc(DLoc);
+                if (DFLoc.isValid()) {
+                    return SM.isBeforeInTranslationUnit(L, DFLoc);
+                }
+            }
+        }
+    }
+
     return isInType(T, Ctx, [&SM, L](const clang::Type *T) {
         if (!T) {
             return false;

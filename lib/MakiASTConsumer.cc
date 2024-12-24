@@ -218,11 +218,10 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 tryGetFullSourceLoc(SM, DefLoc);
             JSONPrinter printer{ "Definition" };
 
-            printer.add({
-                    { "Name", Name },
-                    { "IsDefinitionLocationValid", IsDefinitionLocationValid },
-                    { "DefinitionLocation", std::move(DefinitionLocation) }
-            });
+            printer.add(
+                { { "Name", Name },
+                  { "IsDefinitionLocationValid", IsDefinitionLocationValid },
+                  { "DefinitionLocation", std::move(DefinitionLocation) } });
 
             printers.push_back(std::move(printer));
         }
@@ -836,20 +835,55 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         StmtsExpandedFromBody.begin(),
                         StmtsExpandedFromBody.end(),
                         [&Ctx, &DefLoc](const clang::Stmt *St) {
-                            // If this is a sizeof/cast expression, check if the
-                            // type passed to the expression was defined after
-                            // this macro.
-                            if (auto CastOrSizeOf = clang::dyn_cast<
+                            if (auto SizeOfOrAlignOf = clang::dyn_cast<
                                     clang::UnaryExprOrTypeTraitExpr>(St)) {
-                                auto T = CastOrSizeOf->getTypeOfArgument()
+                                // If this is a sizeof/alignof expression, check
+                                // if the type passed to the expression was
+                                // defined after this macro. We can't ignore
+                                // typedefs in this case because the name of the
+                                // typedef'd type will be in the expression
+                                // itself.
+                                auto T = SizeOfOrAlignOf->getTypeOfArgument()
                                              .getTypePtrOrNull();
-                                return hasTypeDefinedAfter(T, Ctx, DefLoc);
-                            }
-                            if (auto E = clang::dyn_cast<clang::Expr>(St)) {
-                                // Also check if the type of this subexpression
-                                // was defined after this macro.
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc,
+                                                           false);
+                            } else if (auto Cast = clang::dyn_cast<
+                                           clang::ExplicitCastExpr>(St)) {
+                                // Ditto for cast expressions.
+                                auto T =
+                                    Cast->getTypeAsWritten().getTypePtrOrNull();
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc,
+                                                           false);
+
+                            } else if (auto CL = clang::dyn_cast<
+                                           clang::CompoundLiteralExpr>(St)) {
+                                // Ditto for compound literal expressions.
+                                auto T = CL->getType().getTypePtrOrNull();
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc,
+                                                           false);
+                            } else if (auto E =
+                                           clang::dyn_cast<clang::Expr>(St)) {
                                 auto T = E->getType().getTypePtrOrNull();
-                                return hasTypeDefinedAfter(T, Ctx, DefLoc);
+                                return
+                                    // Ditto for typeof types.
+                                    [&T, &Ctx, &DefLoc]() {
+                                        if (auto ToT = clang::dyn_cast_or_null<
+                                                clang::TypeOfType>(T)) {
+                                            auto T = ToT->getUnmodifiedType()
+                                                         .getTypePtrOrNull();
+                                            return hasTypeDefinedAfter(
+                                                T, Ctx, DefLoc, false);
+                                        }
+                                        return false;
+                                    }() ||
+                                    // Also check if the type of this
+                                    // subexpression was defined after this
+                                    // macro. We can ignore typedefs in this
+                                    // case because expressions evaluating to
+                                    // typedef'd types are valid so long as the
+                                    // underlying type is defined before the
+                                    // expression is evaluated.
+                                    hasTypeDefinedAfter(T, Ctx, DefLoc, true);
                             }
                             return false;
                         });
@@ -964,8 +998,12 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                         TypeSignature = CT.getAsString();
                     }
-                    IsExpansionTypeDefinedAfterMacro =
-                        hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
+                    // We can ignore typedef types in the macro's return type
+                    // since we emit the underlying type in the translated type
+                    // signature, which is interhchangeable with the typedef
+                    // type.
+                    IsExpansionTypeDefinedAfterMacro = hasTypeDefinedAfter(
+                        QT.getTypePtrOrNull(), Ctx, DefLoc, true);
 
                     // Properties of integral constant expressions
                     if (auto ICE = E->getIntegerConstantExpr(Ctx)) {
@@ -1049,8 +1087,12 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                         ArgTypeStr = CT.getAsString();
                     }
-                    IsAnyArgumentTypeDefinedAfterMacro |=
-                        hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
+                    // We can ignore typedef types in the macro's argument types
+                    // since we emit the underlying type for each argument in
+                    // the translated type signature, and a typedef and its
+                    // underlying type are interhchangeable.
+                    IsAnyArgumentTypeDefinedAfterMacro |= hasTypeDefinedAfter(
+                        QT.getTypePtrOrNull(), Ctx, DefLoc, true);
 
                     TypeSignature += ArgTypeStr;
                     TypeSignature += " " + Arg.Name.str();
