@@ -218,11 +218,10 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                 tryGetFullSourceLoc(SM, DefLoc);
             JSONPrinter printer{ "Definition" };
 
-            printer.add({
-                    { "Name", Name },
-                    { "IsDefinitionLocationValid", IsDefinitionLocationValid },
-                    { "DefinitionLocation", std::move(DefinitionLocation) }
-            });
+            printer.add(
+                { { "Name", Name },
+                  { "IsDefinitionLocationValid", IsDefinitionLocationValid },
+                  { "DefinitionLocation", std::move(DefinitionLocation) } });
 
             printers.push_back(std::move(printer));
         }
