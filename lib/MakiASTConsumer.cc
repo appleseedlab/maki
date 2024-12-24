@@ -835,20 +835,44 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                         StmtsExpandedFromBody.begin(),
                         StmtsExpandedFromBody.end(),
                         [&Ctx, &DefLoc](const clang::Stmt *St) {
-                            // If this is a sizeof/cast expression, check if the
-                            // type passed to the expression was defined after
-                            // this macro.
-                            if (auto CastOrSizeOf = clang::dyn_cast<
+                            if (auto SizeOfOrAlignOf = clang::dyn_cast<
                                     clang::UnaryExprOrTypeTraitExpr>(St)) {
-                                auto T = CastOrSizeOf->getTypeOfArgument()
+                                // If this is a sizeof/alignof expression, check
+                                // if the type passed to the expression was
+                                // defined after this macro. We can't ignore
+                                // typedefs in this case because the name of the
+                                // typedef'd type will be in the expression
+                                // itself.
+                                auto T = SizeOfOrAlignOf->getTypeOfArgument()
                                              .getTypePtrOrNull();
-                                return hasTypeDefinedAfter(T, Ctx, DefLoc);
-                            }
-                            if (auto E = clang::dyn_cast<clang::Expr>(St)) {
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc,
+                                                           false);
+                            } else if (auto Cast = clang::dyn_cast<
+                                           clang::ExplicitCastExpr>(St)) {
+                                // Ditto for cast expressions.
+                                auto T =
+                                    Cast->getTypeAsWritten().getTypePtrOrNull();
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc,
+                                                           false);
+
+                            } else if (auto CL = clang::dyn_cast<
+                                           clang::CompoundLiteralExpr>(St)) {
+                                // Ditto for compoudn literal expressions.
+                                auto T = CL->getType().getTypePtrOrNull();
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc,
+                                                           false);
+
+                            } else if (auto E =
+                                           clang::dyn_cast<clang::Expr>(St)) {
                                 // Also check if the type of this subexpression
-                                // was defined after this macro.
+                                // was defined after this macro. We can ignore
+                                // typedefs in this case because expressions
+                                // evaluating to typedef'd types are valid so
+                                // long as the underlying type is defined before
+                                // the expression is evaluated.
                                 auto T = E->getType().getTypePtrOrNull();
-                                return hasTypeDefinedAfter(T, Ctx, DefLoc);
+                                return hasTypeDefinedAfter(T, Ctx, DefLoc,
+                                                           true);
                             }
                             return false;
                         });
