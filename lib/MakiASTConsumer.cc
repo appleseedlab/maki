@@ -963,8 +963,12 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                         TypeSignature = CT.getAsString();
                     }
-                    IsExpansionTypeDefinedAfterMacro =
-                        hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
+                    // We can ignore typedef types in the macro's return type
+                    // since we emit the underlying type in the translated type
+                    // signature, which is interhchangeable with the typedef
+                    // type.
+                    IsExpansionTypeDefinedAfterMacro = hasTypeDefinedAfter(
+                        QT.getTypePtrOrNull(), Ctx, DefLoc, true);
 
                     // Properties of integral constant expressions
                     if (auto ICE = E->getIntegerConstantExpr(Ctx)) {
@@ -1048,8 +1052,12 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
 
                         ArgTypeStr = CT.getAsString();
                     }
-                    IsAnyArgumentTypeDefinedAfterMacro |=
-                        hasTypeDefinedAfter(QT.getTypePtrOrNull(), Ctx, DefLoc);
+                    // We can ignore typedef types in the macro's argument types
+                    // since we emit the underlying type for each argument in
+                    // the translated type signature, and a typedef and its
+                    // underlying type are interhchangeable.
+                    IsAnyArgumentTypeDefinedAfterMacro |= hasTypeDefinedAfter(
+                        QT.getTypePtrOrNull(), Ctx, DefLoc, true);
 
                     TypeSignature += ArgTypeStr;
                     TypeSignature += " " + Arg.Name.str();
