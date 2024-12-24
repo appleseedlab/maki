@@ -22,7 +22,7 @@ bool hasLocalType(const clang::Type *T, clang::ASTContext &Ctx);
 
 // Returns true if any type in T was defined after L.
 bool hasTypeDefinedAfter(const clang::Type *T, clang::ASTContext &Ctx,
-                         clang::SourceLocation L);
+                         clang::SourceLocation L, bool IgnoreTypedefs);
 
 // Returns true if a Stmt that satisfies the given predicate is a subtree of the
 // given Stmt.
