@@ -1,5 +1,4 @@
 #include "ASTUtils.hh"
-#include "Logging.hh"
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/ASTTypeTraits.h>
 #include <clang/AST/Decl.h>
@@ -10,114 +9,101 @@
 #include <clang/Basic/SourceLocation.h>
 #include <clang/Basic/SourceManager.h>
 #include <functional>
+#include <llvm-17/llvm/Support/raw_ostream.h>
 #include <queue>
 #include <set>
 
 namespace maki {
-clang::Decl *getTypeDeclOrNull(const clang::Type *T) {
-    if (!T) {
-        return nullptr;
+
+const clang::Type *getBaseUnqualifiedTypeOrNull(const clang::Type *T) {
+    while (T) {
+        if (T->isArrayType()) {
+            T = T->getBaseElementTypeUnsafe();
+        } else if (T->isAnyPointerType()) {
+            T = T->getPointeeType().getTypePtrOrNull();
+        } else if (auto ET = clang::dyn_cast<clang::ElaboratedType>(T)) {
+            T = ET->desugar().getTypePtrOrNull();
+        } else if (auto TD = clang::dyn_cast<clang::TypedefType>(T)) {
+            T = TD->desugar().getTypePtrOrNull();
+        } else if (auto ToT = clang::dyn_cast<clang::TypeOfType>(T)) {
+            T = ToT->getUnmodifiedType().getTypePtrOrNull();
+        } else {
+            return T->getUnqualifiedDesugaredType();
+        }
     }
+    return T ? T->getUnqualifiedDesugaredType() : nullptr;
+}
 
-    if (auto TD = clang::dyn_cast<clang::TypedefType>(T)) {
-        return getTypeDeclOrNull(TD->desugar().getTypePtrOrNull());
-    } else if (auto TD = clang::dyn_cast<clang::TagType>(T)) {
-        return TD->getDecl();
-    } else if (auto ET = clang::dyn_cast<clang::ElaboratedType>(T)) {
-        return getTypeDeclOrNull(ET->desugar().getTypePtrOrNull());
-    } else {
-        return nullptr;
+clang::TagDecl *getBaseTypeTagDeclOrNull(const clang::Type *T) {
+    T = getBaseUnqualifiedTypeOrNull(T);
+    if (auto TT = clang::dyn_cast_or_null<clang::TagType>(T)) {
+        return TT->getAsTagDecl();
     }
+    return nullptr;
 }
 
-bool hasAnonymousType(const clang::Type *T, clang::ASTContext &Ctx) {
-    return isInType(T, Ctx, [](const clang::Type *T) {
-        if (!T) {
-            return false;
-        }
+bool isBaseTypeAnonymous(const clang::Type *T) {
+    auto TD = getBaseTypeTagDeclOrNull(T);
+    auto ND = clang::dyn_cast_or_null<clang::NamedDecl>(TD);
 
-        auto D = getTypeDeclOrNull(T);
-        if (!D) {
-            return false;
-        }
-
-        auto ND = clang::dyn_cast<clang::NamedDecl>(D);
-        if (!ND) {
-            return false;
-        }
-
-        return ND->getIdentifier() == nullptr || ND->getName().empty();
-    });
+    return ND && (!ND->getIdentifier() || ND->getName().empty());
 }
 
-bool hasLocalType(const clang::Type *T, clang::ASTContext &Ctx) {
-    return isInType(T, Ctx, [](const clang::Type *T) {
-        if (!T) {
-            return false;
-        }
+bool isBaseTypeLocal(const clang::Type *T) {
+    auto TD = getBaseTypeTagDeclOrNull(T);
+    auto DCtx = TD ? TD->getDeclContext() : nullptr;
 
-        auto D = getTypeDeclOrNull(T);
-        if (!D) {
-            return false;
-        }
-
-        auto DCtx = D->getDeclContext();
-
-        return !DCtx->isTranslationUnit();
-    });
+    return DCtx && !DCtx->isTranslationUnit();
 }
 
-bool hasTypeDefinedAfter(const clang::Type *T, clang::ASTContext &Ctx,
-                         clang::SourceLocation L, bool IgnoreTypedefs) {
+bool isBaseTypeDefinedAfter(const clang::Type *T, clang::ASTContext &Ctx,
+                            clang::SourceLocation L) {
+    auto &SM = Ctx.getSourceManager();
+    auto TD = getBaseTypeTagDeclOrNull(T);
+    auto DLoc = TD ? TD->getLocation() : clang::SourceLocation();
+    auto DFLoc = DLoc.isValid() ? SM.getFileLoc(DLoc) : clang::SourceLocation();
+
+    return DFLoc.isValid() && SM.isBeforeInTranslationUnit(L, DFLoc);
+}
+
+bool isAnyDeusgaredTypeDefinedAfter(const clang::Type *T,
+                                    clang::ASTContext &Ctx,
+                                    clang::SourceLocation L) {
     auto &SM = Ctx.getSourceManager();
 
-    if (!T) {
-        return false;
+    while (T) {
+        if (T->isArrayType()) {
+            T = T->getBaseElementTypeUnsafe();
+        } else if (T->isAnyPointerType()) {
+            T = T->getPointeeType().getTypePtrOrNull();
+        } else if (auto ET = clang::dyn_cast<clang::ElaboratedType>(T)) {
+            T = ET->desugar().getTypePtrOrNull();
+        } else if (auto TT = clang::dyn_cast_or_null<clang::TagType>(T)) {
+            auto TagDecl = TT->getDecl();
+            auto DLoc = TagDecl ? TagDecl->getLocation() :
+                                  clang::SourceLocation();
+            auto DFLoc = DLoc.isValid() ? SM.getFileLoc(DLoc) :
+                                          clang::SourceLocation();
+
+            return DFLoc.isValid() && SM.isBeforeInTranslationUnit(L, DFLoc);
+        } else if (auto TD = clang::dyn_cast<clang::TypedefType>(T)) {
+            auto TND = TD->getDecl();
+            auto DLoc = TND ? TND->getLocation() : clang::SourceLocation();
+            auto DFLoc = DLoc.isValid() ? SM.getFileLoc(DLoc) :
+                                          clang::SourceLocation();
+            if (DFLoc.isValid() && SM.isBeforeInTranslationUnit(L, DFLoc)) {
+                return true;
+            }
+
+            T = TD->desugar().getTypePtrOrNull();
+        } else if (auto ToT = clang::dyn_cast<clang::TypeOfType>(T)) {
+            T = ToT->getUnmodifiedType().getTypePtrOrNull();
+        } else {
+            break;
+        }
     }
 
-    if (!IgnoreTypedefs) {
-        auto TD = clang::dyn_cast<clang::TypedefType>(T);
-        if (!TD) {
-            auto ET = clang::dyn_cast<clang::ElaboratedType>(T);
-            if (ET) {
-                TD = clang::dyn_cast<clang::TypedefType>(ET->getNamedType());
-            }
-        }
-        if (TD) {
-            auto D = TD->getDecl();
-            auto DLoc = D->getLocation();
-            if (DLoc.isValid()) {
-                auto DFLoc = SM.getFileLoc(DLoc);
-                if (DFLoc.isValid()) {
-                    return SM.isBeforeInTranslationUnit(L, DFLoc);
-                }
-            }
-        }
-    }
-
-    return isInType(T, Ctx, [&SM, L](const clang::Type *T) {
-        if (!T) {
-            return false;
-        }
-
-        auto *D = getTypeDeclOrNull(T);
-
-        if (!D) {
-            return false;
-        }
-
-        auto DLoc = D->getLocation();
-        if (DLoc.isInvalid()) {
-            return false;
-        }
-
-        auto DFLoc = SM.getFileLoc(DLoc);
-        if (DFLoc.isInvalid()) {
-            return false;
-        }
-
-        return SM.isBeforeInTranslationUnit(L, DFLoc);
-    });
+    return false;
 }
 
 bool isInTree(const clang::Stmt *Stmt,
@@ -240,20 +226,6 @@ bool inTree(const clang::Stmt *LHS, const clang::Stmt *RHS) {
         }
     }
     return false;
-}
-
-bool isInType(const clang::Type *T, clang::ASTContext &Ctx,
-              std::function<bool(const clang::Type *)> pred) {
-    debug("Checking if T is a pointer type");
-    while (T && (T->isAnyPointerType() || T->isArrayType())) {
-        if (T->isAnyPointerType()) {
-            T = T->getPointeeType().getTypePtrOrNull();
-        } else if (T->isArrayType()) {
-            T = T->getBaseElementTypeUnsafe();
-        }
-    }
-
-    return pred(T);
 }
 
 std::set<const clang::Stmt *> subtrees(const clang::Stmt *ST) {
