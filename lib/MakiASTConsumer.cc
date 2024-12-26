@@ -289,10 +289,10 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
         // contains a backslash-newline immediately followed by a non-whitespace
         // token. For instance, assuming that the character # corresponds to the
         // first character in a line:
-        //
-        //          #define PLATFORM \
-        //          "LINUX"
-        //
+        /*
+                #define PLATFORM \
+                "LINUX"
+        */
         // Then getDefinitionEndLoc() would say that the macro's definition ends
         // on line 1, whereas it really ends on line 2. Instead, we can use the
         // end location of the macro's last token to get this information.
