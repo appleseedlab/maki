@@ -3,7 +3,7 @@
 #define F(i) i + ((A){ .x = 1 }.x)
 #define ADD(a, b) ((a) + (b))
 #define ONE_PLUS_INT(i) (1 + ((Int)i))
-#define ONE_PLUS_INT_typeof(i) (1 + ((typeof(Int))i))
+#define ONE_PLUS_INT_typeof(i) (1 + ((typeof(typeof(Int)))i))
 typedef struct A {
     int x;
 } A;
@@ -117,10 +117,10 @@ int main(int argc, char const *argv[]) {
 // CHECK:     "Name": "ONE_PLUS_INT_typeof",
 // CHECK:     "IsObjectLike": false,
 // CHECK:     "IsDefinitionLocationValid": true,
-// CHECK:     "Body": "( 1 + ( ( typeof ( Int ) ) i ) )",
+// CHECK:     "Body": "( 1 + ( ( typeof ( typeof ( Int ) ) ) i ) )",
 // CHECK:     "IsDefinedAtGlobalScope": true,
 // CHECK:     "DefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:6:9",
-// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:6:54"
+// CHECK:     "EndDefinitionLocation": "{{.*}}/Tests/typedef_defined_after_macro_subexpr.c:6:62"
 // CHECK:   },
 // CHECK:   {
 // CHECK:     "Kind": "InspectedByCPP",
