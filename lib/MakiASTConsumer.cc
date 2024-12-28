@@ -845,21 +845,21 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                                 // itself.
                                 auto T = SizeOfOrAlignOf->getTypeOfArgument()
                                              .getTypePtrOrNull();
-                                return isAnyDeusgaredTypeDefinedAfter(T, Ctx,
+                                return isAnyDesugaredTypeDefinedAfter(T, Ctx,
                                                                       DefLoc);
                             } else if (auto Cast = clang::dyn_cast<
                                            clang::ExplicitCastExpr>(St)) {
                                 // Ditto for cast expressions.
                                 auto T =
                                     Cast->getTypeAsWritten().getTypePtrOrNull();
-                                return isAnyDeusgaredTypeDefinedAfter(T, Ctx,
+                                return isAnyDesugaredTypeDefinedAfter(T, Ctx,
                                                                       DefLoc);
 
                             } else if (auto CL = clang::dyn_cast<
                                            clang::CompoundLiteralExpr>(St)) {
                                 // Ditto for compound literal expressions.
                                 auto T = CL->getType().getTypePtrOrNull();
-                                return isAnyDeusgaredTypeDefinedAfter(T, Ctx,
+                                return isAnyDesugaredTypeDefinedAfter(T, Ctx,
                                                                       DefLoc);
                             } else if (auto E =
                                            clang::dyn_cast<clang::Expr>(St)) {
@@ -871,7 +871,7 @@ void MakiASTConsumer::HandleTranslationUnit(clang::ASTContext &Ctx) {
                                                 clang::TypeOfType>(T)) {
                                             auto Ty = ToT->getUnmodifiedType()
                                                           .getTypePtrOrNull();
-                                            return isAnyDeusgaredTypeDefinedAfter(
+                                            return isAnyDesugaredTypeDefinedAfter(
                                                 Ty, Ctx, DefLoc);
                                         }
                                         return false;

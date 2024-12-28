@@ -29,7 +29,7 @@ bool isBaseTypeDefinedAfter(const clang::Type *T, clang::ASTContext &Ctx,
 
 // Desugars T one step at a time, and returns whether any desugared type in the
 // process is defined after L.
-bool isAnyDeusgaredTypeDefinedAfter(const clang::Type *T,
+bool isAnyDesugaredTypeDefinedAfter(const clang::Type *T,
                                     clang::ASTContext &Ctx,
                                     clang::SourceLocation L);
 

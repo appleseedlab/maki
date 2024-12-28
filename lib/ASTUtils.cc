@@ -66,7 +66,7 @@ bool isBaseTypeDefinedAfter(const clang::Type *T, clang::ASTContext &Ctx,
     return DFLoc.isValid() && SM.isBeforeInTranslationUnit(L, DFLoc);
 }
 
-bool isAnyDeusgaredTypeDefinedAfter(const clang::Type *T,
+bool isAnyDesugaredTypeDefinedAfter(const clang::Type *T,
                                     clang::ASTContext &Ctx,
                                     clang::SourceLocation L) {
     auto &SM = Ctx.getSourceManager();
