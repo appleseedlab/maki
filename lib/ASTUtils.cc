@@ -78,7 +78,7 @@ bool isAnyDesugaredTypeDefinedAfter(const clang::Type *T,
             T = T->getPointeeType().getTypePtrOrNull();
         } else if (auto ET = clang::dyn_cast<clang::ElaboratedType>(T)) {
             T = ET->desugar().getTypePtrOrNull();
-        } else if (auto TT = clang::dyn_cast_or_null<clang::TagType>(T)) {
+        } else if (auto TT = clang::dyn_cast<clang::TagType>(T)) {
             auto TagDecl = TT->getDecl();
             auto DLoc = TagDecl ? TagDecl->getLocation() :
                                   clang::SourceLocation();
