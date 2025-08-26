@@ -24,6 +24,10 @@ RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt install -y python3.10 python3-pip
 RUN python3 -m pip install lit
 
+# Download Python Libraries
+RUN python3 -m pip install scan-build
+RUN python3 -m pip install numpy
+
 RUN apt install -y ninja-build
 RUN apt install -y jq
 
